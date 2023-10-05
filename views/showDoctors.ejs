@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            /* background-image: url("background2.jpg"); */
+            background-repeat: no-repeat;
+            background-size: 100%;
+            }
+        h1 {
+            text-align: center;
+        }
+        .cont {
+            position:relative;
+            left:600px;
+            top:50px;
+           
+        }
+    </style>
+   
+    <title>Log in</title>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>tozzz feeek</h1>
+    </div>
+    <div class="cont">
+        <form method='post' action='/doctor/createAdmin'>
+            Username: <br>
+            <input type="text" id="user" name="username"> <br>
+            Name: <br>
+            <input type="text" id="name" name="name"> <br>
+            Email: <br>
+            <input type="text" id="email" name="email"> <br>
+            Password: <br>
+            <input type="password" id="password" name="password"> <br> 
+            Date of birth: <br>
+            <input type="date" id="dob" name="date of birth"> <br>
+            Gender: <br>
+            <select id="gender" name="gender">
+                <option value="male">Male</option>
+                <option value="female">female</option>
+              </select><br>
+            mobile number: <br>
+            <input type="tel" id="mobile" name="mobile"> <br>
+            <br>
+            emergency contanct info: <br>
+            <input type="text" id="first" name="first" placeholder="first name"> <br>
+            <input type="text" id="last" name="last" placeholder="last name"><br>
+            <input type="tel" id="mobile" name="emergencyNumber" placeholder="mobile number"> <br><br><br>
+            <input type="submit" id="simple_click" class="btn btn-secondary" value="Login"> <br><br>
+            
+            
+
+        </form>
+    </div>
+</body>
+
+</html>
