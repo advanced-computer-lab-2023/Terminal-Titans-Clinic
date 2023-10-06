@@ -3,6 +3,7 @@ import dotenvModule from 'dotenv'
 import express from 'express'
 import RegisterModule from './Routes/registerRoute.js'
 import DoctorModule from './Routes/doctorRoute.js'
+import PatientModule from './Routes/patientRoute.js'
 import ejs from 'ejs'
 
 const dotenv = dotenvModule.config();
@@ -18,6 +19,7 @@ app.use(express.json())
 
 app.use('/register',RegisterModule)
 app.use('/doctor',DoctorModule)
+app.use('/patient',PatientModule)
 
 app.set('view engine' , 'ejs');
 
