@@ -22,9 +22,17 @@ router.get('/getDoctor/:name', async (req, res) => {
     if (getDoctors.length == 0) {
         res.status(400).json({ message: "No doctor found with this name" })
     }
-    res.status(200).json({ message: getDoctors })
+    res.status(200).json({ Doctors: getDoctors })
 }) ;
-
-
 //requirement number 37
 
+router.get('/getDoctors', async(req, res)=>{
+    const allDoctors = await Doctor.find({});
+    res.status(200).json( allDoctors )
+})
+//requirement number 39
+
+router.get('/filterDoctors', async(req, res)=>{
+
+})
+export default router;
