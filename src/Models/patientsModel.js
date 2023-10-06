@@ -5,6 +5,9 @@ import userModel from './userModel.js';
 const familyMember = {
   name: String,
   age: Number,
+  nationalID: String, 
+  gender: String,
+  relation: String, 
 }
 const patientSchema = new _Schema({
 

@@ -27,6 +27,10 @@ const doctorSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    Speciality:{
+         type:String,
+         enum:['speciality1' , 'speciality2' , 'speciality3']
+    },
 });
 const Doctor=userModel.discriminator('Doctor',doctorSchema);
 export default mongoose.model('Doctor');
