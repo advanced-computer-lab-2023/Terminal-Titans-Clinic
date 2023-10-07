@@ -3,35 +3,9 @@ import Doctor from '../Models/doctorModel.js';
 import patient from '../Models/patientsModel.js';
 import healthModel from '../Models/healthModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
+import { get } from 'mongoose';
 
 const router = express.Router()
-
-router.post('/createAdmin', async (req, res) => {
-    // Create the admin
-    try {
-        const { Username, Pass } = req.body;
-        const Position = 'Admin';
-        const userexist = await adminModel.findOne({ Username });
-        if (!userexist) {
-            const admin = new adminModel({ Username, Pass, Position });
-            const Nadmin = await admin.save();
-            res.status(201).json(Nadmin);
-
-            //throw new Error("Username already exist");
-        }
-        else {
-            res.status(500).json({ message: 'Username already exist' });
-        }
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Username already exist' })
-    }
-});
-
-
-router.get('/createAdmin', (req, res) => {
-    res.render('showDoctors.ejs')
-})
 
 // get all doctors
 // router.get('/', async (req, res) => {
@@ -39,16 +13,19 @@ router.get('/createAdmin', (req, res) => {
 //     res.status(200).json(doctors)
 // })
 
+router.get('/',(req,res)=>{
+    res.render('doctorPage')
+})
 
 // requirement number 14
 router.put('/:id', async (req, res) => {
     const doctor = await Doctor.findById(req.params.id)
     if (!doctor)
-        res.status(400).json({ message: "Doctor not found" })
+        res.status(400).json({ message: "Doctor not found",success:false})
     else {
         const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
-        res.status(200).json(updatedDoctor)
+        res.status(200).json({Result:updatedDoctor,success:true})
     }
 })
 
@@ -59,7 +36,7 @@ router.get('/getPatientsAndHealth', async (req, res) => {
 
 
     if (healthRecords.length == 0) {
-        res.status(400).json({ message: "No patients found" })
+        res.status(400).json({ message: "No patients found",success:false })
         return;
     }
 
@@ -74,40 +51,45 @@ router.get('/getPatientsAndHealth', async (req, res) => {
         "patients": patients
     }
 
-    res.status(200).json(result)
+    res.status(200).json({Result:result,success:true})
 });
 
 // requirement number 33
 router.get('/getPatients', async (req, res) => {
     const getPatients = await patient.find({})
     if (getPatients.length == 0) {
-        res.status(400).json({ message: "No patient found" })
+        res.status(400).json({ message: "No patient found",success:false })
     }
-    res.status(200).json({ getPatients })
+    res.status(200).json({ Result:getPatients,success:true })
 });
 
 // requirement number 34
 router.get('/getPatientName/:name', async (req, res) => {
     const getPatients = await patient.find({ Name: new RegExp(`${req.params.name}`) });
     if (getPatients.length == 0) {
-        res.status(400).json({ message: "No patient found with this name" })
+        res.status(400).json({ message: "No patient found with this name",success:false })
     }
-    res.status(200).json({ message: getPatients })
+    res.status(200).json({ Result: getPatients,success:true })
 })
 
 // requirement number 35
 router.get('/getAppointment/:date', async (req, res) => {
     const getAppointments = await appointmentModel.find({ Date: { $gte: req.params.date } });
-    res.status(200).json(getAppointments)
+
+    if(getAppointments.length == 0)
+        res.status(400).json({ message: "No upcoming appointments found",success:false })
+
+    res.status(200).json({Result:getAppointments,success:true})
 });
 
 // requirement number 36
 router.get('/selectPatientName/:id', async (req, res) => {
-    const getPatients = await patient.find({ Name: req.params.id });
+    
+    const getPatients = await patient.find({ _id: req.params.id });
     if (getPatients.length == 0) {
-        res.status(400).json({ message: "No patient found with this name" })
+        res.status(400).json({ message: "No patient found with this name",success:false })
     }
-    res.status(200).json({ message: getPatients })
+    res.status(200).json({ Result: getPatients,success:true })
 })
 
 export default router;

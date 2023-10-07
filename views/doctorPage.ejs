@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            /* background-image: url("background2.jpg"); */
+            background-repeat: no-repeat;
+            background-size: 100%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        td {
+            border: 1px solid black;
+        }
+    </style>
+
+    <title>Log in</title>
+
+</head>
+
+<body>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>email</th>
+                <th>Date of birth</th>
+                <th>Gender</th>
+                <th>Mobile</th>
+                <th>emergency Name</th>
+                <th>emergency Mobile</th>
+                <th>family memeber</th>
+            </tr>
+        </thead>
+
+        <tbody id="tBody">
+        </tbody>
+    </table>
+
+    <div id="patientDetails">
+
+    </div>
+
+    <script>
+        async function getPatients() {
+            var response = await fetch('http://localhost:8000/doctor/getPatients');
+            var res = await response.json();
+
+
+            var element = document.getElementById('tBody');
+            var cartoona = '';
+
+            res.getPatients.forEach(function (patient) {
+                cartoona += `
+            <tr>
+                <td>${patient.Name}</td>
+                <td>${patient.Email}</td>
+                <td>${patient.Dob}</td>
+                <td>${patient.Gender}</td>
+                <td>${patient.mobile}</td>
+                <td>${patient.emergencyName}</td>
+                <td>${patient.emergencyMobile}</td>
+                <td>${patient.familyMember}</td>
+                <td><button onclick="showPatient('${patient._id}')">Show patient</button></td>
+            </tr>`;
+            });
+
+            element.innerHTML = cartoona;
+        }
+
+        getPatients();
+
+        async function showPatient(id) {
+            try {
+                // Remove the colon from the URL placeholder
+                var response = await fetch(`http://localhost:8000/doctor/selectPatientName/${id}`);
+                var res = await response.json();
+
+                var element = document.getElementById('patientDetails')
+
+                var cartoona = `${res.message[0].Name}   ${res.message[0].Email}     ${res.message[0].Dob}
+                ${res.message[0].Gender}     ${res.message[0].mobile}     ${res.message[0].emergencyName}
+                ${res.message[0].emergencyName}         ${res.message[0].emergencyMobile}     ${res.message[0].familyMember}`
+
+                element.innerHTML = cartoona
+            } catch (error) {
+                console.error('Error fetching patient data:', error);
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
