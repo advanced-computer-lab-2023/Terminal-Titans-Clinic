@@ -48,16 +48,7 @@ router.get('/filterDoctors', async(req, res)=>{
 
 })
 
-router.put('/:id', async (req, res) => {
-    const prescriptions= await prescriptions.findById(req.params.id)
-    if (!doctor)
-        res.status(400).json({ message: "Doctor not found",success:false})
-    else {
-        const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
-        res.status(200).json({Result:updatedDoctor,success:true})
-    }
-})
 
 
 
