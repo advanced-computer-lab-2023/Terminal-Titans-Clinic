@@ -3,6 +3,7 @@ import dotenvModule from 'dotenv'
 import express from 'express'
 import RegisterModule from './Routes/registerRoute.js'
 import DoctorModule from './Routes/doctorRoute.js'
+import PatientModule from './Routes/patientRoute.js'
 import ejs from 'ejs'
 
 const dotenv = dotenvModule.config();
@@ -18,6 +19,7 @@ app.use(express.json())
 
 app.use('/register',RegisterModule)
 app.use('/doctor',DoctorModule)
+app.use('/patient',PatientModule)
 
 app.set('view engine' , 'ejs');
 
@@ -25,7 +27,16 @@ app.set('view engine' , 'ejs');
 app.get('/',(req,res)=>{
    res.render('../../views/home');
 })
+app.post('/',(req,res)=>{
+   var username=req.body.user;
+   if(!username)return(res.status(400));
+   //if(username=="patient")//render patient
+   //if(username=="admin")//render admin
+   if(username=="doctor")   res.render('../../views/showDoctors');
+   
 
+
+})
 app.listen(port, "localhost", () => {
    console.log("Server is running on port 8000");
 })

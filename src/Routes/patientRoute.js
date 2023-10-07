@@ -25,6 +25,15 @@ router.get('/getDoctor/:name', async (req, res) => {
     res.status(200).json({ message: getDoctors })
 }) ;
 
-
 //requirement number 37
 
+router.get('/getDoctors', async(req, res)=>{
+    const allDoctors = await Doctor.find({});
+    res.status(200).json( allDoctors )
+})
+//requirement number 39
+
+router.get('/filterDoctors', async(req, res)=>{
+
+})
+export default router;
