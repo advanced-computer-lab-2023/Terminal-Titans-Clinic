@@ -8,9 +8,9 @@ import { get } from 'mongoose';
 
 const router = express.Router()
 
-// get all doctors
+//get all doctors
 // router.get('/', async (req, res) => {
-//     const doctors = await Doctor.find({})
+//    const doctors = await doctorModel.find({})
 //     res.status(200).json(doctors)
 // })
 
@@ -21,15 +21,18 @@ router.get('/', (req, res) => {
 
 // es2l feeha farah
 // requirement number 14
-router.put('/updateDoctor/:id', async (req, res) => {
-    const doctor = await doctorModel.findById(req.params.id)
+router.put('/updateDoctor', async (req, res) => {
+    const doctor = await doctorModel.findOne({_id:req.body.id});
     console.log("here",doctor)
     if (!doctor || doctor.length == 0)
         res.status(400).json({ message: "Doctor not found", success: false })
     else {
-        console.log("req.body")
-        const updatedDoctor = await doctorModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
-
+        console.log(req.body);
+        //const updatedDoctor = await doctorModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const updatedDoctor=await doctorModel.findOneAndUpdate({_id:req.body.id},
+            {Email:req.body.Email||doctor.Email,
+                HourlyRate:req.body.HourlyRate||doctor.HourlyRate,
+                Affiliation:req.body.Affiliation||doctor.Affiliation},{ new: true });
         res.status(200).json({ Result: updatedDoctor, success: true })
     }
 })
