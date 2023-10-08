@@ -2,13 +2,7 @@ import mongoose, { Schema as _Schema, model } from 'mongoose';
 import userModel from './userModel.js';
 
 // const User=require('./userModel');
-const familyMember = {
-  name: String,
-  age: Number,
-  nationalID: String, 
-  gender: String,
-  relation: String, 
-}
+
 const patientSchema = new _Schema({
 
   
@@ -41,9 +35,7 @@ const patientSchema = new _Schema({
     type: Number,
     required: true,
   },
-  familyMember: {
-    type: [familyMember]
-  }
+ 
 
 }, { timestamps: true });
 const patient=userModel.discriminator('patient',patientSchema);
