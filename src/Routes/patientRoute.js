@@ -18,7 +18,7 @@ router.get('/getAppointment/:date', async (req, res) => {
 });
 
 // requirement number 54
-router.post('/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const prescriptions = await patient.findById(req.params.id)
     if (!prescriptions)
         res.status(400).json({ message: "no presriptions found",success:false})
