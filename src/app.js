@@ -27,7 +27,16 @@ app.set('view engine' , 'ejs');
 app.get('/',(req,res)=>{
    res.render('../../views/home');
 })
+app.post('/',(req,res)=>{
+   var username=req.body.user;
+   if(!username)return(res.status(400));
+   //if(username=="patient")//render patient
+   //if(username=="admin")//render admin
+   if(username=="doctor")   res.render('../../views/showDoctors');
+   
 
+
+})
 app.listen(port, "localhost", () => {
    console.log("Server is running on port 8000");
 })

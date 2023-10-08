@@ -15,9 +15,10 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
+    "email-validator": "^2.0.4",
     "express": "^4.18.2",
     "mongodb": "^6.1.0",
-    "mongoose": "^7.5.3",
+    "mongoose": "^7.6.0",
     "nodemon": "^3.0.1",
     "routes": "^2.1.0"
   }

@@ -3,6 +3,7 @@ import Doctor from '../Models/doctorModel.js';
 import patient from '../Models/patientsModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import doctorModel from '../Models/doctorModel.js';
+import prescriptions from '../Models/prescriptionsModel.js';
 
 
 const router = express.Router();
@@ -17,6 +18,16 @@ router.get('/getAppointment/:date', async (req, res) => {
     res.status(200).json(getAppointments);
 });
 
+// requirement number 54
+router.get('/:id', async (req, res) => {
+    const prescriptions = await patient.findById(req.params.id)
+    if (!prescriptions)
+        res.status(400).json({ message: "no presriptions found",success:false})
+    else {
+
+        res.status(200).json({Result:prescriptions, success:true})
+    }
+})
 // requirement number 38
 router.get('/getDoctor/:name', async (req, res) => {
     const getDoctors = await Doctor.find({ Name: new RegExp(`${req.params.name}`) });
@@ -25,6 +36,7 @@ router.get('/getDoctor/:name', async (req, res) => {
     }
     res.status(200).json({ Doctors: getDoctors });
 }) ;
+
 //requirement number 37
 
 router.get('/getDoctors', async(req, res)=>{
