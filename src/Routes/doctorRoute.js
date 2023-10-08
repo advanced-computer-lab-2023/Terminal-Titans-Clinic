@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 
 // es2l feeha farah
 // requirement number 14
-router.put('/updateDoctor', async (req, res) => {
+router.put('/updateDoctor/:id', async (req, res) => {
     const doctor = await doctorModel.findOne({_id:req.body.id});
     console.log("here",doctor)
     if (!doctor || doctor.length == 0)
