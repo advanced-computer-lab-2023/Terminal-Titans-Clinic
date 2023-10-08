@@ -1,11 +1,11 @@
 import { mongoose } from 'mongoose';
 
 const HealthRecSchema = new mongoose.Schema({
-    healthDocument:{
+    HealthDocument:{
         type:String,
         required:true
     },
-    patientId:{
+    PatientId:{
         type:String,
         required:true
     },

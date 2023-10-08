@@ -28,7 +28,7 @@ const familyMemberSchema = new _Schema({
     type:String,
     required:true
   },
-  familyMemId:{
+  FamilyMemId:{
     type:String
   }
  
