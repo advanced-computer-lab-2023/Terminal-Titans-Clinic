@@ -51,11 +51,13 @@
             var response = await fetch('http://localhost:8000/doctor/getPatients');
             var res = await response.json();
 
-
             var element = document.getElementById('tBody');
             var cartoona = '';
 
-            res.getPatients.forEach(function (patient) {
+            if(!res.success)
+                return alert('No patients found');
+
+            res.Result.forEach(function (patient) {
                 cartoona += `
             <tr>
                 <td>${patient.Name}</td>
@@ -80,6 +82,11 @@
                 // Remove the colon from the URL placeholder
                 var response = await fetch(`http://localhost:8000/doctor/selectPatientName/${id}`);
                 var res = await response.json();
+
+                console.log(res)
+
+                if(!res.success)
+                    return alert('No patient found');
 
                 var element = document.getElementById('patientDetails')
 
