@@ -18,7 +18,6 @@ router.get('/', (req, res) => {
     res.render('doctorPage')
 })
 
-// es2l feeha farah
 // requirement number 14
 router.put('/updateDoctor/:id', async (req, res) => {
     const doctor = await doctorModel.findOne({_id:req.params.id});
@@ -49,7 +48,6 @@ router.get('/getPatientsAndHealth/:id', async (req, res) => {
         healthRecords = [...healthRecords, ...element];
     }
 
-    console.log(healthRecords)
 
     if (healthRecords.length == 0) {
         res.status(400).json({ message: "No patients found",success:false })
