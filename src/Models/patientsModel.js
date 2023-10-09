@@ -35,7 +35,9 @@ const patientSchema = new _Schema({
     type: Number,
     required: true,
   },
- 
+  PackageId:{ //if registered in any packages
+    type:String
+  }
 
 }, { timestamps: true });
 const patient=userModel.discriminator('patient',patientSchema);

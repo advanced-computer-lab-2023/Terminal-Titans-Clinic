@@ -2,8 +2,8 @@ import { mongoose } from 'mongoose';
 
 const HealthRecSchema = new mongoose.Schema({
     HealthDocument:{
-        type:String,
-        required:true
+        binData:Buffer,
+        contentType: String,
     },
     PatientId:{
         type:String,

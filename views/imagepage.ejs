@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Image Uploading</title>
+</head>
+
+<body>
+	<h1>To Upload Image on mongoDB</h1>
+	<hr />
+	<div>
+	
+
+	<h1>Uploaded Images</h1>
+	<div>
+	<div>
+        <%console.log('FE')%>
+
+        <%console.log(items)%>
+		<div>
+		<iframe
+			src="data:'application/pdf';base64,
+					<%=items[2].HealthDocument.binData.toString('base64')%>"></iframe>
+		
+        
+		
+		</div>
+	</div>
+	</div>
+</body>
+</html>

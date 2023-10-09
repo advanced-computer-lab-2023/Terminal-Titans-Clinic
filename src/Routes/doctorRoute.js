@@ -4,6 +4,7 @@ import patientsModel from '../Models/patientsModel.js';
 import healthModel from '../Models/healthModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import userModel from '../Models/userModel.js';
+//import fs from 'fs';
 import { get } from 'mongoose';
 
 const router = express.Router()
@@ -116,4 +117,48 @@ router.get('/selectPatientName/:id', async (req, res) => {
     res.status(200).json({ Result: getPatients, success: true })
 })
 
+//add file to db
+// router.post('/test',async(req,res)=>{
+
+// // POST: called by uploading form
+
+// var model = new healthModel({PatientId:'651c89b4a38c19dc5624ca5f'});
+//     console.log('here')
+//     await fs.readFile(req.body.myFile, function (err, data) {
+//     console.log(data)
+//     model.HealthDocument.binData = data;
+//     // get extension
+//     model.HealthDocument.contentType = 'file/pdf'
+//         model.save();
+//     console.log("end end")
+//     res.status(200).json({status:"success"});
+//   });
+// });
+
+//export file from db
+// router.post('/test',async(req,res)=>{    
+//     var model = new healthModel({PatientId:'651c89b4a38c19dc5624ca5f'});
+//         console.log('here')
+//         await fs.readFile(req.body.myFile, function (err, data) {
+//         console.log(data)
+//         model.HealthDocument.binData = data;
+//         // get extension
+//         model.HealthDocument.contentType = 'application/pdf'
+//             model.save();
+//         console.log("end end")
+//         res.status(200).json({status:"success"});
+//       });
+//     });
+//     router.get('/test', (req, res) => {
+//         healthModel.find({})
+//         .then((data, err)=>{
+//             if(err){
+//                 console.log(err);
+//             }
+//             console.log(data)
+//             res.render('../../views/imagepage',{items: data})
+//             //return(res.render('../../views/home'));
+
+//         })
+//     });
 export default router;

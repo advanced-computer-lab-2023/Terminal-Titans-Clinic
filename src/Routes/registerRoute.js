@@ -67,7 +67,7 @@ router.post('/patient',async (req,res)=>{
     });
     
     newPatient.save();
-    res.status(200).send("success");
+   // res.status(200).send("success");
     return res.redirect('/'); //render patient views page
     }
     catch(error){
@@ -126,7 +126,7 @@ router.post('/doctor',async (req,res)=>{
      });
      
      newDoctor.save();
-     res.status(200).send("success");
+    // res.status(200).send("success");
      return res.redirect('/');
      }
      catch(error){
