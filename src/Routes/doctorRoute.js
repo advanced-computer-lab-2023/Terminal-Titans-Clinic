@@ -46,7 +46,7 @@ router.get('/updateDoctor', async (req, res) => {
             //     {Email:req.query.email||doctor.Email,
             //         HourlyRate:req.query.hourlyRate||doctor.HourlyRate,
             //         Affiliation:req.query.affiliation||doctor.Affiliation},{ new: true });
-            res.status(200).json({ Result: updatedDoctor, success: true })
+            res.status(200).render('doctorPage',{ Result: updatedDoctor, success: true })
         }
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
