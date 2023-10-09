@@ -5,6 +5,8 @@ import appointmentModel from '../Models/appointmentModel.js';
 import prescriptionsModel from '../Models/prescriptionsModel.js';
 import familyMember from '../Models/familyMemberModel.js'
 import fs from 'fs';
+import doctorModel from '../Models/doctorModel.js';
+import { pid } from 'process';
 
 
 const router = express.Router();
@@ -48,22 +50,35 @@ router.get('/getAppointment/:date', async (req, res) => {
 });
 
 // requirement number 54
-router.get('/:id', async (req, res) => {
-        const prescriptions = await patient.findById(req.params.id)
+router.get('/viewPrescriptions', async (req, res) => {
+        const prescriptions = await prescriptionsModel.find({ PatientId: pId })
     if (!prescriptions)
-        res.status(400).json({ message: "no presriptions found",success:false})
+       return  res.status(400).json({ message: "no presriptions found",success:false})
         else {
 
-                res.status(200).json({Result:prescriptions, success:true})
+            return    res.status(200).json({Result:prescriptions, success:true})
         }
 })
 // requirement number 38
-router.get('/getDoctor/:name', async (req, res) => {
-    const getDoctors = await Doctor.find({ Name: new RegExp(`${req.params.name}`) });
-    if (getDoctors.length == 0) {
-        res.status(400).json({ message: "No doctor found with this name" })
+router.get('/getDoctor', async (req, res) => {
+    var getDoctors ;
+    if(req.body.Name && req.body.Speciality){
+     getDoctors = await Doctor.find({ Name: req.body.Name,Speciality:req.body.Speciality});
     }
-    res.status(200).json({ Doctors: getDoctors });
+    if(!req.body.Name){
+         getDoctors = await Doctor.find({Speciality:req.body.Speciality});
+    }
+    if(!req.body.Speciality){
+         getDoctors = await Doctor.find({Name:req.body.Name});
+    }
+    if(!req.body.Speciality && !req.body.Name){
+        getDoctors=await Doctor.find({});
+    }
+    console.log(getDoctors);
+    if (getDoctors.length == 0) {
+        return res.status(400).json({ message: "No doctors found "});
+    }
+    return res.status(200).json({ Doctors: getDoctors , success:true });
 }) ;
 // router.post('/pres',async(req,res)=>{
 //     var model = new prescriptionsModel({PatientId:pId,DoctorId:dId,status:"not filled"});
@@ -85,7 +100,7 @@ router.get('/getDoctors', async(req, res)=>{
 //requirement number 39
 
 router.get('/filterDoctors', async(req, res)=>{
-    const spclty = req.body.specialty;
+    const spclty = req.body.Specialty;
     const  dTime = req.body.date;
     const spcltyDocs = await Doctor.find({Speciality:spclty})
     const aptmnts = await appointmentModel.find({Date:dTime})
@@ -102,10 +117,39 @@ router.get('/filterDoctors', async(req, res)=>{
    res.status(200).json(result);
 })
 
+router.get('/filterPrescriptions', async(req, res)=>{
+    const date = req.body.Date;
+    const id = doctorModel.find({Name:req.body.Name});
+    const  status = req.body.status ;
+    const result = await prescriptionsModel.filter((Pr)=>{
+    
+
+
+    })
+    
+   // const result = prescriptionsModel.filter({Date: date , DoctorId: doctorID ,  })
+
+
+    res.status(200).json(result);
+    
+
+
+
+}
+
+)
+
 router.get('/selectDoctors', async(req,res)=>{
     const dId= req.body.id;
     const Dr = await Doctor.find({_id:dId});
     res.status(200).json(Dr);
+})
+
+// requirement 56
+router.get('/selectPrescriptions', async(req,res)=>{
+    const id= req.body._id;
+    const result = await prescriptionsModel.find({_id:id});
+    res.status(200).json(result);
 })
 
 export default router;
