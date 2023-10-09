@@ -9,10 +9,14 @@ const prescriptionSchema = new mongoose.Schema({
         type: String, 
         required:true
     },
-    prescription:{
+    prescriptionDoc:{
+        binData:Buffer,
+        contentType: String,
+    },
+    status:{
         type:String,
         required:true
-    },
+    }
     //appointment?
 });
 export default model('prescription',prescriptionSchema);

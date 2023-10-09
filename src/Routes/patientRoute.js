@@ -2,8 +2,9 @@ import express from 'express'
 import Doctor from '../Models/doctorModel.js';
 import patient from '../Models/patientsModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
-import prescriptions from '../Models/prescriptionsModel.js';
+import prescriptionsModel from '../Models/prescriptionsModel.js';
 import familyMember from '../Models/familyMemberModel.js'
+import fs from 'fs';
 
 
 const router = express.Router();
@@ -47,15 +48,15 @@ router.get('/getAppointment/:date', async (req, res) => {
 });
 
 // requirement number 54
-// router.get('/:id', async (req, res) => {
-//     const prescriptions = await patient.findById(req.params.id)
-//     if (!prescriptions)
-//         res.status(400).json({ message: "no presriptions found",success:false})
-//     else {
+router.get('/:id', async (req, res) => {
+        const prescriptions = await patient.findById(req.params.id)
+    if (!prescriptions)
+        res.status(400).json({ message: "no presriptions found",success:false})
+        else {
 
-//         res.status(200).json({Result:prescriptions, success:true})
-//     }
-// })
+                res.status(200).json({Result:prescriptions, success:true})
+        }
+})
 // requirement number 38
 router.get('/getDoctor/:name', async (req, res) => {
     const getDoctors = await Doctor.find({ Name: new RegExp(`${req.params.name}`) });
@@ -64,6 +65,16 @@ router.get('/getDoctor/:name', async (req, res) => {
     }
     res.status(200).json({ Doctors: getDoctors });
 }) ;
+// router.post('/pres',async(req,res)=>{
+//     var model = new prescriptionsModel({PatientId:pId,DoctorId:dId,status:"not filled"});
+//         await fs.readFile(req.body.myFile, function (err, data) {
+//         console.log(data)
+//         model.prescriptionDoc.binData = data;
+//         model.prescriptionDoc.contentType = 'application/pdf'
+//             model.save();
+//         res.status(200).json({status:"success"});
+//       });
+// })
 
 //requirement number 37
 

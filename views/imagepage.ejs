@@ -19,11 +19,14 @@
 
         <%console.log(items)%>
 		<div>
-		<iframe
+			
+
+		 <iframe
 			src="data:'application/pdf';base64,
-					<%=items[2].HealthDocument.binData.toString('base64')%>"></iframe>
+					<%=items[2].HealthDocument.binData.toString('base64')%>"></iframe> 
 		
-        
+					<!-- <embed src="data:'application/pdf';base64,
+					<%=items[2].HealthDocument.binData.toString('base64')%>"> -->
 		
 		</div>
 	</div>

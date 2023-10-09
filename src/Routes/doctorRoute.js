@@ -149,16 +149,16 @@ router.get('/selectPatientName/:id', async (req, res) => {
 //         res.status(200).json({status:"success"});
 //       });
 //     });
-//     router.get('/test', (req, res) => {
-//         healthModel.find({})
-//         .then((data, err)=>{
-//             if(err){
-//                 console.log(err);
-//             }
+    //     router.get('/test', (req, res) => {
+        //         healthModel.find({})
+        //         .then((data, err)=>{
+            //             if(err){
+                //                 console.log(err);
+            //             }
 //             console.log(data)
-//             res.render('../../views/imagepage',{items: data})
-//             //return(res.render('../../views/home'));
+            //             res.render('../../views/imagepage',{items: data})
+            //             //return(res.render('../../views/home'));
 
-//         })
-//     });
+        //         })
+    //     });
 export default router;
