@@ -16,6 +16,10 @@ const prescriptionSchema = new mongoose.Schema({
     status:{
         type:String,
         required:true
+    },
+    Date:{
+        type:Date,
+        required:true
     }
     //appointment?
 });
