@@ -24,6 +24,17 @@
 
 <body>
 
+    <div id="myDoctor">
+
+    </div>
+
+    <form action="/doctor/updateDoctor" method="get">
+        <input name="Email" id="Email" placeholder="email">
+        <input name="HourlyRate" id="HourlyRate" placeholder="hourlyRate">
+        <input name="Affiliation" id="Affiliation" placeholder="affiliation">
+        <button type="submit">Update</button>
+    </form>
+
     <table>
         <thead>
             <tr>
@@ -46,15 +57,65 @@
 
     </div>
 
+
+
+    <h1>List of Patients</h1>
+    <input type="text" name="" id="nameSearch">
+    <button type="button" onclick="showPatientsName()">Click me</button>
+    <div id="patientsNames"></div>
+
+
     <script>
+        async function updateDoctor() {
+            let myBody = {
+                email: document.getElementById('email').value,
+                hourlyRate: document.getElementById('hourlyRate').value,
+                affiliation: document.getElementById('affiliation').value
+            }
+            
+            console.log(JSON.stringify(myBody))
+            console.log(myBody.hourlyRate)
+            console.log(myBody.affiliation)
+            var response = await fetch('http://localhost:8000/doctor/updateDoctor', {
+                method: 'PUT', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)
+                body: JSON.stringify(myBody), // Convert the data to a JSON string and include it as the body
+            });
+            var res = await response.json();
+
+            console.log(res)
+        }
+        getCurrentDoctor()
+        async function getCurrentDoctor() {
+            var response = await fetch('http://localhost:8000/doctor/getCurrentDoctor');
+            var res = await response.json();
+
+            if (!res.success)
+                return alert('No doctor found');
+
+            var element = document.getElementById('myDoctor');
+            var list = res.Result;
+
+            var cartoona = `<h1>My info:</h1> <p> ${res.Result.Name} </p>`;
+            cartoona += `<p> ${res.Result.Email} </p>`;
+            cartoona += `<p> ${res.Result.DateOfBirth} </p>`;
+            cartoona += `<p> ${res.Result.HourlyRate} </p>`;
+            cartoona += `<p> ${res.Result.Affiliation} </p>`;
+            cartoona += `<p> ${res.Result.Education} </p>`;
+            cartoona += `<p> ${res.Result.Speciality} </p>`;
+            cartoona += `<p> ${res.Result.Username} </p>`;
+
+            element.innerHTML = cartoona;
+        }
+
         async function getPatients() {
             var response = await fetch('http://localhost:8000/doctor/getPatients');
             var res = await response.json();
 
+
             var element = document.getElementById('tBody');
             var cartoona = '';
 
-            if(!res.success)
+            if (!res.success)
                 return alert('No patients found');
 
             res.Result.forEach(function (patient) {
@@ -62,7 +123,7 @@
             <tr>
                 <td>${patient.Name}</td>
                 <td>${patient.Email}</td>
-                <td>${patient.Dob}</td>
+                <td>${patient.DateOfBirth}</td>
                 <td>${patient.Gender}</td>
                 <td>${patient.mobile}</td>
                 <td>${patient.emergencyName}</td>
@@ -83,19 +144,69 @@
                 var response = await fetch(`http://localhost:8000/doctor/selectPatientName/${id}`);
                 var res = await response.json();
 
-                console.log(res)
+                var list = res.Result
 
-                if(!res.success)
+
+
+                if (!res.success)
                     return alert('No patient found');
 
                 var element = document.getElementById('patientDetails')
 
-                var cartoona = `${res.message[0].Name}   ${res.message[0].Email}     ${res.message[0].Dob}
-                ${res.message[0].Gender}     ${res.message[0].mobile}     ${res.message[0].emergencyName}
-                ${res.message[0].emergencyName}         ${res.message[0].emergencyMobile}     ${res.message[0].familyMember}`
+                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
+                ${list[0].Gender}     ${list[0].mobile}     ${list[0].emergencyName}
+                ${list[0].emergencyName}         ${list[0].emergencyMobile}     ${list[0].familyMember}`
 
                 element.innerHTML = cartoona
             } catch (error) {
+                console.error('Error fetching patient data:', error);
+            }
+        }
+
+        async function showPatientsName() {
+            try {
+                let name = document.getElementById('nameSearch').value
+
+                // Remove the colon from the URL placeholder
+                var response = await fetch(`http://localhost:8000/doctor/getPatientName/${name}`);
+                var res = await response.json();
+
+                var list = res.Result
+                console.log(list)
+                var cartoona = ''
+                for (let i = 0; i < list.length; i++) {
+                    cartoona += `
+                    <ul>
+                <li>Name: ${list[i].Name}
+                </li>
+                <li><strong>Email:</strong>
+                    ${list[i].Email}
+                </li>
+                <li><strong>Date of Birth:</strong>
+                    ${list[i].DateOfBirth}
+                </li>
+                <li><strong>Gender:</strong>
+                    ${list[i].Gender}
+                </li>
+                <li><strong>Mobile:</strong>
+                    ${list[i].mobile}
+                </li>
+                <li><strong>Emergency Contact Name:</strong>
+                    ${list[i].emergencyName}
+                </li>
+                <li><strong>Emergency Contact Mobile:</strong>
+                    ${list[i].emergencyMobile}
+                </li>
+                <li><strong>Username:</strong>
+                    ${list[i].Username}
+                </li>
+        </ul>`
+                }
+
+                var element = document.getElementById('patientsNames')
+                element.innerHTML = cartoona
+            }
+            catch (error) {
                 console.error('Error fetching patient data:', error);
             }
         }
