@@ -44,8 +44,15 @@ router.get('/viewRegFamMem', async (req, res) => {
 })
 
 // requirement number 23
-router.get('/getAppointment/:date', async (req, res) => {
-    const getAppointments = await appointmentModel.find({ Date: { $gte: req.params.date } });
+router.get('/getAppointment', async (req, res) => {
+
+    let getAppointments;
+    if (req.body.date){
+        getAppointments = await appointmentModel.find({ Date: req.body.date });
+    }
+    else{
+        getAppointments = await appointmentModel.find({});
+    }
     res.status(200).json(getAppointments);
 });
 

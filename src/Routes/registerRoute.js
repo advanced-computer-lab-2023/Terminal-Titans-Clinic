@@ -43,10 +43,12 @@ router.post('/patient',async (req,res)=>{
     return(res.render('../../views/patientRegistration',{message: "username has to be one word"}));
 
 }
-   const savedUser =  await userModel.find({Username :req.body.username});
-    if(savedUser.length>0)
-    return(res.render('../../views/patientRegistration',{message: "username has to be"}));
-
+   var unqiueUser =  await userModel.find({Username :req.body.username});
+    if(unqiueUser.length>0)
+    return(res.render('../../views/patientRegistration',{message: "username has to be unique"}));
+    unqiueUser =  await userModel.find({Email :req.body.email});
+    if(unqiueUser.length>0)
+    return(res.render('../../views/patientRegistration',{message: "email has to be unique"}));
     //return(res.status(400).send({message: "username exists "}));
 
    if(!validator.validate(req.body.email))
@@ -106,7 +108,9 @@ router.post('/doctor',async (req,res)=>{
     const savedUser =  await userModel.find({Username :req.body.username});
      if(savedUser.length>0)
      return(res.render('../../views/doctorRegistration',{message: "username exists "}));
-
+     const unqiueUser =  await userModel.find({Email :req.body.email});
+     if(unqiueUser.length>0)
+     return(res.render('../../views/doctorRegistration',{message: "email has to be unique"}));
      //return(res.status(400).send({message: "username exists "}));
      if(!validator.validate(req.body.email))
      return(res.render('../../views/doctorRegistration',{message:"Please enter a valid email"}));
