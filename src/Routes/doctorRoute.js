@@ -135,7 +135,6 @@ router.get('/getPatientsList', async (req, res) => {
 // requirement number 34
 router.get('/getPatientName/:name', async (req, res) => {
     try {
-        console.log("appointments")
         const doctor = await doctorModel.findOne({ _id: id })
 
         if (!doctor) {
