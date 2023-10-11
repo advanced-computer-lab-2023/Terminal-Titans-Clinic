@@ -254,7 +254,7 @@ router.get('/selectPatientName/:id', async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 })
-router.get('/getAppointment', async (req, res) => {
+router.post('/getAppointment', async (req, res) => {
     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
