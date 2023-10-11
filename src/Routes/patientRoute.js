@@ -14,8 +14,17 @@ const pId='651c89b4a38c19dc5624ca5f';
 const doc1Id='652323f2050647d6c71d8758';
 const doc2Id='6523244bc7aa4b1920a48e03';
 
+router.get('/getCurrentPatient', async (req, res) => {
+    const patient = await patientModel.findOne({ _id: pId })
+    if (!patient) {
+        res.status(400).json({ message: "Patient not found", success: false })
+    }
+    else
+        res.status(200).json({ Result: patient, success: true })
+})
+
 //requirement 18 (add family member)
-router.post('/addFamilyMem', async (req,res)=>{
+router.get('/addFamilyMem', async (req,res)=>{
     const rel=req.body.relation.toLowerCase()
     if(!(rel==('wife') || (rel)==('husband')|| (rel)==('child')))
         return(res.status(400).send({message: "family member can only be wife/husband or child"}));
@@ -109,7 +118,7 @@ router.get('/viewPrescriptions', async (req, res) => {
         }
 })
 // requirement number 38
-router.get('/getDoctor', async (req, res) => {
+router.get('/getDoctors', async (req, res) => {
     var getDoctors ;
     if(req.body.Name && req.body.Speciality){
      getDoctors = await Doctor.find({ Name: req.body.Name,Speciality:req.body.Speciality});
@@ -142,7 +151,7 @@ router.get('/getDoctor', async (req, res) => {
 
 //requirement number 37
 
-router.get('/getDoctors', async(req, res)=>{
+router.get('/getDoctorInfo', async(req, res)=>{
     const allDoctors = await Doctor.find({});
     const discount=80;//get from PACKAGE
     var result={};
