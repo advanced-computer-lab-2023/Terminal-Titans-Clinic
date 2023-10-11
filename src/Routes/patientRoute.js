@@ -63,8 +63,13 @@ router.get('/addFamilyMem', async (req,res)=>{
 
 // requirement number 22
 router.get('/viewRegFamMem', async (req, res) => {
+   
     const famMembers = await familyMember.find({ PatientId: pId });
-    res.status(200).json(famMembers);
+    if (!famMembers){
+    return  res.status(400).json({ message: "no family members found",success:false})}
+else {
+    res.status(200).json({Result:famMembers, success:true});
+}
 })
 
 // requirement number 23

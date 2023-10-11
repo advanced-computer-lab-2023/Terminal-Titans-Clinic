@@ -35,6 +35,9 @@
     <button type="button" onclick="viewPrescriptions()">MyPrescriptions</button>
     <div id="viewPrescriptions"></div>
 
+    <button type="button" onclick="viewRegFamMem()">MyFamilyMembers</button>
+    <div id="MyFamilyMembers"></div>
+
    
 
 
@@ -42,6 +45,57 @@
 
 
     <script>
+
+
+async function viewRegFamMem() {
+            try {
+                var response = await fetch(`http://localhost:8000/patient/viewRegFamMem`);
+
+
+                var res = await response.json();
+
+
+                if (!res.success)
+                    return alert(res.message);
+
+                var list = res.Result
+                console.log(list)
+                var cartoona = ''
+                for (let i = 0; i < list.length; i++) {
+                    cartoona += `
+                    <ul>
+                   
+                <li><strong>Name:</strong>
+                    ${list[i].Name}
+                </li>
+                <li><strong>Age:</strong>
+                    ${list[i].Age}
+                </li>
+                <li><strong>NationalId:</strong>
+                    ${list[i].NationalId}
+                </li>
+                <li><strong>Gender:</strong>
+                    ${list[i].Gender}
+                </li>
+                <li><strong>Relation:</strong>
+                    ${list[i].Relation}
+                </li>
+                <li><strong>FamilyMemId:</strong>
+                    ${list[i].FamilyMemId}
+                </li>
+               
+                
+                                
+        </ul>`
+                }
+
+                document.getElementById('MyFamilyMembers').innerHTML = cartoona
+            }
+            catch (error) {
+                console.error('Error fetching family members data:', error);
+            }
+        }
+
        
        async function viewPrescriptions() {
             try {
