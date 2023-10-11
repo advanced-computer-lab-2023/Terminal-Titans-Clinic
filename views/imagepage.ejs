@@ -17,16 +17,14 @@
 	<div>
         <%console.log('FE')%>
 
-        <%console.log(items)%>
+        <%console.log(items[1].HealthDocument.binData.toString('base64'))%>
 		<div>
 			
 
-		 <iframe
-			src="data:'application/pdf';base64,
-					<%=items[2].HealthDocument.binData.toString('base64')%>"></iframe> 
-		
-					<!-- <embed src="data:'application/pdf';base64,
-					<%=items[2].HealthDocument.binData.toString('base64')%>"> -->
+			
+					<a href="data:'application/pdf';base64,
+					<%=items[1].HealthDocument.binData.toString('base64')%> "download="your-filename.pdf">Download PDF</a>
+			
 		
 		</div>
 	</div>

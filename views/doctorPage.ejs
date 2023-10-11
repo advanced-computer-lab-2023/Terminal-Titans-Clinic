@@ -240,7 +240,7 @@
 
                 var list = res.Result
 
-                console.log(list)
+                console.log(list.patient)
 
                 var element = document.getElementById('patientDetails')
 
@@ -248,9 +248,9 @@
                 ${list.patient.Gender}     ${list.patient.mobile}     ${list.patient.emergencyName}
                 ${list.patient.emergencyName}         ${list.patient.emergencyMobile}     ${list.patient.familyMember}`
 
-                for (let i = 0; i < list.healthRecords.length; i++) {
+                for (let i = 0; i < list.healthDoc.length; i++) {                    
                     cartoona += `<p><a href="data:'application/pdf';base64,
-			${list.healthRecords[i].HealthDocument.binData.toString('base64')} "download="your-filename.pdf">Download PDF</a></p>`
+                    ${list.healthDoc[i]} "download="your-filename.pdf">Download Health Doc${i+1}</a></p>`
                 }
 
                 element.innerHTML = cartoona

@@ -50,6 +50,8 @@ router.get('/updateDoctor', async (req, res) => {
 
 // requirement number 25
 router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
+    console.log(req.params.id)
+    // return(res.render('../..views/home'))
     try {
         const appointment = await appointmentModel.findOne({ PatientId: req.params.id });
 
@@ -83,11 +85,17 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
             console.log(familyMembers[i].Name)
             patient.familyMember.push(familyMembers[i].Name)
         }
+        let list=[]
+        for (let x in healthRecords){
+           list.push(healthRecords[x].HealthDocument.binData.toString('base64'))
+           
+        }
 
-
+        //console.log(patient)
         const result = {
             "healthRecords": healthRecords,
-            "patient": patient
+            "patient": patient,
+            "healthDoc":list
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -323,16 +331,16 @@ router.post('/getAppointment', async (req, res) => {
 //         res.status(200).json({status:"success"});
 //       });
 //     });
-//     router.get('/test', (req, res) => {
-//         healthModel.find({})
-//         .then((data, err)=>{
-//             if(err){
-//                 console.log(err);
-//             }
-//             console.log(data)
-//             res.render('../../views/imagepage',{items: data})
-//             //return(res.render('../../views/home'));
+    router.get('/test', (req, res) => {
+        healthModel.find({})
+        .then((data, err)=>{
+            if(err){
+                console.log(err);
+            }
+            console.log(data)
+            res.render('../../views/imagepage',{items: data})
+            //return(res.render('../../views/home'));
 
-//         })
-//     });
+        })
+    });
 export default router;
