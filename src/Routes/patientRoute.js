@@ -153,7 +153,15 @@ router.get('/getDoctors', async (req, res) => {
 
 router.get('/getDoctorInfo', async(req, res)=>{
     const allDoctors = await Doctor.find({});
-    const discount=80;//get from PACKAGE
+    const currPat= await patient.find({_id:pId})
+    const packId=currPat.PackageId;
+    if(packId){
+        const discountP= packId.doctorDiscountInPercentage;
+    }
+    else{
+        const discountP=0;
+    }
+    discount=100-discountP;
     var result={};
     for(let x in allDoctors){
         console.log("here")
