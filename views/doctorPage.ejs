@@ -269,6 +269,7 @@
 
                 var res = await response.json();
 
+
                 if (!res.success)
                     return alert(res.message);
 
@@ -305,6 +306,11 @@
                     <strong>Family Member:</strong>
                     ${list[i].familyMember}
                 </li>
+                <li>
+                    <strong>Appointment Date:</strong>
+                    ${list[i].appointmentDate}
+                </li>
+                                
         </ul>`
                 }
 
