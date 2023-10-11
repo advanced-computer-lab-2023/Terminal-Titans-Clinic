@@ -60,14 +60,13 @@ router.get('/viewRegFamMem', async (req, res) => {
 
 // requirement number 23
 router.get('/getAppointment', async (req, res) => {
+    const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+    const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
     let getAppointmentsbyDate;
-    if (req.body.date){
-        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date,PatientId:pId });
-    }
-    else{
-        getAppointmentsbyDate = await appointmentModel.find({PatientId:pId});
-    }
+    getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
+        $lte: endDate } ,PatientId:pId });
+    
     let getAppointmentsbyStatus;
     if (req.body.status){
         getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status,PatientId:pId });
@@ -165,24 +164,28 @@ router.get('/getDoctors', async(req, res)=>{
 })
 //requirement number 39
 
-router.get('/filterDoctors', async(req, res)=>{
+router.post('/filterDoctors', async(req, res)=>{
     const spclty = req.body.Speciality;
-    const  dTime = req.body.date;
+    let  dTimeTemp = req.body.date;
+    let dTime = new Date(dTimeTemp);
+    dTime.setHours(dTime.getHours()+2) 
     var spcltyDocs = await Doctor.find({Speciality:spclty})
     if(!spclty){
         spcltyDocs = await Doctor.find({});
     }
-    const aptmnts = await appointmentModel.find({Date:dTime})
+    const aptmnts = await appointmentModel.find({})
     
     const result = spcltyDocs.filter((Dr) => {
     for(let y in aptmnts){
     if(aptmnts[y].DoctorId == Dr._id){
-    console.log(Dr.Name);
-    return false;
+        let start= aptmnts[y].Date;
+        let end = new Date ( start );
+        end.setMinutes ( start.getMinutes() + 30 );
+        if(dTime>=start && dTime<end)
+            return false;
             }
         }
         return true});
-    console.log(aptmnts);
    res.status(200).json(result);
 })
 

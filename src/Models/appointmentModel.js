@@ -1,5 +1,5 @@
 import mongoose, { Schema as _Schema, model } from 'mongoose';
-
+//default duration is 30 mmins
 const apppointmentSchema = new mongoose.Schema({
     PatientId:{
         type: String, 
