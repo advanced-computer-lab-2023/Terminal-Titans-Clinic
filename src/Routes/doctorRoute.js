@@ -258,14 +258,13 @@ router.get('/selectPatientName/:id', async (req, res) => {
     }
 })
 router.get('/getAppointment', async (req, res) => {
+    const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+    const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
     let getAppointmentsbyDate;
-    if (req.body.date){
-        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date,DoctorId: id});
-    }
-    else{
-        getAppointmentsbyDate = await appointmentModel.find({DoctorId: id});
-    }
+        getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
+        $lte: endDate } ,DoctorId: id});
+    
     let getAppointmentsbyStatus;
     if (req.body.status){
         getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status ,DoctorId: id});
@@ -288,7 +287,6 @@ router.get('/getAppointment', async (req, res) => {
         const patient=await patientsModel.find({_id:temp[x].PatientId})
         if(patient.length>0)
         result.Name=patient[0].Name;           
-        //result.prescriptionDoc=temp[x].prescriptionDoc;
         result.Date=temp[x].Date;
         result.Status=temp[x].Status;
         final.push(result);
