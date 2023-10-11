@@ -15,13 +15,27 @@ const dId='652323f2050647d6c71d8758';
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', async (req,res)=>{
+    const rel=req.body.relation.toLowerCase()
+    if(!(rel==('wife') || (rel)==('husband')|| (rel)==('child')))
+        return(res.status(400).send({message: "family member can only be wife/husband or child"}));
+    
+    var famMember = await familyMember.find({ PatientId: pId,NationalId:req.body.nId});
+    if(famMember.length>0)
+        return(res.status(400).send({message: "This National Id is already registered as a family member"}));
+        
+    if((rel)==('wife') || (rel)==('husband')  ){  
+    const famMember = await familyMember.find({ PatientId: pId,Relation: req.body.relation.toLowerCase()});
+    if(famMember.length>0)
+        return(res.status(400).send({message: "a family member is already registered as your spouse"}));
+        }
+
     try{
         const newFamilyMember = new familyMember({
             Name : req.body.name,
             Age : req.body.age,
             NationalId:req.body.nId,
             Gender:req.body.gender,
-            Relation:req.body.relation,
+            Relation:req.body.relation.toLowerCase(),
             PatientId: pId,
             FamilyMemId: req.body.fMemId
         });
@@ -46,20 +60,48 @@ router.get('/viewRegFamMem', async (req, res) => {
 // requirement number 23
 router.get('/getAppointment', async (req, res) => {
 
-    let getAppointments;
+    let getAppointmentsbyDate;
     if (req.body.date){
-        getAppointments = await appointmentModel.find({ Date: req.body.date });
+        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date,PatientId:pId });
     }
     else{
-        getAppointments = await appointmentModel.find({});
+        getAppointmentsbyDate = await appointmentModel.find({PatientId:pId});
     }
-    res.status(200).json(getAppointments);
+    let getAppointmentsbyStatus;
+    if (req.body.status){
+        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status,PatientId:pId });
+    }
+    else{
+        getAppointmentsbyStatus = await appointmentModel.find({PatientId:pId});
+    }
+    var temp = getAppointmentsbyDate.filter((app) => {
+        for(let y in getAppointmentsbyStatus){
+        if(getAppointmentsbyStatus[y]._id .equals( app._id)){
+            return true;
+                }
+            }
+       return false;
+        }
+    );
+    let final=[]
+    for(let x in temp){///if you need the patient's name in front end
+        var result={}
+        const doctor=await doctorModel.find({_id:temp[x].DoctorId})
+        if(doctor.length>0)
+        result.Name=doctor[0].Name;           
+        //result.prescriptionDoc=temp[x].prescriptionDoc;
+        result.Date=temp[x].Date;
+        result.Status=temp[x].Status;
+        final.push(result);
+
+    }
+    res.status(200).json(final);
 });
 
 // requirement number 54
 router.get('/viewPrescriptions', async (req, res) => {
         const prescriptions = await prescriptionsModel.find({ PatientId: pId })
-    if (!prescriptions)
+            if (!prescriptions)
        return  res.status(400).json({ message: "no presriptions found",success:false})
         else {
 
@@ -102,14 +144,33 @@ router.get('/getDoctor', async (req, res) => {
 
 router.get('/getDoctors', async(req, res)=>{
     const allDoctors = await Doctor.find({});
-    res.status(200).json( allDoctors );
+    const discount=80;//get from PACKAGE
+    var result={};
+    for(let x in allDoctors){
+        console.log("here")
+        var cur=allDoctors[x];
+        var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
+        result.sessionPrice=price;
+        result.Name=allDoctors[x].Name;
+        result.Email=allDoctors[x].Email;
+        result.Affiliation=allDoctors[x].Affiliation;
+        result.Education=allDoctors[x].Education;
+        result.Speciality=allDoctors[x].Speciality;
+        result.id=allDoctors[x].id;
+
+    }
+    //console.log(allDoctors)
+    res.status(200).json( result );
 })
 //requirement number 39
 
 router.get('/filterDoctors', async(req, res)=>{
-    const spclty = req.body.Specialty;
+    const spclty = req.body.Speciality;
     const  dTime = req.body.date;
-    const spcltyDocs = await Doctor.find({Speciality:spclty})
+    var spcltyDocs = await Doctor.find({Speciality:spclty})
+    if(!spclty){
+        spcltyDocs = await Doctor.find({});
+    }
     const aptmnts = await appointmentModel.find({Date:dTime})
     
     const result = spcltyDocs.filter((Dr) => {
@@ -126,26 +187,63 @@ router.get('/filterDoctors', async(req, res)=>{
 
 router.get('/filterPrescriptions', async(req, res)=>{
     const date = req.body.Date;
-    const id = doctorModel.find({Name:req.body.Name});
+    var id = await doctorModel.find({Name:req.body.Name});
+    // var id=await prescriptionsModel.find({DoctorId: req.body.DoctorId,PatientId:pId})
     const  status = req.body.status ;
-    const result = await prescriptionsModel.filter((Pr)=>{
+    var presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
+    var presStatus = await prescriptionsModel.find({status: status,PatientId:pId});
+    if(!req.body.Name){
+        var id = await doctorModel.find({});
+    }
+    // if(!req.body.DoctorId){
+    //     var id = await prescriptionsModel.find({PatientId:pId});
+    // }
+    if(!req.body.Date){
+        var presDate = await prescriptionsModel.find({PatientId:pId});
+    }
+    if(!req.body.status){
+        var presStatus = await prescriptionsModel.find({PatientId:pId});
+    }
+    var temp = presDate.filter((pres) => {
+        var flag1=false;
+        for(let y in id){
+        if(id[y]._id == pres.DoctorId){
+          //if(id[y].DoctorId==pres.DoctorId){  
+        flag1=true;
+                }
+            }
+        var flag2=false;    
+        for(let y in presStatus){
+            
+            if(presStatus[y]._id.equals( pres._id)){
+                flag2=true;
+            }
+        }
+            return flag1 && flag2});
+         
+            var final=[];
+        for(let x in temp){///if you need the doctor's name in front end
+            var result={}
+            const doc=await Doctor.find({_id:temp[x].DoctorId})
+            console.log(doc.Name)
+            if(doc.length>0)
+            result.Name=doc[0].Name;           
+            //result.prescriptionDoc=temp[x].prescriptionDoc;
+            result.Date=temp[x].Date;
+            result.status=temp[x].status;
+            result.id=temp[x].id;
+            final.push(result);
     
+        }
+    res.status(200).json(final);
 
-
-    })
-    
-   // const result = prescriptionsModel.filter({Date: date , DoctorId: doctorID ,  })
-
-
-    res.status(200).json(result);
-    
 
 
 
 }
 
 )
-
+// requirement 40/41
 router.get('/selectDoctors', async(req,res)=>{
     const dId= req.body.id;
     const Dr = await Doctor.find({_id:dId});
@@ -154,7 +252,7 @@ router.get('/selectDoctors', async(req,res)=>{
 
 // requirement 56
 router.get('/selectPrescriptions', async(req,res)=>{
-    const id= req.body._id;
+    const id= req.body.id;
     const result = await prescriptionsModel.find({_id:id});
     res.status(200).json(result);
 })

@@ -6,7 +6,7 @@ import appointmentModel from '../Models/appointmentModel.js';
 import familyMemberModel from '../Models/familyMemberModel.js';
 
 const router = express.Router()
-let id = '651c89b4a38c19dc5624ca5f';
+let id = '652323f2050647d6c71d8758';
 
 //get all doctors
 // router.get('/', async (req, res) => {
@@ -29,7 +29,7 @@ router.get('/', (req, res) => {
 
 // requirement number 14 later
 router.get('/updateDoctor', async (req, res) => {
-    // const doctor = await doctorModel.findOne({_id:req.params.id});
+    const doctor = await doctorModel.findOne({_id:id});
     try {
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: id },
             {
@@ -255,7 +255,45 @@ router.get('/selectPatientName/:id', async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 })
+router.get('/getAppointment', async (req, res) => {
 
+    let getAppointmentsbyDate;
+    if (req.body.date){
+        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date,DoctorId: id});
+    }
+    else{
+        getAppointmentsbyDate = await appointmentModel.find({DoctorId: id});
+    }
+    let getAppointmentsbyStatus;
+    if (req.body.status){
+        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status ,DoctorId: id});
+    }
+    else{
+        getAppointmentsbyStatus = await appointmentModel.find({DoctorId: id});
+    }
+    var temp = getAppointmentsbyDate.filter((app) => {
+        for(let y in getAppointmentsbyStatus){
+        if(getAppointmentsbyStatus[y]._id .equals( app._id)){
+            return true;
+                }
+            }
+       return false;
+        }
+    );
+    var final=[];
+    for(let x in temp){///if you need the patient's name in front end
+        var result={}
+        const patient=await patientsModel.find({_id:temp[x].PatientId})
+        if(patient.length>0)
+        result.Name=patient[0].Name;           
+        //result.prescriptionDoc=temp[x].prescriptionDoc;
+        result.Date=temp[x].Date;
+        result.Status=temp[x].Status;
+        final.push(result);
+
+    }
+    res.status(200).json(final);
+});
 //add file to db
 // router.post('/test',async(req,res)=>{
 

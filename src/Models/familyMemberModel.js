@@ -18,6 +18,7 @@ const familyMemberSchema = new _Schema({
   },
   Gender: {
     type: String,
+    enum:['Male', 'Female', 'Other'],
     required: true
   },
   Relation: {
