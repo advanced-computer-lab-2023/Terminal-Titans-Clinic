@@ -11,7 +11,8 @@ import { pid } from 'process';
 
 const router = express.Router();
 const pId='651c89b4a38c19dc5624ca5f';
-const dId='652323f2050647d6c71d8758';
+const doc1Id='652323f2050647d6c71d8758';
+const doc2Id='6523244bc7aa4b1920a48e03';
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', async (req,res)=>{
