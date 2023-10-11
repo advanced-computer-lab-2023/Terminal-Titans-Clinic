@@ -7,6 +7,7 @@ import familyMember from '../Models/familyMemberModel.js'
 import fs from 'fs';
 import doctorModel from '../Models/doctorModel.js';
 import { pid } from 'process';
+import healthPackageModel from '../Models/healthPackageModel.js' ;
 
 
 const router = express.Router();
@@ -157,34 +158,54 @@ router.get('/getDoctors', async (req, res) => {
 //requirement number 37
 
 router.get('/getDoctorInfo', async(req, res)=>{
+    try{
     const allDoctors = await Doctor.find({});
     const currPat= await patient.find({_id:pId})
-    const packId=currPat.PackageId;
-    //var discountP ;
-    //if(packId){
-     //  discountP= packId.doctorDiscountInPercentage;
-    //   console.log(discountP);
-  //  }
-   // else{
-     //    discountP=0;
-   // }
-    //const discount=100-discountP;
-    var result={};
+    if(currPat.length<1){
+        return(res.status(400).send({error: "cant find patient",success: false }));
+
+    }
+    const packId=currPat[0].PackageId;
+    console.log(currPat)
+    var discountP=0;
+    if(packId){
+        const allPackages = await healthPackageModel.find({_id:packId});
+        if(allPackages.length>0)
+         discountP= allPackages[0].doctorDiscountInPercentage;
+    else
+    return(res.status(400).send({error: "cant find package",success: false }));
+
+    }
+    else{
+         discountP=0;
+    }
+    let discount=100-discountP;
+
+    console.log(discount)
+    var final=[]
     for(let x in allDoctors){
+        var result={};
         console.log("here")
         var cur=allDoctors[x];
-        //var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
-        //result.sessionPrice=price;
+        var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
+        result.sessionPrice=price;
         result.Name=allDoctors[x].Name;
         result.Email=allDoctors[x].Email;
         result.Affiliation=allDoctors[x].Affiliation;
         result.Education=allDoctors[x].Education;
         result.Speciality=allDoctors[x].Speciality;
         result.id=allDoctors[x].id;
+        final.push(result)
 
     }
-    //console.log(allDoctors)
-    res.status(200).json( result );
+    console.log(final)
+    res.status(200).json({final: final ,success: true });
+
+}
+catch(error){
+    res.status(400).send({error: error,success: false });
+
+}
 })
 //requirement number 39
 

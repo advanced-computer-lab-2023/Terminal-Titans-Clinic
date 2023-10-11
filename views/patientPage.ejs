@@ -140,28 +140,39 @@ async function viewRegFamMem() {
        
         async function getDoctorInfo() {
             try {
-                var response = await fetch(`http://localhost:8000/patient/getDoctorInfo'`);
+                var response = await fetch(`http://localhost:8000/patient/getDoctorInfo`);
 
 
                 var res = await response.json();
-
+                console.log(res)
 
                 if (!res.success)
                     return alert(res.message);
 
-                var list = res.Result
+                var list = res.final
                 console.log(list)
                 var cartoona = ''
                 for (let i = 0; i < list.length; i++) {
+                    console.log(list[i].Name)
+
                     cartoona += `
                     <ul>
-                        <li><strong>Price</strong>
+                        <li><strong>Doctor's Name</strong>
                     ${list[i].Name}
                 </li>
-               
-               
-                
-                                
+                <li><strong>Doctor's Affiliation</strong>
+                    ${list[i].Affiliation}
+                </li>
+                <li><strong>Doctor's Education</strong>
+                    ${list[i].Education}
+                </li>
+                <li><strong>Doctor's Email</strong>
+                    ${list[i].Email}
+                </li>
+                <li><strong>Doctor's Speciality</strong>
+                    ${list[i].Speciality}
+                </li><li><strong>Doctor's sessionPrice</strong>
+                    ${list[i].sessionPrice}      
         </ul>`
                 }
 
