@@ -24,12 +24,12 @@ router.get('/getCurrentDoctor', async (req, res) => {
 })
 
 router.get('/', (req, res) => {
-    res.render('../../views/doctorPage')
+    res.render('doctorPage')
 })
 
 // requirement number 14 later
 router.get('/updateDoctor', async (req, res) => {
-    const doctor = await doctorModel.findOne({_id:id});
+    const doctor = await doctorModel.findOne({ _id: id });
     try {
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: id },
             {
@@ -98,7 +98,6 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
 
 // requirement number 33
 router.get('/getPatientsList', async (req, res) => {
-    console.log("hereeee")
     try {
         const appointments = await appointmentModel.find({ DoctorId: id });
         if (appointments.length == 0) {
@@ -120,7 +119,6 @@ router.get('/getPatientsList', async (req, res) => {
 
             result = [...result, patient];
         }
-        console.log(appointments)
 
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })
@@ -135,14 +133,13 @@ router.get('/getPatientsList', async (req, res) => {
 // requirement number 34
 router.get('/getPatientName/:name', async (req, res) => {
     try {
-        console.log("hereeeeeeeeeeeellll")
         const doctor = await doctorModel.findOne({ _id: id })
 
         if (!doctor) {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
-        
+
         let appointments = await appointmentModel.find({ DoctorId: doctor._id })
 
         if (appointments.length == 0) {
@@ -160,7 +157,7 @@ router.get('/getPatientName/:name', async (req, res) => {
                 let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
 
                 patient = { ...patient._doc, "familyMember": [] }
-                console.log(patient)
+
                 for (let i = 0; i < familyMembers.length; i++) {
                     patient.familyMember.push(familyMembers[i].Name)
                 }
@@ -169,7 +166,6 @@ router.get('/getPatientName/:name', async (req, res) => {
             }
         }
 
-        console.log(patients.length)
         if (patients.length == 0) {
             res.status(400).json({ message: "No patient found with this name", success: false })
         }
@@ -200,15 +196,17 @@ router.get('/getUpcomingAppointment', async (req, res) => {
 
         let result = []
 
+
         for (let i = 0; i < getAppointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: getAppointments[i].PatientId })
             let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-            patient = { ...patient._doc, "familyMember": [] }
+
+            patient = { ...patient._doc, "familyMember": [] ,"appointmentDate":getAppointments[i].Date}
 
             for (let j = 0; j < familyMembers.length; j++) {
                 patient.familyMember.push(familyMembers[j].Name)
             }
-            patient={appDate}
+
             result = [...result, patient]
         }
 
@@ -244,14 +242,13 @@ router.get('/selectPatientName/:id', async (req, res) => {
         patient = { ...patient._doc, "familyMember": [] }
 
         for (let i = 0; i < familyMembers.length; i++) {
-            console.log(familyMembers[i].Name)
             patient.familyMember.push(familyMembers[i].Name)
         }
 
         result = [patient];
 
 
-        res.status(200).json( { Result: result, success: true })
+        res.status(200).json({ Result: result, success: true })
     }
     catch (err) {
         res.status(400).json({ message: err.message, success: false })
@@ -260,37 +257,37 @@ router.get('/selectPatientName/:id', async (req, res) => {
 router.get('/getAppointment', async (req, res) => {
 
     let getAppointmentsbyDate;
-    if (req.body.date){
-        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date,DoctorId: id});
+    if (req.body.date) {
+        getAppointmentsbyDate = await appointmentModel.find({ Date: req.body.date, DoctorId: id });
     }
-    else{
-        getAppointmentsbyDate = await appointmentModel.find({DoctorId: id});
+    else {
+        getAppointmentsbyDate = await appointmentModel.find({ DoctorId: id });
     }
     let getAppointmentsbyStatus;
-    if (req.body.status){
-        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status ,DoctorId: id});
+    if (req.body.status) {
+        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status, DoctorId: id });
     }
-    else{
-        getAppointmentsbyStatus = await appointmentModel.find({DoctorId: id});
+    else {
+        getAppointmentsbyStatus = await appointmentModel.find({ DoctorId: id });
     }
     var temp = getAppointmentsbyDate.filter((app) => {
-        for(let y in getAppointmentsbyStatus){
-        if(getAppointmentsbyStatus[y]._id .equals( app._id)){
-            return true;
-                }
+        for (let y in getAppointmentsbyStatus) {
+            if (getAppointmentsbyStatus[y]._id.equals(app._id)) {
+                return true;
             }
-       return false;
         }
+        return false;
+    }
     );
-    var final=[];
-    for(let x in temp){///if you need the patient's name in front end
-        var result={}
-        const patient=await patientsModel.find({_id:temp[x].PatientId})
-        if(patient.length>0)
-        result.Name=patient[0].Name;           
+    var final = [];
+    for (let x in temp) {///if you need the patient's name in front end
+        var result = {}
+        const patient = await patientsModel.find({ _id: temp[x].PatientId })
+        if (patient.length > 0)
+            result.Name = patient[0].Name;
         //result.prescriptionDoc=temp[x].prescriptionDoc;
-        result.Date=temp[x].Date;
-        result.Status=temp[x].Status;
+        result.Date = temp[x].Date;
+        result.Status = temp[x].Status;
         final.push(result);
 
     }
