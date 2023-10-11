@@ -126,7 +126,7 @@ router.get('/getPatientsList', async (req, res) => {
             res.status(400).json({ message: "No patient found", success: false })
         }
         else
-            res.status(200).render('doctorPage', { Result: result, success: true })
+            res.status(200).json({ Result: result, success: true })
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
     }
@@ -172,7 +172,7 @@ router.get('/getPatientName/:name', async (req, res) => {
             res.status(400).json({ message: "No patient found with this name", success: false })
         }
         else
-            res.status(200).render('doctorPage', { Result: patients, success: true })
+            res.status(200).json({ Result: patients, success: true })
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
     }
@@ -210,7 +210,7 @@ router.get('/getUpcomingAppointment', async (req, res) => {
             result = [...result, patient]
         }
 
-        res.status(200).render('doctorPage', { Result: result, success: true })
+        res.status(200).json({ Result: result, success: true })
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
     }
