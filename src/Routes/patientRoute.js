@@ -155,19 +155,21 @@ router.get('/getDoctorInfo', async(req, res)=>{
     const allDoctors = await Doctor.find({});
     const currPat= await patient.find({_id:pId})
     const packId=currPat.PackageId;
-    if(packId){
-        const discountP= packId.doctorDiscountInPercentage;
-    }
-    else{
-        const discountP=0;
-    }
-    discount=100-discountP;
+    //var discountP ;
+    //if(packId){
+     //  discountP= packId.doctorDiscountInPercentage;
+    //   console.log(discountP);
+  //  }
+   // else{
+     //    discountP=0;
+   // }
+    //const discount=100-discountP;
     var result={};
     for(let x in allDoctors){
         console.log("here")
         var cur=allDoctors[x];
-        var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
-        result.sessionPrice=price;
+        //var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
+        //result.sessionPrice=price;
         result.Name=allDoctors[x].Name;
         result.Email=allDoctors[x].Email;
         result.Affiliation=allDoctors[x].Affiliation;

@@ -28,352 +28,99 @@
     </div>
 
 
-    <form action="/patient/addFamilyMember" method="get">
-        <input name="Name" id="Name" placeholder="Name">
-        <input name="Age" id="Age" placeholder="Age">
-        <input name="NationalId" id="NationalId" placeholder="NationalId">
-        <input name="Gender" id="Gender" placeholder="Gender">
-        <input name="Relation" id="Relation" placeholder="Relation">
-        <input name="FamilyMemId" id="FamilyMemId" placeholder="FamilyMemId">
-        <button type="submit">Add</button>
-    </form>
+    <button type="button" onclick="getDoctorInfo()">ViewAllDoctors</button>
+    <div id="ViewAllDoctors"></div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>NationalId</th>
-                <th>Gender</th>
-                <th>Relation</th>
-                <th>emergency Name</th>
-                <th>emergency Mobile</th>
-                <th>family memeber</th>
-            </tr>
-        </thead>
+    
+    <button type="button" onclick="viewPrescriptions()">MyPrescriptions</button>
+    <div id="viewPrescriptions"></div>
 
-        <tbody id="tBody">
-        </tbody>
-    </table>
-
-    <div id="patientDetails">
-
-    </div>
+   
 
 
-
-    <h1>List of Patients</h1>
-    <input type="text" name="" id="nameSearch">
-    <button type="button" onclick="showPatientsName()">Click me</button>
-    <div id="patientsNames"></div>
-
-
-    <h1>Upcoming Appointments</h1>
-    <button type="button" onclick="filterAppointments()">Filter</button>
-    <div id="upcomingAppointments"></div>
-
-    <h1>Filter Appointment by date/status</h1>
-    <input type="date" name="" id="startDate">
-    <input type="date" name="" id="endDate">
-    <select name="" id="status">
-        <option value="upcoming">upcoming</option>
-        <option value="completed">completed</option>
-        <option value="cancelled">cancelled</option>
-        <option value="rescheduled">rescheduled</option>
-        <option value=""></option>
-    </select>
-    <button type="button" onclick="filterDateAppointments()">Filter</button>
-    <div id="filterDateAppointments"></div>
+    
 
 
     <script>
-        // async function updateDoctor() {
-        //     let myBody = {
-        //         email: document.getElementById('email').value,
-        //         hourlyRate: document.getElementById('hourlyRate').value,
-        //         affiliation: document.getElementById('affiliation').value
-        //     }
-
-        //     console.log(JSON.stringify(myBody))
-        //     console.log(myBody.hourlyRate)
-        //     console.log(myBody.affiliation)
-        //     var response = await fetch('http://localhost:8000/doctor/updateDoctor', {
-        //         method: 'PUT', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)
-        //         body: JSON.stringify(myBody), // Convert the data to a JSON string and include it as the body
-        //     });
-        //     if (!res.success)
-        //         return alert(res.message);
-        //     var res = await response.json();
-
-        //     if (!res.success)
-        //         return alert(res.message);
-        //     console.log(res)
-        // }
-
-        getCurrenPatient()
-        async function getCurrentPatient() {
-            var response = await fetch('http://localhost:8000/patient/getCurrentPatient');
-            var res = await response.json();
-
-            if (!res.success)
-                return alert(res.message);
-
-            var element = document.getElementById('myPatient');
-            var list = res.Result;
-
-            var cartoona = `<h1>My info:</h1> <p> ${res.Result.Name} </p>`;
-            cartoona += `<p> ${res.Result.Email} </p>`;
-            cartoona += `<p> ${res.Result.DateOfBirth} </p>`;
-            cartoona += `<p> ${res.Result.Gender} </p>`;
-            cartoona += `<p> ${res.Result.Mobile} </p>`;
-            cartoona += `<p> ${res.Result.EmergencyName} </p>`;
-            cartoona += `<p> ${res.Result.EmergencyMobile} </p>`;
-            cartoona += `<p> ${res.Result.PackageId} </p>`;
-
-            element.innerHTML = cartoona;
-        }
-
-        async function filterDateAppointments() {
-            let myBody = {
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                status: document.getElementById('status').value
-            }
+       
+       async function viewPrescriptions() {
+            try {
+                var response = await fetch(`http://localhost:8000/patient/viewPrescriptions`);
 
 
-            let response = await fetch(`http://localhost:8000/doctor/getAppointment`, {
-                method: 'POST', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(myBody), // Convert the data to a JSON string and include it as the body
-            });
+                var res = await response.json();
 
 
-            let res = await response.json();
+                if (!res.success)
+                    return alert(res.message);
 
-
-            let cartoona = ''
-            for (let i = 0; i < res.length; i++) {
-                cartoona += `
+                var list = res.Result
+                console.log(list)
+                var cartoona = ''
+                for (let i = 0; i < list.length; i++) {
+                    cartoona += `
                     <ul>
-                <li>Name: ${res[i].Name}
-                </li>
-                <li><strong>Date:</strong>
-                    ${res[i].Date}
+                   
+                <li><strong>DoctorId:</strong>
+                    ${list[i].DoctorId}
                 </li>
                 <li><strong>Status:</strong>
-                    ${res[i].Status}
+                    ${list[i].status}
                 </li>
-        </ul>`
-            }
-
-            var element = document.getElementById('filterDateAppointments')
-            element.innerHTML = cartoona
-        }
-
-        
-
-        async function viewRegFamMem() {
-            var response = await fetch('http://localhost:8000/patient/viewRegFamMem');
-            var res = await response.json();
-
-
-            var element = document.getElementById('tBody');
-            var cartoona = '';
-
-            if (!res.success)
-                return alert(res.message);
-
-            res.Result.forEach(function (Mem) {
-                cartoona += `
-            <tr>
-                <td>${Mem.Name}</td>
-                <td>${Mem.Age}</td>
-                <td>${Mem.NationalId}</td>
-                <td>${Mem.Gender}</td>
-                <td>${Mem.Gender}</td>
-                <td>${Mem.Relation}</td>
-                <td><button onclick="showMem('${Mem._id}')">Show Mem</button></td>
-            </tr>`;
-            });
-
-            element.innerHTML = cartoona;
-        }
-
-        viewRegFamMem();
-
-        async function showPatient(id) {
-            try {
-                // Remove the colon from the URL placeholder
-                var response = await fetch(`http://localhost:8000/doctor/selectPatientName/${id}`);
-                var res = await response.json();
-
-                var list = res.Result
-                console.log(list[0])
-
-
-
-                if (!res.success)
-                    return alert(res.message);
-
-                var element = document.getElementById('patientDetails')
-
-                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
-                ${list[0].Gender}     ${list[0].mobile}     ${list[0].emergencyName}
-                ${list[0].emergencyName}         ${list[0].emergencyMobile}     ${list[0].familyMember}`
-
-                element.innerHTML = cartoona
-            } catch (error) {
-                console.error('Error fetching patient data:', error);
-            }
-        }
-
-        async function getPatientInfoAndHealth(id) {
-            try {
-                var response = await fetch(`http://localhost:8000/doctor/getPatientInfoAndHealth/${id}`);
-                var res = await response.json();
-
-                if (!res.success)
-                    return alert(res.message);
-
-                var list = res.Result
-
-                console.log(list.patient)
-
-                var element = document.getElementById('patientDetails')
-
-                var cartoona = `${list.patient.Name}   ${list.patient.Email}     ${list.patient.DateOfBirth}
-                ${list.patient.Gender}     ${list.patient.mobile}     ${list.patient.emergencyName}
-                ${list.patient.emergencyName}         ${list.patient.emergencyMobile}     ${list.patient.familyMember}`
-
-                for (let i = 0; i < list.healthDoc.length; i++) {                    
-                    cartoona += `<p><a href="data:'application/pdf';base64,
-                    ${list.healthDoc[i]} "download="your-filename.pdf">Download Health Doc${i+1}</a></p>`
-                }
-
-                element.innerHTML = cartoona
-            } catch (error) {
-                console.error('Error fetching patient data:', error);
-            }
-        }
-
-
-        async function showPatientsName() {
-            try {
-                let name = document.getElementById('nameSearch').value
-
-                // Remove the colon from the URL placeholder
-                var response = await fetch(`http://localhost:8000/doctor/getPatientName/${name}`);
-                var res = await response.json();
-
-
-                if (!res.success)
-                    return alert(res.message);
-
-                var list = res.Result
-                console.log(list)
-                var cartoona = ''
-                for (let i = 0; i < list.length; i++) {
-                    cartoona += `
-                    <ul>
-                <li>Name: ${list[i].Name}
+                <li><strong>Date:</strong>
+                    ${list[i].Date}
                 </li>
-                <li><strong>Email:</strong>
-                    ${list[i].Email}
-                </li>
-                <li><strong>Date of Birth:</strong>
-                    ${list[i].DateOfBirth}
-                </li>
-                <li><strong>Gender:</strong>
-                    ${list[i].Gender}
-                </li>
-                <li><strong>Mobile:</strong>
-                    ${list[i].mobile}
-                </li>
-                <li><strong>Emergency Contact Name:</strong>
-                    ${list[i].emergencyName}
-                </li>
-                <li><strong>Emergency Contact Mobile:</strong>
-                    ${list[i].emergencyMobile}
-                </li>
-                <li><strong>Username:</strong>
-                    ${list[i].Username}
-                </li>
-                <li>
-                    <strong>Family Member:</strong>
-                    ${list[i].familyMember}
-                </li>
-        </ul>`
-                }
-
-                var element = document.getElementById('patientsNames')
-                element.innerHTML = cartoona
-            }
-            catch (error) {
-                console.error('Error fetching patient data:', error);
-            }
-        }
-
-        async function filterAppointments() {
-            try {
-                var response = await fetch(`http://localhost:8000/doctor/getUpcomingAppointment`);
-
-
-                var res = await response.json();
-
-
-                if (!res.success)
-                    return alert(res.message);
-
-                var list = res.Result
-                console.log(list)
-                var cartoona = ''
-                for (let i = 0; i < list.length; i++) {
-                    cartoona += `
-                    <ul>
-                <li>Name: ${list[i].Name}
-                </li>
-                <li><strong>Email:</strong>
-                    ${list[i].Email}
-                </li>
-                <li><strong>Date of Birth:</strong>
-                    ${list[i].DateOfBirth}
-                </li>
-                <li><strong>Gender:</strong>
-                    ${list[i].Gender}
-                </li>
-                <li><strong>Mobile:</strong>
-                    ${list[i].mobile}
-                </li>
-                <li><strong>Emergency Contact Name:</strong>
-                    ${list[i].emergencyName}
-                </li>
-                <li><strong>Emergency Contact Mobile:</strong>
-                    ${list[i].emergencyMobile}
-                </li>
-                <li><strong>Username:</strong>
-                    ${list[i].Username}
-                </li>
-                <li>
-                    <strong>Family Member:</strong>
-                    ${list[i].familyMember}
-                </li>
-                <li>
-                    <strong>Appointment Date:</strong>
-                    ${list[i].appointmentDate}
-                </li>
+               
+                
                                 
         </ul>`
                 }
 
-                document.getElementById('upcomingAppointments').innerHTML = cartoona
+                document.getElementById('viewPrescriptions').innerHTML = cartoona
             }
             catch (error) {
-                console.error('Error fetching patient data:', error);
+                console.error('Error fetching prescriptions data:', error);
             }
         }
+
+       
+        async function getDoctorInfo() {
+            try {
+                var response = await fetch(`http://localhost:8000/patient/getDoctorInfo'`);
+
+
+                var res = await response.json();
+
+
+                if (!res.success)
+                    return alert(res.message);
+
+                var list = res.Result
+                console.log(list)
+                var cartoona = ''
+                for (let i = 0; i < list.length; i++) {
+                    cartoona += `
+                    <ul>
+                        <li><strong>Price</strong>
+                    ${list[i].Name}
+                </li>
+               
+               
+                
+                                
+        </ul>`
+                }
+
+                document.getElementById('ViewAllDoctors').innerHTML = cartoona
+            }
+            catch (error) {
+                console.error('Error fetching doctors data:', error);
+            }
+        }
+
+
+
+       
     </script>
 </body>
 
