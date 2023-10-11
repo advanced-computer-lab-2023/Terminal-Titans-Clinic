@@ -208,7 +208,7 @@
 
         async function showPatientsName() {
             try {
-                let name = document.getElementById('nameSearch').value +"seif"
+                let name = document.getElementById('nameSearch').value 
 
                 // Remove the colon from the URL placeholder
                 var response = await fetch(`http://localhost:8000/doctor/getPatientName/${name}`);

@@ -24,7 +24,7 @@ router.get('/getCurrentDoctor', async (req, res) => {
 })
 
 router.get('/', (req, res) => {
-    res.render('doctorPage')
+    res.render('../../views/doctorPage')
 })
 
 // requirement number 14 later
@@ -41,7 +41,7 @@ router.get('/updateDoctor', async (req, res) => {
             res.status(400).json({ message: "Doctor not found", success: false })
         }
         else {
-            res.status(200).render('doctorPage', { Result: updatedDoctor, success: true })
+            res.status(200).render('../../views/doctorPage', { Result: updatedDoctor, success: true })
         }
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
@@ -90,7 +90,7 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
             "patient": patient
         }
 
-        res.status(200).render('doctorPage', { Result: result, success: true })
+        res.status(200).json({ Result: result, success: true })
     } catch (err) {
         res.status(400).json({ message: err.message, success: false })
     }
@@ -98,16 +98,15 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
 
 // requirement number 33
 router.get('/getPatientsList', async (req, res) => {
+    console.log("hereeee")
     try {
         const appointments = await appointmentModel.find({ DoctorId: id });
-
         if (appointments.length == 0) {
             res.status(400).json({ message: "No patients found", success: false })
             return;
         }
 
         let result = []
-
 
         for (let i = 0; i < appointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
@@ -121,6 +120,7 @@ router.get('/getPatientsList', async (req, res) => {
 
             result = [...result, patient];
         }
+        console.log(appointments)
 
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })
@@ -135,13 +135,14 @@ router.get('/getPatientsList', async (req, res) => {
 // requirement number 34
 router.get('/getPatientName/:name', async (req, res) => {
     try {
+        console.log("hereeeeeeeeeeeellll")
         const doctor = await doctorModel.findOne({ _id: id })
 
         if (!doctor) {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
-
+        
         let appointments = await appointmentModel.find({ DoctorId: doctor._id })
 
         if (appointments.length == 0) {
@@ -155,19 +156,20 @@ router.get('/getPatientName/:name', async (req, res) => {
         for (let key in appointments) {
             let patient = await patientsModel.findOne({ _id: appointments[key].PatientId })
 
-            let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
+            if (patient.Name.toLowerCase() == req.params.name.toLowerCase()) {
+                let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
 
-            patient = { ...patient._doc, "familyMember": [] }
+                patient = { ...patient._doc, "familyMember": [] }
+                console.log(patient)
+                for (let i = 0; i < familyMembers.length; i++) {
+                    patient.familyMember.push(familyMembers[i].Name)
+                }
 
-            for (let i = 0; i < familyMembers.length; i++) {
-                console.log(familyMembers[i].Name)
-                patient.familyMember.push(familyMembers[i].Name)
+                patients.push(patient)
             }
-
-            patients.push(patient)
         }
 
-
+        console.log(patients.length)
         if (patients.length == 0) {
             res.status(400).json({ message: "No patient found with this name", success: false })
         }
@@ -206,7 +208,7 @@ router.get('/getUpcomingAppointment', async (req, res) => {
             for (let j = 0; j < familyMembers.length; j++) {
                 patient.familyMember.push(familyMembers[j].Name)
             }
-
+            patient={appDate}
             result = [...result, patient]
         }
 
@@ -249,7 +251,7 @@ router.get('/selectPatientName/:id', async (req, res) => {
         result = [patient];
 
 
-        res.status(200).render('doctorPage', { Result: result, success: true })
+        res.status(200).json( { Result: result, success: true })
     }
     catch (err) {
         res.status(400).json({ message: err.message, success: false })
