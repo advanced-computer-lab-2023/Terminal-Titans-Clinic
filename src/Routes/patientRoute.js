@@ -25,7 +25,7 @@ router.get('/getCurrentPatient', async (req, res) => {
 })
 
 //requirement 18 (add family member)
-router.get('/addFamilyMem', async (req,res)=>{
+router.post('/addFamilyMem', async (req,res)=>{
     const rel=req.body.relation.toLowerCase()
     if(!(rel==('wife') || (rel)==('husband')|| (rel)==('child')))
         return(res.status(400).send({message: "family member can only be wife/husband or child"}));
@@ -153,17 +153,35 @@ router.post('/getAppointment', async (req, res) => {
 
 // requirement number 54
 router.get('/viewPrescriptions', async (req, res) => {
-        const prescriptions = await prescriptionsModel.find({ PatientId: pId })
-            if (!prescriptions)
-       return  res.status(400).json({ message: "no presriptions found",success:false})
-        else {
+    const allprescriptions = await prescriptionsModel.find({ PatientId: pId })
+        if (!allprescriptions)
+   return  res.status(400).json({ message: "no presriptions found",success:false})
+    else {
+        var final=[]
+for(let x in allprescriptions){
+    var result={};
+    const doc=await Doctor.find({_id:allprescriptions[x].DoctorId})
+    if(doc.length<1){
+        return  res.status(400).json({ message: "no doctors found",success:false})
 
-            return    res.status(200).json({Result:prescriptions, success:true})
-        }
+    }
+    result.id=allprescriptions[x]._id;
+    result.Doctor=doc[0].Name;
+    result.Date=allprescriptions[x].Date;
+    result.status=allprescriptions[x].status;
+   
+    final.push(result)
+
+}
+let prescriptions=final;
+
+        return    res.status(200).json({Result:prescriptions, success:true})
+    }
 })
 // requirement number 38
-router.get('/getDoctors', async (req, res) => {
-    var getDoctors ;
+router.post('/getDoctors', async (req, res) => {
+    console.log("h")
+    var getDoctors;
     if(req.body.Name && req.body.Speciality){
      getDoctors = await Doctor.find({ Name: req.body.Name,Speciality:req.body.Speciality});
     }
@@ -182,6 +200,7 @@ router.get('/getDoctors', async (req, res) => {
     }
     return res.status(200).json({ Doctors: getDoctors , success:true });
 }) ;
+
 // router.post('/pres',async(req,res)=>{
 //     var model = new prescriptionsModel({PatientId:pId,DoctorId:dId,status:"not filled"});
 //         await fs.readFile(req.body.myFile, function (err, data) {
@@ -193,9 +212,9 @@ router.get('/getDoctors', async (req, res) => {
 //       });
 // })
 
-//requirement number 37
+//requirement number 37 //get all doctors
 
-router.get('/getDoctorInfo', async(req, res)=>{
+router.get('/getDoctorsInfo', async(req, res)=>{
     try{
     const allDoctors = await Doctor.find({});
     const currPat= await patient.find({_id:pId})
@@ -272,12 +291,17 @@ router.post('/filterDoctors', async(req, res)=>{
    res.status(200).json(result);
 })
 
-router.get('/filterPrescriptions', async(req, res)=>{
-    const date = req.body.Date;
+router.post('/filterPrescriptions', async(req, res)=>{
+    const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+    const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
+    let presDate;
+    presDate = await prescriptionsModel.find({ Date: { $gte: startDate,
+    $lte: endDate } ,PatientId:pId});
+   
     var id = await doctorModel.find({Name:req.body.Name});
     // var id=await prescriptionsModel.find({DoctorId: req.body.DoctorId,PatientId:pId})
     const  status = req.body.status ;
-    var presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
+    // presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
     var presStatus = await prescriptionsModel.find({status: status,PatientId:pId});
     if(!req.body.Name){
         var id = await doctorModel.find({});
@@ -285,9 +309,9 @@ router.get('/filterPrescriptions', async(req, res)=>{
     // if(!req.body.DoctorId){
     //     var id = await prescriptionsModel.find({PatientId:pId});
     // }
-    if(!req.body.Date){
-        var presDate = await prescriptionsModel.find({PatientId:pId});
-    }
+    // if(!req.body.Date){
+    //      presDate = await prescriptionsModel.find({PatientId:pId});
+    // }
     if(!req.body.status){
         var presStatus = await prescriptionsModel.find({PatientId:pId});
     }
@@ -295,32 +319,33 @@ router.get('/filterPrescriptions', async(req, res)=>{
         var flag1=false;
         for(let y in id){
         if(id[y]._id == pres.DoctorId){
-          //if(id[y].DoctorId==pres.DoctorId){  
+          //if(id[y].DoctorId==pres.DoctorId){ 
         flag1=true;
                 }
             }
-        var flag2=false;    
+        var flag2=false;   
         for(let y in presStatus){
-            
+           
             if(presStatus[y]._id.equals( pres._id)){
                 flag2=true;
             }
         }
             return flag1 && flag2});
-         
+        
             var final=[];
         for(let x in temp){///if you need the doctor's name in front end
             var result={}
             const doc=await Doctor.find({_id:temp[x].DoctorId})
             console.log(doc.Name)
             if(doc.length>0)
-            result.Name=doc[0].Name;           
+            result.Name=doc[0].Name;          
             //result.prescriptionDoc=temp[x].prescriptionDoc;
             result.Date=temp[x].Date;
             result.status=temp[x].status;
             result.id=temp[x].id;
+            result.prescriptionDoc=temp[x].prescriptionDoc.binData.toString('base64');
             final.push(result);
-    
+   
         }
     res.status(200).json(final);
 
@@ -331,17 +356,50 @@ router.get('/filterPrescriptions', async(req, res)=>{
 
 )
 // requirement 40/41
-router.get('/selectDoctors', async(req,res)=>{
-    const dId= req.body.id;
-    const Dr = await Doctor.find({_id:dId});
-    res.status(200).json(Dr);
+router.get('/selectDoctors/:id', async(req,res)=>{
+    const docId= req.params.id;
+    const Dr = await Doctor.find({_id:docId});
+    console.log("kkk")
+    console.log(Dr)
+    res.status(200).json({Dr:Dr, success:true});
 })
 
 // requirement 56
-router.get('/selectPrescriptions', async(req,res)=>{
-    const id= req.body.id;
-    const result = await prescriptionsModel.find({_id:id});
-    res.status(200).json(result);
-})
-
-export default router;
+router.get('/selectPrescriptions/:id', async(req,res)=>{
+    try{
+        const id= req.params.id;
+        console.log(id)
+        const prescriptions = await prescriptionsModel.find({_id:id});
+        if(prescriptions.length<0){
+           
+                res.status(400).send({error: error, success:false});
+       
+            }
+       
+        console.log(prescriptions)
+        let final=[]
+        for(let x in prescriptions){
+            var result={};
+            const doc=await Doctor.find({_id:prescriptions[x].DoctorId})
+            if(doc.length<1){
+                return  res.status(400).json({ message: "no doctors found",success:false})
+    
+            }
+            result.id=prescriptions[x].DoctorId;
+            result.Doctor=doc[0].Name;
+            result.Date=prescriptions[x].Date;
+            result.status=prescriptions[x].status;
+            result.prescriptionDoc=prescriptions[x].prescriptionDoc.binData.toString('base64');
+            final.push(result)
+    
+        }
+        res.status(200).json({final:final[0],success:true});
+    }
+    catch(error){
+            res.status(400).send({error: error, success :false});
+    
+       
+    }
+    })
+    
+    export default router;
