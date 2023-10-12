@@ -32,13 +32,9 @@ app.get('/',(req,res)=>{
 app.post('/',(req,res)=>{
    var username=req.body.user;
    if(!username)return(res.status(400));
-   if(username=="patient") res.render('../../views/patientPage')
-   // if(username=="admin")//render admin
+   if(username=="patient") res.render('../../views/patientPage');
    if(username=="doctor")   res.render('../../views/doctorPage');
    if(username=="admin")   res.render('../../views/adminPage');
-   
-
-
 })
 app.listen(port, "localhost", () => {
    console.log("Server is running on port 8000");
