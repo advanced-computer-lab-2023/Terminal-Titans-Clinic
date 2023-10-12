@@ -74,37 +74,75 @@ else {
 })
 
 // requirement number 23
-router.get('/getAppointment', async (req, res) => {
+// router.GET('/getAppointment', async (req, res) => {
+//     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+//     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
+
+//     let getAppointmentsbyDate;
+//     getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
+//         $lte: endDate } ,PatientId:pId });
+    
+//     let getAppointmentsbyStatus;
+//     if (req.body.status){
+//         getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status,PatientId:pId });
+//     }
+//     else{
+//         getAppointmentsbyStatus = await appointmentModel.find({PatientId:pId});
+//     }
+//     var temp = getAppointmentsbyDate.filter((app) => {
+//         for(let y in getAppointmentsbyStatus){
+//         if(getAppointmentsbyStatus[y]._id .equals( app._id)){
+//             return true;
+//                 }
+//             }
+//        return false;
+//         }
+//     );
+//     let final=[]
+//     for(let x in temp){///if you need the patient's name in front end
+//         var result={}
+//         const doctor=await doctorModel.find({_id:temp[x].DoctorId})
+//         if(doctor.length>0)
+//         result.Name=doctor[0].Name;           
+//         //result.prescriptionDoc=temp[x].prescriptionDoc;
+//         result.Date=temp[x].Date;
+//         result.Status=temp[x].Status;
+//         final.push(result);
+
+//     }
+//     res.status(200).json(final);
+// });
+
+router.post('/getAppointment', async (req, res) => {
     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
     let getAppointmentsbyDate;
-    getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
-        $lte: endDate } ,PatientId:pId });
+        getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
+        $lte: endDate } ,PatientId: pId});
     
     let getAppointmentsbyStatus;
-    if (req.body.status){
-        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status,PatientId:pId });
+    if (req.body.status) {
+        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status, PatientId: pId });
     }
-    else{
-        getAppointmentsbyStatus = await appointmentModel.find({PatientId:pId});
+    else {
+        getAppointmentsbyStatus = await appointmentModel.find({ PatientId: pId });
     }
     var temp = getAppointmentsbyDate.filter((app) => {
-        for(let y in getAppointmentsbyStatus){
-        if(getAppointmentsbyStatus[y]._id .equals( app._id)){
-            return true;
-                }
+        for (let y in getAppointmentsbyStatus) {
+            if (getAppointmentsbyStatus[y]._id.equals(app._id)) {
+                return true;
             }
-       return false;
         }
+        return false;
+    }
     );
-    let final=[]
+    var final=[];
     for(let x in temp){///if you need the patient's name in front end
         var result={}
         const doctor=await doctorModel.find({_id:temp[x].DoctorId})
-        if(doctor.length>0)
+        if(patient.length>0)
         result.Name=doctor[0].Name;           
-        //result.prescriptionDoc=temp[x].prescriptionDoc;
         result.Date=temp[x].Date;
         result.Status=temp[x].Status;
         final.push(result);

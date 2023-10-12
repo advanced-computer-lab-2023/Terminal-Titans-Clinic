@@ -38,6 +38,19 @@
     <button type="button" onclick="viewRegFamMem()">MyFamilyMembers</button>
     <div id="MyFamilyMembers"></div>
 
+    <h1>Filter Appointment by date/status</h1>
+    <input type="date" name="" id="startDate">
+    <input type="date" name="" id="endDate">
+    <select name="" id="status">
+        <option value="upcoming">upcoming</option>
+        <option value="completed">completed</option>
+        <option value="cancelled">cancelled</option>
+        <option value="rescheduled">rescheduled</option>
+        <option value=""></option>
+    </select>
+    <button type="button" onclick="filterDateAppointments()">Filter</button>
+    <div id="filterDateAppointments"></div>
+
    
 
 
@@ -45,6 +58,45 @@
 
 
     <script>
+
+async function filterDateAppointments() {
+            let myBody = {
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                status: document.getElementById('status').value
+            }
+
+
+            let response = await fetch(`http://localhost:8000/Patient/getAppointment`, {
+                method: 'POST', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(myBody), // Convert the data to a JSON string and include it as the body
+            });
+            
+            let res = await response.json();
+
+
+            let cartoona = ''
+            for (let i = 0; i < res.length; i++) {
+                cartoona += `
+                    <ul>
+                <li>Name: ${res[i].Name}
+                </li>
+                <li><strong>Date:</strong>
+                    ${res[i].Date}
+                </li>
+                <li><strong>Status:</strong>
+                    ${res[i].Status}
+                </li>
+        </ul>`
+            }
+
+            var element = document.getElementById('filterDateAppointments')
+            element.innerHTML = cartoona
+        }
 
 
 async function viewRegFamMem() {
