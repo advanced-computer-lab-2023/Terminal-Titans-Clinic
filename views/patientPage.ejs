@@ -32,6 +32,18 @@
     <button type="button" onclick="getDoctorNames()">ViewAllDoctors</button>
     <div id="ViewAllDoctors"></div>
 
+    <br>
+    <h1>Filter doctors by speciality/availability on a certain date</h1>
+    <input type="date" name="date" id="date">
+    <input type="text" name="speciality" id="speciality"placeholder="doc speciality">
+   
+    <br>
+       
+        <option value=""></option>
+    </select>
+    <button type="button" onclick="filterDoctors()">Filter</button>
+    <div id="filterDoctors"></div><br
+
     <h1>View all prescriptions</h1>
 
     <button type="button" onclick="viewPrescriptions()">MyPrescriptions</button>
@@ -133,9 +145,7 @@ async function filterPres() {
                 <li><strong>Status:</strong>
                     ${res[i].status}
                 </li>
-                <li><strong>Status:</strong>
-                    ${res[i].status}
-                </li>
+                
                 <li>
                  <p><a href="data:'application/pdf';base64,
                     ${res[i].prescriptionDoc} "download="Prescription.pdf">Download Prescription Document</a></p>
@@ -184,6 +194,53 @@ async function filterDateAppointments() {
             var element = document.getElementById('filterDateAppointments')
             element.innerHTML = cartoona
         }
+
+        async function filterDoctors() {
+            let myBody = {
+                date: document.getElementById('date').value,
+                Speciality: document.getElementById('speciality').value
+                
+            }
+
+
+            let response = await fetch(`http://localhost:8000/Patient/filterDoctors`, {
+                method: 'POST', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(myBody), // Convert the data to a JSON string and include it as the body
+            });
+            
+            let res = await response.json();
+
+
+            let cartoona = ''
+            for (let i = 0; i < res.length; i++) {
+                cartoona += `
+                    <ul>
+                <li>Name: ${res[i].Name}
+                </li>
+                <li>Name: ${res[i].Email}
+                </li>
+                <li>Name: ${res[i].DateOfBirth}
+                </li>
+                <li>Name: ${res[i].HourlyRate}
+                </li>
+                <li>Name: ${res[i].Affiliation}
+                </li>
+                <li>Name: ${res[i].Education}
+                </li>
+                <li>Name: ${res[i].Speciality}
+                </li>
+              
+        </ul>`
+            }
+
+            var element = document.getElementById('filterDoctors')
+            element.innerHTML = cartoona
+        }
+
 
         async function showDrs() {
             try {
