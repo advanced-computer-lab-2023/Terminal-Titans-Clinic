@@ -207,7 +207,7 @@
         async function showPatient(id) {
             try {
                 // Remove the colon from the URL placeholder
-                var response = await fetch(`http://localhost:8000/doctor/selectPatientName  `);
+                var response = await fetch(`http://localhost:8000/doctor/selectPatientName/${id}`);
                 var res = await response.json();
 
                 var list = res.Result
