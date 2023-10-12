@@ -34,8 +34,9 @@
 
     <br>
     <h1>Filter doctors by speciality/availability on a certain date</h1>
-    <input type="date" name="date" id="date">
-    <input type="text" name="speciality" id="speciality"placeholder="doc speciality">
+    <input type="date" name="date" id="dateFilter">
+    <input type="time" name="time" value="00:00" id="timeFilter">
+    <input type="text" name="speciality" id="specialityFilter"placeholder="doc speciality">
    
     <br>
        
@@ -196,12 +197,14 @@ async function filterDateAppointments() {
         }
 
         async function filterDoctors() {
+            time=document.getElementById('timeFilter').value
+            let[hours, mins] = time.split(":");
+            
             let myBody = {
-                date: document.getElementById('date').value,
-                Speciality: document.getElementById('speciality').value
+                date: document.getElementById('dateFilter').value+"T"+hours+":"+mins,
+                Speciality: document.getElementById('specialityFilter').value
                 
             }
-
 
             let response = await fetch(`http://localhost:8000/Patient/filterDoctors`, {
                 method: 'POST', // Use the appropriate HTTP method (e.g., POST, PUT, or PATCH)

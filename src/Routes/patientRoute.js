@@ -271,6 +271,8 @@ router.post('/filterDoctors', async(req, res)=>{
     let  dTimeTemp = req.body.date;
     let dTime = new Date(dTimeTemp);
     dTime.setHours(dTime.getHours()+2) 
+    console.log(dTime)
+
     var spcltyDocs = await Doctor.find({Speciality:spclty})
     if(!spclty){
         spcltyDocs = await Doctor.find({});
