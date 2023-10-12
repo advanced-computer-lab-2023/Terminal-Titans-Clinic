@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tabbed Page</title>
+  <style>
+    /* Common styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Tab styles */
+    .tabs {
+      display: flex;
+    }
+
+    .tablinks {
+      background-color: #3498db; /* Change tab button color */
+      border: 1px solid #ccc;
+      padding: 10px 15px;
+      cursor: pointer;
+      margin-right: 4px;
+      color: white; /* Change text color */
+    }
+
+    .tablinks:hover {
+      background-color: #45a049; /* Change hover color */
+    }
+
+    .tablinks.active {
+      background-color: #4CAF50; /* Change active tab color to green */
+    }
+
+    .tabcontent {
+      display: none;
+      margin-top: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 400px;
+    }
+
+    .tabcontent iframe {
+      border: none;
+    }
+
+    /* First Tab styles */
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: -webkit-fill-available;
+      padding: 10px 5px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Tab 2 styles */
+    ul#userList-tab2 {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    ul#userList-tab2 li {
+      margin-bottom: 10px;
+    }
+
+    button#fetchUsersButton-tab2, button#deleteUserButton-tab2 {
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    #deleteUserForm-tab2 {
+      margin-top: 20px;
+    }
+
+    /* Tab 3 styles */
+    #doctorApplicationsList {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .application-item {
+      width: calc(33.33% - 20px);
+      margin: 10px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+
+    .application-item h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .application-item p {
+      margin: 5px 0;
+    }
+
+    /* Tab 4 styles */
+    .package-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .package-item {
+      margin-bottom: 20px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .package-item h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .package-item p {
+      margin: 5px 0;
+    }
+
+    .package-item button.delete-button {
+      background-color: #e74c3c;
+    }
+
+    .package-item button.delete-button:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tablinks" onclick="openTab(event, 'tab1')">Create Admin</button>
+    <button class="tablinks" onclick="openTab(event, 'tab2')">Manage Users</button>
+    <button class="tablinks" onclick="openTab(event, 'tab3')">Doctor Applications</button>
+    <button class="tablinks" onclick="openTab(event, 'tab4')">Manage Packages</button>
+  </div>
+
+  <div id="tab1" class="tabcontent">
+    <div class="container">
+      <h1>Admin Creation Form</h1>
+      <form id="adminForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required oninput="enableCreateButton()"><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required oninput="enableCreateButton()"><br>
+
+        <button type="submit" id="createAdminButton" disabled>Create Admin</button>
+      </form>
+
+      <div id="response"></div>
+    </div>
+  </div>
+
+  <div id="tab2" class="tabcontent">
+    <h1 id="header-tab2">User List</h1>
+    <ul id="userList-tab2">
+      <!-- User list will be populated here -->
+    </ul>
+
+    <button onclick="fetchUsers()" id="fetchUsersButton-tab2">Fetch Users</button>
+
+    <div id="deleteUserForm-tab2" style="display:none;">
+      <h2>Select a user to delete:</h2>
+      <select id="userSelect-tab2"></select>
+      <button onclick="deleteUser()" id="deleteUserButton-tab2">Delete User</button>
+    </div>
+  </div>
+
+  <div id="tab3" class="tabcontent">
+    <h1>Doctor Applications</h1>
+    <div id="doctorApplicationsList"></div>
+  </div>
+
+  <div id="tab4" class="tabcontent">
+    <h1>Health Packages</h1>
+    <div id="packageList"></div>
+    <button onclick="addHealthPackage()">Add Health Package</button>
+  </div>
+
+  <script>
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+
+      tabcontent = document.getElementsByClassName('tabcontent');
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = 'none';
+      }
+
+      tablinks = document.getElementsByClassName('tablinks');
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].style.backgroundColor = '#3498db';
+      }
+
+      // Tab1 Script
+      document.getElementById(tabName).style.display = 'block';
+      evt.currentTarget.style.backgroundColor = '#4CAF50';
+      evt.currentTarget.classList.add('active');
+    }
+
+    function enableCreateButton() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const createAdminButton = document.getElementById('createAdminButton');
+      createAdminButton.disabled = !(username && password);
+    }
+
+    document.getElementById('adminForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/admin/createAdmin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          Username: username,
+          Password: password
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const responseDiv = document.getElementById('response');
+        if (data.success) {
+          responseDiv.innerHTML = `
+            <h2>Response:</h2>
+            <p>_id: ${data.savedAdmin._id}</p>
+            <p>Username: ${data.savedAdmin.Username}</p>
+            <p>Password: ${data.savedAdmin.Password}</p>
+            <p>Type: ${data.savedAdmin.__t}</p>
+            <p>Created At: ${data.savedAdmin.createdAt}</p>
+            <p>Updated At: ${data.savedAdmin.updatedAt}</p>
+            <p>__v: ${data.savedAdmin.__v}</p>
+          `;
+        } else {
+          responseDiv.innerHTML = `Error: ${data.message}`;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = error.message;
+      });
+    });
+
+    // Tab 2 script
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/admin/fetchUsers');
+        const data = await response.json();
+        const userList = document.getElementById('userList-tab2');
+
+        // Clear previous user list
+        userList.innerHTML = '';
+
+        if (data.success) {
+          data.users.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.innerText = user.Username;
+            userList.appendChild(listItem);
+          });
+
+          // Show the delete user form
+          document.getElementById('deleteUserForm-tab2').style.display = 'block';
+
+          // Populate the select dropdown with user options
+          const userSelect = document.getElementById('userSelect-tab2');
+          userSelect.innerHTML = '';
+          data.users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.Username;
+            option.innerText = user.Username;
+            userSelect.appendChild(option);
+          });
+        } else {
+          alert('Failed to fetch users.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+      }
+    }
+
+    async function deleteUser() {
+      const selectedUsername = document.getElementById('userSelect-tab2').value;
+      try {
+        const response = await fetch(`/admin/deleteUser/${selectedUsername}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          alert('User successfully deleted.');
+          fetchUsers();
+        } else {
+          alert('Failed to delete user: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete user: ' + error.message);
+      }
+    }
+
+    // Tab 3 scripts
+    async function fetchDoctorApplications() {
+      try {
+        const response = await fetch('/admin/viewDoctorApplications');
+        const data = await response.json();
+
+        if (data.success) {
+          const applicationsList = document.getElementById('doctorApplicationsList');
+          applicationsList.innerHTML = ''; // Clear previous content
+
+          if (data.doctorApplications.length > 0) {
+            data.doctorApplications.forEach(application => {
+              const applicationDiv = document.createElement('div');
+              applicationDiv.classList.add('application-item');
+
+              // Display application details using the provided model
+              applicationDiv.innerHTML = `
+                <h2>Name: ${application.Name}</h2>
+                <p>Email: ${application.Email}</p>
+                <p>Date of Birth: ${application.DateOfBirth}</p>
+                <p>Hourly Rate: ${application.HourlyRate}</p>
+                <p>Affiliation: ${application.Affiliation}</p>
+                <p>Education: ${application.Education}</p>
+              `;
+
+              applicationsList.appendChild(applicationDiv);
+            });
+          } else {
+            applicationsList.innerHTML = 'No doctor applications found.';
+          }
+        } else {
+          alert('Failed to fetch doctor applications: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while fetching doctor applications: ' + error.message);
+      }
+    }
+
+    // Load doctor applications when Tab 3 is opened
+    document.querySelector('.tablinks:nth-child(3)').addEventListener('click', fetchDoctorApplications);
+
+    // Tab 4 script
+    async function fetchHealthPackages() {
+      try {
+        const response = await fetch('/admin/viewHealthPackages');
+        const data = await response.json();
+
+        if (data.success) {
+          const packageList = document.getElementById('packageList');
+          packageList.innerHTML = ''; // Clear previous content
+
+          if (data.packages.length > 0) {
+            data.packages.forEach(package => {
+              const packageItem = document.createElement('div');
+              packageItem.classList.add('package-item');
+
+              packageItem.innerHTML = `
+                <h2>Package Type: ${package.packageType}</h2>
+                <p>Subscription Fees (EGP): ${package.subsriptionFeesInEGP}</p>
+                <p>Doctor Discount (%): ${package.doctorDiscountInPercentage}</p>
+                <p>Medicine Discount (%): ${package.medicinDiscountInPercentage}</p>
+                <p>Family Discount (%): ${package.familyDiscountInPercentage}</p>
+                <button onclick="editHealthPackage('${package.packageType}', ${package.subsriptionFeesInEGP}, ${package.doctorDiscountInPercentage}, ${package.medicinDiscountInPercentage}, ${package.familyDiscountInPercentage})">Edit</button>
+                <button class="delete-button" onclick="deleteHealthPackage('${package.packageType}')">Delete</button>
+              `;
+
+              packageList.appendChild(packageItem);
+            });
+          } else {
+            packageList.innerHTML = 'No health packages available.';
+          }
+        } else {
+          alert('Failed to fetch health packages: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while fetching health packages: ' + error.message);
+      }
+    }
+
+    async function deleteHealthPackage(packageType) {
+      try {
+        const response = await fetch('/admin/deleteHealthPackage', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            packageType: packageType
+          })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Health package successfully deleted.');
+          fetchHealthPackages(); // Refresh the health packages after deletion
+        } else {
+          alert('Failed to delete health package: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the health package: ' + error.message);
+      }
+    }
+
+    async function editHealthPackage(packageType, subscriptionFees, doctorDiscount, medicineDiscount, familyDiscount) {
+      const newSubscriptionFees = parseFloat(prompt('Enter new subscription fees (EGP):', subscriptionFees));
+      const newDoctorDiscount = parseFloat(prompt('Enter new doctor discount (%):', doctorDiscount));
+      const newMedicineDiscount = parseFloat(prompt('Enter new medicine discount (%):', medicineDiscount));
+      const newFamilyDiscount = parseFloat(prompt('Enter new family discount (%):', familyDiscount));
+
+      const updatedPackage = {
+        healthPackage: {
+          packageType,
+          subsriptionFeesInEGP: newSubscriptionFees,
+          doctorDiscountInPercentage: newDoctorDiscount,
+          medicinDiscountInPercentage: newMedicineDiscount,
+          familyDiscountInPercentage: newFamilyDiscount
+        }
+      };
+
+      try {
+        const response = await fetch('/admin/updateHealthPackage', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedPackage)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Health package updated successfully.');
+          fetchHealthPackages(); // Reload the health packages after update
+        } else {
+          alert('Failed to update health package: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating the health package: ' + error.message);
+      }
+    }
+
+    function addHealthPackage() {
+      const packageType = prompt('Enter package type:');
+      const subscriptionFees = parseFloat(prompt('Enter subscription fees (EGP):'));
+      const doctorDiscount = parseFloat(prompt('Enter doctor discount (%):'));
+      const medicineDiscount = parseFloat(prompt('Enter medicine discount (%):'));
+      const familyDiscount = parseFloat(prompt('Enter family discount (%):'));
+
+      const newPackage = {
+        healthPackage: {
+          packageType,
+          subsriptionFeesInEGP: subscriptionFees,
+          doctorDiscountInPercentage: doctorDiscount,
+          medicinDiscountInPercentage: medicineDiscount,
+          familyDiscountInPercentage: familyDiscount
+        }
+      };
+
+      fetch('/admin/addHealthPackage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newPackage)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Health package added successfully.');
+          fetchHealthPackages(); // Reload the health packages after adding
+        } else {
+          alert('Failed to add health package: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while adding the health package: ' + error.message);
+      });
+    }
+
+    // Load health packages when Tab 4 is opened
+    document.querySelector('.tablinks:nth-child(4)').addEventListener('click', fetchHealthPackages);
+  </script>
+</body>
+</html>
+
+
+
+

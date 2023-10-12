@@ -63,19 +63,18 @@ router.delete('/deleteUser/:username', async (req, res) => {
 });
 
 //requirement number 9
-router.get('/viewDoctorApplication/:doctornName', async (req, res) => {
+router.get('/viewDoctorApplications', async (req, res) => {
     try {
-        const doctorName= req.params.doctornName;
-        const doctorApplication = await DoctorApplication.findOne({ Name: new RegExp(`${doctorName}`) });
-        if (doctorApplication) {
+        const doctorApplications = await DoctorApplication.find({});
+        if (doctorApplications) {
             res.status(200).json({
                 success:true,
-                doctorApplication: doctorApplication});
+                doctorApplications: doctorApplications});
         }
         else {
             res.status(500).json({ 
                 success:false,
-                message: "No doctor applications found with this name" });
+                message: "No doctor applications found" });
         }
     }
     catch (error) {
@@ -169,6 +168,44 @@ router.delete('/deleteHealthPackage', async (req, res) => {
             message: "General Error" })
     }
 });
+
+//requirement number 10
+router.get('/viewHealthPackages', async (req, res) => {
+    try {
+            const packages = await HealthPackage.find({});
+            if(packages){
+                res.status(200).json(
+                    {success:true,
+                        packages: packages});
+            }else{
+                res.status(500).json({
+                     success:false,
+                     message: "No Packages Available" });
+            }
+    }
+    catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success:false,
+            message: "General Error" })
+    }
+});
+
+router.get('/fetchUsers', async (req, res) => {
+    try {
+      const users = await User.find({});
+      res.status(200).json({
+        success: true,
+        users: users,
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch users.',
+      });
+    }
+  });
 
 
 export default router;

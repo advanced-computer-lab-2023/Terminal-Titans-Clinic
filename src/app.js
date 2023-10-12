@@ -35,6 +35,7 @@ app.post('/',(req,res)=>{
    //if(username=="patient")//render patient
    //if(username=="admin")//render admin
    if(username=="doctor")   res.render('../../views/doctorPage');
+   if(username=="admin")   res.render('../../views/adminPage');
    
 
 
