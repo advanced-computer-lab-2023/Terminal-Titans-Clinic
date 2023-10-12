@@ -32,8 +32,8 @@ app.get('/',(req,res)=>{
 app.post('/',(req,res)=>{
    var username=req.body.user;
    if(!username)return(res.status(400));
-   //if(username=="patient")//render patient
-   //if(username=="admin")//render admin
+   if(username=="patient") res.render('../../views/patientPage')
+   // if(username=="admin")//render admin
    if(username=="doctor")   res.render('../../views/doctorPage');
    if(username=="admin")   res.render('../../views/adminPage');
    

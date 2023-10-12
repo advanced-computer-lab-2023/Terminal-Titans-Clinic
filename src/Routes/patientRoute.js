@@ -7,6 +7,7 @@ import familyMember from '../Models/familyMemberModel.js'
 import fs from 'fs';
 import doctorModel from '../Models/doctorModel.js';
 import { pid } from 'process';
+import healthPackageModel from '../Models/healthPackageModel.js' ;
 
 
 const router = express.Router();
@@ -14,8 +15,17 @@ const pId='651c89b4a38c19dc5624ca5f';
 const doc1Id='652323f2050647d6c71d8758';
 const doc2Id='6523244bc7aa4b1920a48e03';
 
+router.get('/getCurrentPatient', async (req, res) => {
+    const patient = await patientModel.findOne({ _id: pId })
+    if (!patient) {
+        res.status(400).json({ message: "Patient not found", success: false })
+    }
+    else
+        res.status(200).json({ Result: patient, success: true })
+})
+
 //requirement 18 (add family member)
-router.post('/addFamilyMem', async (req,res)=>{
+router.get('/addFamilyMem', async (req,res)=>{
     const rel=req.body.relation.toLowerCase()
     if(!(rel==('wife') || (rel)==('husband')|| (rel)==('child')))
         return(res.status(400).send({message: "family member can only be wife/husband or child"}));
@@ -54,8 +64,13 @@ router.post('/addFamilyMem', async (req,res)=>{
 
 // requirement number 22
 router.get('/viewRegFamMem', async (req, res) => {
+   
     const famMembers = await familyMember.find({ PatientId: pId });
-    res.status(200).json(famMembers);
+    if (!famMembers){
+    return  res.status(400).json({ message: "no family members found",success:false})}
+else {
+    res.status(200).json({Result:famMembers, success:true});
+}
 })
 
 // requirement number 23
@@ -109,7 +124,7 @@ router.get('/viewPrescriptions', async (req, res) => {
         }
 })
 // requirement number 38
-router.get('/getDoctor', async (req, res) => {
+router.get('/getDoctors', async (req, res) => {
     var getDoctors ;
     if(req.body.Name && req.body.Speciality){
      getDoctors = await Doctor.find({ Name: req.body.Name,Speciality:req.body.Speciality});
@@ -142,11 +157,34 @@ router.get('/getDoctor', async (req, res) => {
 
 //requirement number 37
 
-router.get('/getDoctors', async(req, res)=>{
+router.get('/getDoctorInfo', async(req, res)=>{
+    try{
     const allDoctors = await Doctor.find({});
-    const discount=80;//get from PACKAGE
-    var result={};
+    const currPat= await patient.find({_id:pId})
+    if(currPat.length<1){
+        return(res.status(400).send({error: "cant find patient",success: false }));
+
+    }
+    const packId=currPat[0].PackageId;
+    console.log(currPat)
+    var discountP=0;
+    if(packId){
+        const allPackages = await healthPackageModel.find({_id:packId});
+        if(allPackages.length>0)
+         discountP= allPackages[0].doctorDiscountInPercentage;
+    else
+    return(res.status(400).send({error: "cant find package",success: false }));
+
+    }
+    else{
+         discountP=0;
+    }
+    let discount=100-discountP;
+
+    console.log(discount)
+    var final=[]
     for(let x in allDoctors){
+        var result={};
         console.log("here")
         var cur=allDoctors[x];
         var price=(allDoctors[x].HourlyRate*1.1)*discount/100;
@@ -157,10 +195,17 @@ router.get('/getDoctors', async(req, res)=>{
         result.Education=allDoctors[x].Education;
         result.Speciality=allDoctors[x].Speciality;
         result.id=allDoctors[x].id;
+        final.push(result)
 
     }
-    //console.log(allDoctors)
-    res.status(200).json( result );
+    console.log(final)
+    res.status(200).json({final: final ,success: true });
+
+}
+catch(error){
+    res.status(400).send({error: error,success: false });
+
+}
 })
 //requirement number 39
 
