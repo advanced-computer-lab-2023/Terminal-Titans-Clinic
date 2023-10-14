@@ -314,6 +314,11 @@ async function filterDateAppointments() {
                         <li><strong>Doctor's Name</strong>
                     ${list[i].Name}
                 </li>
+                <li><strong>Doctor's speciality</strong>
+                    ${list[i].speciality}
+                </li><li><strong>Doctor's session price</strong>
+                    ${list[i].sessionPrice}
+                </li>
                 <td><button onclick="showDoctor('${list[i].id}')">Select Doctor</button></td>    
         </ul>`
                 }
@@ -343,9 +348,9 @@ async function filterDateAppointments() {
 
                 var element = document.getElementById('ViewAllDoctors')
 
-                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
-                ${list[0].HourlyRate}     ${list[0].Affiliation}     ${list[0].Education}
-                ${list[0].Speciality}`
+                var cartoona = `Name: ${list[0].Name} <br>Email:  ${list[0].Email}<br>   Date of Birth:  ${list[0].DateOfBirth}<br>
+                Hourly Rate: ${list[0].HourlyRate}  <br>   Affiliation:${list[0].Affiliation}   <br> Education: ${list[0].Education}<br>
+                Speciality: ${list[0].Speciality}<br>  Price:${list[0].sessionPrice}`
 
                 element.innerHTML = cartoona
             } catch (error) {
@@ -371,9 +376,9 @@ async function filterDateAppointments() {
                 var element = document.getElementById('drNamesAndSpecialty')
                 
 
-                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
-                ${list[0].HourlyRate}     ${list[0].Affiliation}     ${list[0].Education}
-                ${list[0].Speciality}`
+                var cartoona = `Name: ${list[0].Name} <br>Email:  ${list[0].Email}<br>   Date of Birth:  ${list[0].DateOfBirth}<br>
+                Hourly Rate: ${list[0].HourlyRate}  <br>   Affiliation:${list[0].Affiliation}   <br> Education: ${list[0].Education}<br>
+                Speciality: ${list[0].Speciality}<br>  Price:${list[0].sessionPrice}`
 
                 element.innerHTML = cartoona
             } catch (error) {

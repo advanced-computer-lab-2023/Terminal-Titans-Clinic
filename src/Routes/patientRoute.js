@@ -359,11 +359,54 @@ router.post('/filterPrescriptions', async(req, res)=>{
 )
 // requirement 40/41
 router.get('/selectDoctors/:id', async(req,res)=>{
-    const docId= req.params.id;
-    const Dr = await Doctor.find({_id:docId});
+    
+        const docId= req.params.id;
+        const Dr = await Doctor.find({_id:docId});
+        const currPat= await patient.find({_id:pId})
+
+        if(currPat.length<1){
+            return(res.status(400).send({error: "cant find patient",success: false }));
+    
+        }
+        const packId=currPat[0].PackageId;
+        console.log(currPat)
+        var discountP=0;
+        if(packId){
+            const allPackages = await healthPackageModel.find({_id:packId});
+            if(allPackages.length>0)
+             discountP= allPackages[0].doctorDiscountInPercentage;
+        else
+        return(res.status(400).send({error: "cant find package",success: false }));
+    
+        }
+        else{
+             discountP=0;
+        }
+        let discount=100-discountP;
+    
+        console.log(discount)
+        var final=[]
+        for(let x in Dr){
+            var result={};
+            console.log("here")
+            var cur=Dr[x];
+            var price=(Dr[x].HourlyRate*1.1)*discount/100;
+            result.sessionPrice=price;
+            result.Name=Dr[x].Name;
+            result.Email=Dr[x].Email;
+            result.Affiliation=Dr[x].Affiliation;
+            result.Education=Dr[x].Education;
+            result.Speciality=Dr[x].Speciality;
+            result.HourlyRate=Dr[x].HourlyRate;
+            result.DateOfBirth=Dr[x].DateOfBirth;
+            result.id=Dr[x].id;
+            final.push(result)
+    
+        }
+    
     console.log("kkk")
     console.log(Dr)
-    res.status(200).json({Dr:Dr, success:true});
+    res.status(200).json({Dr:final, success:true});
 })
 
 // requirement 56
