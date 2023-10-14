@@ -43,7 +43,7 @@
         <option value=""></option>
     </select>
     <button type="button" onclick="filterDoctors()">Filter</button>
-    <div id="filterDoctors"></div><br
+    <div id="filterDoctors"></div><br>
 
     <h1>View all prescriptions</h1>
 
@@ -216,27 +216,20 @@ async function filterDateAppointments() {
             });
             
             let res = await response.json();
+            console.log(res);
+            // var list = res.final;
+            // console.log(list);
+
 
 
             let cartoona = ''
-            for (let i = 0; i < res.length; i++) {
+            for (let i in res) {
                 cartoona += `
-                    <ul>
-                <li>Name: ${res[i].Name}
+                <ul>
+                        <li><strong>Doctor's Name</strong>
+                    ${res[i].Name}
                 </li>
-                <li>Name: ${res[i].Email}
-                </li>
-                <li>Name: ${res[i].DateOfBirth}
-                </li>
-                <li>Name: ${res[i].HourlyRate}
-                </li>
-                <li>Name: ${res[i].Affiliation}
-                </li>
-                <li>Name: ${res[i].Education}
-                </li>
-                <li>Name: ${res[i].Speciality}
-                </li>
-              
+                <td><button onclick="showDoctor2('${res[i]._id}')">Select Doctor</button></td>    
         </ul>`
             }
 
@@ -379,6 +372,35 @@ async function filterDateAppointments() {
                 var cartoona = `Name: ${list[0].Name} <br>Email:  ${list[0].Email}<br>   Date of Birth:  ${list[0].DateOfBirth}<br>
                 Hourly Rate: ${list[0].HourlyRate}  <br>   Affiliation:${list[0].Affiliation}   <br> Education: ${list[0].Education}<br>
                 Speciality: ${list[0].Speciality}<br>  Price:${list[0].sessionPrice}`
+
+                element.innerHTML = cartoona
+            } catch (error) {
+                console.error('Error fetching Doctor data:', error);
+            }
+        }
+
+        async function showDoctor2(id) {
+            try {
+                console.log("pp");
+                console.log(id);
+                // Remove the colon from the URL placeholder
+                var response = await fetch(`http://localhost:8000/patient/selectDoctors/${id}`);
+                var res = await response.json();
+
+                var list = res.Dr
+                console.log(list)
+
+
+
+                if (!res.success)
+                    return alert(res.message);
+
+                var element = document.getElementById('filterDoctors')
+                
+
+                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
+                ${list[0].HourlyRate}     ${list[0].Affiliation}     ${list[0].Education}
+                ${list[0].Speciality}`
 
                 element.innerHTML = cartoona
             } catch (error) {
