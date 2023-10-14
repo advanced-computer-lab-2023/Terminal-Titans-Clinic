@@ -193,7 +193,7 @@ router.get('/viewHealthPackages', async (req, res) => {
 
 router.get('/fetchUsers', async (req, res) => {
     try {
-      const users = await User.find({});
+      const users = await User.find(({'__t': {$ne : "RequestedDoctor"}}));
       res.status(200).json({
         success: true,
         users: users,

@@ -296,6 +296,9 @@ router.post('/filterDoctors', async(req, res)=>{
 router.post('/filterPrescriptions', async(req, res)=>{
     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
+    if(startDate>endDate)
+    return(res.status(400).send({error: "please enter valid dates",success: false }));
+
     let presDate;
     presDate = await prescriptionsModel.find({ Date: { $gte: startDate,
     $lte: endDate } ,PatientId:pId});
@@ -349,7 +352,7 @@ router.post('/filterPrescriptions', async(req, res)=>{
             final.push(result);
    
         }
-    res.status(200).json(final);
+    res.status(200).json({final,success: true});
 
 
 

@@ -24,7 +24,7 @@ const patientSchema = new _Schema({
     required: true
   },
   Mobile: {
-    type: Number,
+    type: String,
     required: true,
   },
   EmergencyName: {
@@ -32,7 +32,7 @@ const patientSchema = new _Schema({
     required: true
   },
   EmergencyMobile: {
-    type: Number,
+    type: String,
     required: true,
   },
   PackageId:{ //if registered in any packages

@@ -190,9 +190,9 @@
                 <td>${patient.Email}</td>
                 <td>${patient.DateOfBirth}</td>
                 <td>${patient.Gender}</td>
-                <td>${patient.mobile}</td>
-                <td>${patient.emergencyName}</td>
-                <td>${patient.emergencyMobile}</td>
+                <td>${patient.Mobile}</td>
+                <td>${patient.EmergencyName}</td>
+                <td>${patient.EmergencyMobile}</td>
                 <td>${patient.familyMember}</td>
                 <td><button onclick="showPatient('${patient._id}')">Show patient</button></td>
                 <td><button onclick="getPatientInfoAndHealth('${patient._id}')">Show Patient Info AndHealth</button></td>
@@ -221,8 +221,8 @@
                 var element = document.getElementById('patientDetails')
 
                 var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
-                ${list[0].Gender}     ${list[0].mobile}     ${list[0].emergencyName}
-                ${list[0].emergencyName}         ${list[0].emergencyMobile}     ${list[0].familyMember}`
+                ${list[0].Gender}     ${list[0].Mobile}     ${list[0].EmergencyName}
+                        ${list[0].EmergencyMobile}     ${list[0].familyMember}`
 
                 element.innerHTML = cartoona
             } catch (error) {
@@ -245,8 +245,8 @@
                 var element = document.getElementById('patientDetails')
 
                 var cartoona = `${list.patient.Name}   ${list.patient.Email}     ${list.patient.DateOfBirth}
-                ${list.patient.Gender}     ${list.patient.mobile}     ${list.patient.emergencyName}
-                ${list.patient.emergencyName}         ${list.patient.emergencyMobile}     ${list.patient.familyMember}`
+                ${list.patient.Gender}     ${list.patient.Mobile}     ${list.patient.EmergencyName}
+                        ${list.patient.EmergencyMobile}     ${list.patient.familyMember}`
 
                 for (let i = 0; i < list.healthDoc.length; i++) {                    
                     cartoona += `<p><a href="data:'application/pdf';base64,
@@ -290,13 +290,13 @@
                     ${list[i].Gender}
                 </li>
                 <li><strong>Mobile:</strong>
-                    ${list[i].mobile}
+                    ${list[i].Mobile}
                 </li>
                 <li><strong>Emergency Contact Name:</strong>
-                    ${list[i].emergencyName}
+                    ${list[i].EmergencyName}
                 </li>
                 <li><strong>Emergency Contact Mobile:</strong>
-                    ${list[i].emergencyMobile}
+                    ${list[i].EmergencyMobile}
                 </li>
                 <li><strong>Username:</strong>
                     ${list[i].Username}
@@ -345,13 +345,13 @@
                     ${list[i].Gender}
                 </li>
                 <li><strong>Mobile:</strong>
-                    ${list[i].mobile}
+                    ${list[i].Mobile}
                 </li>
                 <li><strong>Emergency Contact Name:</strong>
-                    ${list[i].emergencyName}
+                    ${list[i].EmergencyName}
                 </li>
                 <li><strong>Emergency Contact Mobile:</strong>
-                    ${list[i].emergencyMobile}
+                    ${list[i].EmergencyMobile}
                 </li>
                 <li><strong>Username:</strong>
                     ${list[i].Username}

@@ -76,9 +76,9 @@
         <input name="nId" id="nId" placeholder="national Id">
 
         <select name="relation" id="relation">
-            <option value="wife">Male</option>
-            <option value="husband">Female</option>
-            <option value="child">Other</option>
+            <option value="wife">Wife</option>
+            <option value="husband">Husband</option>
+            <option value="child">Child</option>
 
         </select>
                 <button type="submit">Add</button>
@@ -132,8 +132,9 @@ async function filterPres() {
             });
            
             let res = await response.json();
-
-
+            if (!res.success)
+                    return alert(res.error);
+            res=    res.final;
             let cartoona = ''
             for (let i = 0; i < res.length; i++) {
                 cartoona += `
@@ -398,10 +399,9 @@ async function filterDateAppointments() {
                 var element = document.getElementById('filterDoctors')
                 
 
-                var cartoona = `${list[0].Name}   ${list[0].Email}     ${list[0].DateOfBirth}
-                ${list[0].HourlyRate}     ${list[0].Affiliation}     ${list[0].Education}
-                ${list[0].Speciality}`
-
+                var cartoona = `Name: ${list[0].Name} <br>Email:  ${list[0].Email}<br>   Date of Birth:  ${list[0].DateOfBirth}<br>
+                Hourly Rate: ${list[0].HourlyRate}  <br>   Affiliation:${list[0].Affiliation}   <br> Education: ${list[0].Education}<br>
+                Speciality: ${list[0].Speciality}<br>  Price:${list[0].sessionPrice}`
                 element.innerHTML = cartoona
             } catch (error) {
                 console.error('Error fetching Doctor data:', error);
