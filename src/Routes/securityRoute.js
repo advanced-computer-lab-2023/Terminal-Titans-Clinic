@@ -2,19 +2,14 @@ import { Router } from 'express';
 import patientModel from '../Models/patientsModel.js';
 import userModel from '../Models/userModel.js';
 import reqdoctorModel from '../Models/requestedDoctorModel.js';
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import nodemailer from 'node-mailer';
+import otp from '../Models/otpModel.js';
 
-import validator from 'email-validator'
+// import validator from 'email-validator'
 
 const router = Router()
-
-router.get('/patient', (req, res) => {
-    res.render('../../views/patientRegistration', { message: "" });
-})
-
-router.get('/doctor', (req, res) => {
-    res.render('../../views/doctorRegistration', { message: "" });
-
-})
 
 
 router.post('/patient', async (req, res) => {
@@ -42,9 +37,13 @@ router.post('/patient', async (req, res) => {
     //     return res.status(400).json({ message: 'Please enter a valid email', success: false })
 
     try {
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt)
+
         const newPatient = new patientModel({
             Username: req.body.username,
-            Password: req.body.password,
+            Password: hashedPassword,
             Name: req.body.name,
             Email: req.body.email,
             DateOfBirth: req.body.dob,
@@ -55,6 +54,11 @@ router.post('/patient', async (req, res) => {
         });
 
         newPatient.save();
+
+        let resultPatient = JSON.parse(JSON.stringify(newPatient))
+
+        resultPatient["token"] = generateToken(newPatient._id)
+
         return res.status(200).json({ message: "You have registered", success: true, user: newPatient })
     }
     catch (error) {
@@ -64,8 +68,7 @@ router.post('/patient', async (req, res) => {
 
 
 router.post('/doctor', async (req, res) => {
-
-    if (!req.body.username || !req.body.dob || !req.body.password
+    if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
         || !req.body.affiliation || !req.body.education || !req.body.speciality) {
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
@@ -86,29 +89,29 @@ router.post('/doctor', async (req, res) => {
     // if(!validator.validate(req.body.email))
     //      return(res.status(400).json({message:"Please enter a valid email"}))
     try {
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt)
+
         const newDoctor = new reqdoctorModel({
             Username: req.body.username,
-            Password: req.body.password,
+            Password: hashedPassword,
             Name: req.body.name,
             Email: req.body.email,
-            DateOfBirth: req.body.dob,
+            DateOfBirth: req.body.dateOfBirth,
             HourlyRate: req.body.hourlyRate,
             Affiliation: req.body.affiliation,
             Education: req.body.education,
             Speciality: req.body.speciality
         });
 
+
         newDoctor.save();
 
         let resultDoctor = JSON.parse(JSON.stringify(newDoctor))
 
-
         resultDoctor["token"] = generateToken(newDoctor._id)
 
-        console.log(resultDoctor);
-
-
-        // res.status(200).send("success");
         return res.status(200).json({ message: "You have registered", success: true, user: resultDoctor })
     }
     catch (error) {
@@ -116,10 +119,83 @@ router.post('/doctor', async (req, res) => {
     }
 });
 
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body
+
+    if (!username || !password) {
+        res.status(400).json({ message: 'Please fill all fields' })
+        return;
+    }
+
+    const user = await userModel.findOne({ Username : username })
+
+
+    if (user && (await bcrypt.compare(password, user.Password))) {
+        // generate token
+        res.status(200).json({
+            _id: user._id,
+            name: user.Name,
+            email: user.Email,
+            type: user.__t,
+            token: generateToken(user._id)
+        })
+    }
+    else {
+        res.status(400).json({ message: 'Invalid email or password' })
+    }
+})
+
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     })
 }
 
+router.post('/forgotPassword', async (req, res) => {
+    const { email } = req.body
+
+    const user = await userModel.findOne({ email })
+
+    if (user) {
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+
+        try {
+            const mailResponse = await mailSender(
+                email,
+                "Verification Email",
+                `<h1>Please confirm your OTP</h1>
+                 <p>Here is your OTP code: ${otp}</p>`
+            );
+            console.log("Email sent successfully: ", mailResponse);
+            res.status(200).json({ message: 'Email sent' })
+        } catch (error) {
+            res.status(500).json({ message: 'Error sending email' })
+        }
+    }
+
+})
+const mailSender = async (email, title, body) => {
+    try {
+        // Create a Transporter to send emails
+
+        let transporter = nodemailer.createTransport({
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            }
+        });
+        // Send emails to users
+        let info = await transporter.sendMail({
+            from: 'Terminal Titans',
+            to: email,
+            subject: title,
+            html: body,
+        });
+        console.log("Email info: ", info);
+        return info;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
 export default router;

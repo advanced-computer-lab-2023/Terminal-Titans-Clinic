@@ -1,7 +1,7 @@
 import connectDB from './config/db.js'
 import dotenvModule from 'dotenv'
 import express from 'express'
-import RegisterModule from './Routes/registerRoute.js'
+import securityModule from './Routes/securityRoute.js'
 import DoctorModule from './Routes/doctorRoute.js'
 import PatientModule from './Routes/patientRoute.js'
 import AdminModule from './Routes/adminRoute.js'
@@ -18,7 +18,7 @@ const port = process.env.PORT || "8000";
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json())
 
-app.use('/register',RegisterModule)
+app.use('/security',securityModule)
 app.use('/doctor',DoctorModule)
 app.use('/patient',PatientModule)
 app.use('/admin',AdminModule)
