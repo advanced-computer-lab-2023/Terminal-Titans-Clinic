@@ -10,9 +10,16 @@ import bcrypt from 'bcryptjs'
 const router = express.Router()
 
 //requirement number 7
-router.post('/createAdmin', async (req, res) => {
+router.post('/createAdmin', protect,async (req, res) => {
     // Create the admin
     try {
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not an admin"
+            });
+        }
         const { Username, Password } = req.body;
         if (!Username || !Password) {
             return res.status(500).json({
