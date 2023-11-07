@@ -338,6 +338,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
             Date: date
         });
         newAppointment.save();
+        docAvailableSlots.findOneAndDelete({DoctorId:dId})
         res.status(200).json({ Result: newAppointment, success: true });
     }
     if(aptmnt.length<1){
@@ -350,7 +351,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
+    docAvailableSlots.findOneAndDelete({DoctorId:dId})
     res.status(200).json({ Result: newAppointment, success: true });
+
+    
 })
 
 //requirement number 39
