@@ -1,0 +1,9 @@
+username:doctorSeif
+password:hello kitty
+token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NDk3ZGJkNTI0OTg0YTUxZTIzMjlhZiIsImlhdCI6MTY5OTMxOTU4MywiZXhwIjoxNzAxOTExNTgzfQ.SbfBT7DN-niGMGUrUBIB0OWtrLaIBi6XPnfXuChsWn0
+
+---------------
+
+username:admin
+password:admin
+token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NDk5N2I4NDIwN2ZiOTkwODY4OTk0NiIsImlhdCI6MTY5OTMyMTc4NSwiZXhwIjoxNzAxOTEzNzg1fQ.nDQepEbNfOe6NFrSjHq-4tkfFXOKsa4qRHi_AmZoGGE
