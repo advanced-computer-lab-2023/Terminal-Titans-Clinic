@@ -169,6 +169,7 @@ router.post('/login', async (req, res) => {
     const user = await userModel.findOne({ Username: username })
 
     console.log(user);
+    console.log(username);
     console.log(password);
     if (user && (await bcrypt.compare(password, user.Password))) {
         // generate token
