@@ -4,6 +4,7 @@ import patientsModel from '../Models/patientsModel.js';
 import healthModel from '../Models/healthModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import familyMemberModel from '../Models/familyMemberModel.js';
+import protect from '../middleware/authMiddleware.js';
 
 const router = express.Router()
 
