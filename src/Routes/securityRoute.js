@@ -15,10 +15,9 @@ const router = Router()
 
 router.post('/patient', async (req, res) => {
 
-    if (!req.body.username || !req.body.dob || !req.body.password
+    if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
         || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender) {
-
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -40,14 +39,14 @@ router.post('/patient', async (req, res) => {
     try {
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
 
         const newPatient = new patientModel({
             Username: req.body.username,
             Password: hashedPassword,
             Name: req.body.name,
             Email: req.body.email,
-            DateOfBirth: req.body.dob,
+            DateOfBirth: req.body.dateOfBirth,
             Mobile: req.body.mobile,
             EmergencyName: req.body.first + " " + req.body.last,
             EmergencyMobile: req.body.emergencyNumber,
@@ -56,15 +55,13 @@ router.post('/patient', async (req, res) => {
 
         newPatient.save();
 
-        let resultPatient = JSON.parse(JSON.stringify(newDoctor));
-
-        resultPatient["token"] = generateToken(newPatient._id);
+        let resultPatient = JSON.parse(JSON.stringify(newPatient));
 
         return res.status(200).json({ message: "You have registered", success: true, Result: resultPatient })
 
     }
     catch (error) {
-        return res.status(400).json({ message: "There is an error", success: false })
+        return res.status(400).json({ message: error.message, success: false })
     }
 })
 
@@ -111,12 +108,10 @@ router.post('/doctor', async (req, res) => {
 
         let resultDoctor = JSON.parse(JSON.stringify(newDoctor));
 
-        resultDoctor["token"] = generateToken(newDoctor._id);
-
         return res.status(200).json({ message: "You have registered", success: true, Result: resultDoctor })
     }
     catch (error) {
-        return res.status(400).json({ message: "There is an error", success: false })
+        return res.status(400).json({ message: error.message, success: false })
     }
 });
 

@@ -39,7 +39,6 @@ router.post('/createAdmin', protect,async (req, res) => {
             const savedAdmin = await admin.save();
 
             let savedAdminResult = JSON.parse(JSON.stringify(savedAdmin));
-            savedAdminResult["token"] = generateToken(savedAdmin._id);
 
             res.status(200).json({
                 message: 'Admin created successfully',
