@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import patientModel from '../Models/patientsModel.js';
+import Admin from '../Models/adminModel.js';
 import userModel from '../Models/userModel.js';
 import reqdoctorModel from '../Models/requestedDoctorModel.js';
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import nodemailer from 'node-mailer';
-import otp from '../Models/otpModel.js';
+import nodemailer from 'nodemailer';
+import otpModel from '../Models/otpModel.js';
+
 
 // import validator from 'email-validator'
 
@@ -55,17 +57,54 @@ router.post('/patient', async (req, res) => {
 
         newPatient.save();
 
-        let resultPatient = JSON.parse(JSON.stringify(newPatient))
+        let resultPatient = JSON.parse(JSON.stringify(newDoctor));
 
-        resultPatient["token"] = generateToken(newPatient._id)
+        resultPatient["token"] = generateToken(newPatient._id);
 
-        return res.status(200).json({ message: "You have registered", success: true, user: newPatient })
+        return res.status(200).json({ message: "You have registered", success: true, Result: resultPatient })
+
     }
     catch (error) {
         return res.status(400).json({ message: "There is an error", success: false })
     }
 })
 
+//requirement number 7
+router.get('/createAdmin', async (req, res) => {
+    // Create the admin
+    try {
+        const { Username, Password } = req.body;
+        const userexist = await Admin.findOne({ Username });
+        if (!userexist) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(Password, salt)
+            const admin = new Admin({ Username, hashedPassword });
+            const savedAdmin = await admin.save();
+
+            let savedAdminResult = JSON.parse(JSON.stringify(savedAdmin));
+            savedAdminResult["token"] = generateToken(savedAdmin._id);
+
+            res.status(200).json({
+                message: 'Admin created successfully',
+                success: true,
+                Result: savedAdminResult
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: 'Username already exist'
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: "General Error"
+        })
+    }
+});
 
 router.post('/doctor', async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
@@ -108,11 +147,11 @@ router.post('/doctor', async (req, res) => {
 
         newDoctor.save();
 
-        let resultDoctor = JSON.parse(JSON.stringify(newDoctor))
+        let resultDoctor = JSON.parse(JSON.stringify(newDoctor));
 
-        resultDoctor["token"] = generateToken(newDoctor._id)
+        resultDoctor["token"] = generateToken(newDoctor._id);
 
-        return res.status(200).json({ message: "You have registered", success: true, user: resultDoctor })
+        return res.status(200).json({ message: "You have registered", success: true, Result: resultDoctor })
     }
     catch (error) {
         return res.status(400).json({ message: "There is an error", success: false })
@@ -123,25 +162,30 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body
 
     if (!username || !password) {
-        res.status(400).json({ message: 'Please fill all fields' })
+        res.status(400).json({ message: 'Please fill all fields', success: false })
         return;
     }
 
-    const user = await userModel.findOne({ Username : username })
+    const user = await userModel.findOne({ Username: username })
 
-
+    console.log(user);
+    console.log(password);
     if (user && (await bcrypt.compare(password, user.Password))) {
         // generate token
         res.status(200).json({
-            _id: user._id,
-            name: user.Name,
-            email: user.Email,
-            type: user.__t,
-            token: generateToken(user._id)
+            Result:
+            {
+                _id: user._id,
+                name: user.Name,
+                email: user.Email,
+                type: user.__t,
+                token: generateToken(user._id)
+            },
+            success: true
         })
     }
     else {
-        res.status(400).json({ message: 'Invalid email or password' })
+        res.status(400).json({ message: 'Invalid username or password', success: false })
     }
 })
 
@@ -154,11 +198,16 @@ const generateToken = (id) => {
 router.post('/forgotPassword', async (req, res) => {
     const { email } = req.body
 
-    const user = await userModel.findOne({ email })
-
+    const user = await userModel.findOne({ Email: email })
+    console.log(user)
     if (user) {
         const otp = Math.floor(100000 + Math.random() * 900000);
-
+        const newOtp = new otpModel({
+            userId: user._id,
+            otp: otp
+        });
+        newOtp.save();
+        console.log("OTP: ", otp);
 
         try {
             const mailResponse = await mailSender(
@@ -178,8 +227,20 @@ router.post('/forgotPassword', async (req, res) => {
 const mailSender = async (email, title, body) => {
     try {
         // Create a Transporter to send emails
-
+        // var smtpConfig = {
+        //     host: 'smtp.gmail.com',
+        //     port: 587,
+        //     secure: false, // use SSL
+        //     auth: {
+        //         user: process.env.MAIL_USER,
+        //         pass: process.env.MAIL_PASS,
+        //     }
+        // };
+        // var transporter = nodemailer.createTransport(smtpConfig);
         let transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+             secure: true,
             auth: {
                 user: process.env.MAIL_USER,
                 pass: process.env.MAIL_PASS,

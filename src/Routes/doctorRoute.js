@@ -6,7 +6,6 @@ import appointmentModel from '../Models/appointmentModel.js';
 import familyMemberModel from '../Models/familyMemberModel.js';
 
 const router = express.Router()
-let id = '652323f2050647d6c71d8758';
 
 //get all doctors
 // router.get('/', async (req, res) => {
@@ -14,17 +13,13 @@ let id = '652323f2050647d6c71d8758';
 //     res.status(200).render('doctorPage',doctors)
 // })
 
-router.get('/getCurrentDoctor', async (req, res) => {
-    const doctor = await doctorModel.findOne({ _id: id })
+router.get('/getCurrentDoctor', protect,async (req, res) => {
+    const doctor = await doctorModel.findOne({ _id: req.user._id })
     if (!doctor) {
         res.status(400).json({ message: "Doctor not found", success: false })
     }
     else
         res.status(200).json({ Result: doctor, success: true })
-})
-
-router.get('/', (req, res) => {
-    res.render('doctorPage')
 })
 
 // requirement number 14 later
