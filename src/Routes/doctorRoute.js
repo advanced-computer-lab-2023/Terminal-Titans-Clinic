@@ -13,7 +13,7 @@ const router = express.Router()
 //     res.status(200).render('doctorPage',doctors)
 // })
 
-router.get('/getCurrentDoctor', protect,async (req, res) => {
+router.get('/getCurrentDoctor',async (req, res) => {
     const doctor = await doctorModel.findOne({ _id: req.user._id })
     if (!doctor) {
         res.status(400).json({ message: "Doctor not found", success: false })
