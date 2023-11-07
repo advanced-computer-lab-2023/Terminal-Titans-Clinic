@@ -10,6 +10,7 @@ import healthPackageModel from '../Models/healthPackageModel.js';
 import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
+import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
 
 const router = express.Router();
 
@@ -289,11 +290,70 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
     }
 })
 //get all available slots with a given Doctor._id
+//req42
 router.get('/getDoctorAvailableSlots', async (req, res) => {
-    const dId = req.body.dId
+    let exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const dId = req.body.dId;
+    const Dr = await Doctor.find({ _id: dId });
+    if (Dr.length < 1) {
+        return (res.status(400).send({ error: "cant find doctor", success: false }));
+    }
+    const allSlots = await docAvailableSlots.find({ DoctorId: dId });
+    if (allSlots.length < 1) {
+        return (res.status(400).send({ error: "no available slots", success: false }));
+    }
+    var final = [];
+    for (let x in allSlots) {
+        var result = {};
+        result.Date = allSlots[x].Date;
+        result.id = allSlots[x].id;
+        final.push(result);
+    }
+    res.status(200).json({ final: final, success: true });
 })
-//requirement number 39
 
+//select an available slot and book an appointment for myself or a family member
+//req43
+router.post('/bookAppointment', protect, async (req, res) => {
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const dId = req.body.dId;
+    const date = req.body.date;
+    const aptmnt=await docAvailableSlots.findOne({DoctorId:dId,Date:date});
+    const famId = req.body.famId;
+    if (famId) {
+        const famMember = await familyMember.find({ PatientId: req.user._id, FamilyMemId: famId });
+        if (famMember.length < 1) {
+            return (res.status(400).send({ error: "cant find family member", success: false }));
+        }
+        const newAppointment = new appointmentModel({
+            PatientId: famId,
+            DoctorId: dId,
+            Status: "upcoming",
+            Date: date
+        });
+        newAppointment.save();
+        res.status(200).json({ Result: newAppointment, success: true });
+    }
+    if(aptmnt.length<1){
+        return (res.status(400).send({ error: "This slot is no longer available", success: false }));
+    }
+    const newAppointment = new appointmentModel({
+        PatientId: req.user._id,
+        DoctorId: dId,
+        Status: "upcoming",
+        Date: date
+    });
+    newAppointment.save();
+    res.status(200).json({ Result: newAppointment, success: true });
+})
+
+//requirement number 39
 router.post('/filterDoctors', async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
