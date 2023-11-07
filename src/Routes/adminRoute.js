@@ -4,19 +4,31 @@ import Admin from '../Models/adminModel.js';
 import DoctorApplication from '../Models/requestedDoctorModel.js';
 import HealthPackage from '../Models/healthPackageModel.js';
 import protect from '../middleware/authMiddleware.js';
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
 const router = express.Router()
 
 //requirement number 7
-router.get('/createAdmin', async (req, res) => {
+router.post('/createAdmin', async (req, res) => {
     // Create the admin
     try {
         const { Username, Password } = req.body;
+        if (!Username || !Password) {
+            return res.status(500).json({
+                success: false,
+                message: "Please enter username and password"
+            });
+        }
         const userexist = await Admin.findOne({ Username });
         if (!userexist) {
             const salt = await bcrypt.genSalt(10);
+            console.log(Password);
             const hashedPassword = await bcrypt.hash(Password, salt)
-            const admin = new Admin({ Username, hashedPassword });
+            const admin = new Admin({
+                Username: Username,
+                Password: hashedPassword
+            });
             const savedAdmin = await admin.save();
 
             let savedAdminResult = JSON.parse(JSON.stringify(savedAdmin));
@@ -44,6 +56,11 @@ router.get('/createAdmin', async (req, res) => {
     }
 });
 
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '30d',
+    })
+}
 
 //requirement number 8
 router.delete('/deleteUser/:username', protect, async (req, res) => {

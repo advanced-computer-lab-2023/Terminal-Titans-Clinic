@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import patientModel from '../Models/patientsModel.js';
-import Admin from '../Models/adminModel.js';
 import userModel from '../Models/userModel.js';
 import reqdoctorModel from '../Models/requestedDoctorModel.js';
 import jwt from 'jsonwebtoken'
