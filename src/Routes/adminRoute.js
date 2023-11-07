@@ -8,41 +8,48 @@ import protect from '../middleware/authMiddleware.js';
 const router = express.Router()
 
 //requirement number 7
-// router.get('/createAdmin', protect, async (req, res) => {
-//     // Create the admin
-//     try {
-//         const { Username, Password } = req.body;
-//         const userexist = await Admin.findOne({ Username });
-//         if (!userexist) {
-//             const admin = new Admin({ Username, Password });
-//             const savedAdmin = await admin.save();
-//             res.status(200).json({
-//                 success: true,
-//                 savedAdmin: savedAdmin
-//             });
-//         }
-//         else {
-//             res.status(500).json({
-//                 success: false,
-//                 message: 'Username already exist'
-//             });
-//         }
-//     }
-//     catch (error) {
-//         console.error('Error: ', error);
-//         res.status(500).json({
-//             success: false,
-//             message: "General Error"
-//         })
-//     }
-// });
+router.get('/createAdmin', async (req, res) => {
+    // Create the admin
+    try {
+        const { Username, Password } = req.body;
+        const userexist = await Admin.findOne({ Username });
+        if (!userexist) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(Password, salt)
+            const admin = new Admin({ Username, hashedPassword });
+            const savedAdmin = await admin.save();
+
+            let savedAdminResult = JSON.parse(JSON.stringify(savedAdmin));
+            savedAdminResult["token"] = generateToken(savedAdmin._id);
+
+            res.status(200).json({
+                message: 'Admin created successfully',
+                success: true,
+                Result: savedAdminResult
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: 'Username already exist'
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: "General Error"
+        })
+    }
+});
 
 
 //requirement number 8
 router.delete('/deleteUser/:username', protect, async (req, res) => {
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -77,10 +84,10 @@ router.delete('/deleteUser/:username', protect, async (req, res) => {
 });
 
 //requirement number 9
-router.get('/viewDoctorApplications',protect, async (req, res) => {
+router.get('/viewDoctorApplications', protect, async (req, res) => {
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -111,12 +118,12 @@ router.get('/viewDoctorApplications',protect, async (req, res) => {
 
 
 //requirement number 10
-router.post('/addHealthPackage',protect, async (req, res) => {
+router.post('/addHealthPackage', protect, async (req, res) => {
     const newPackage = req.body.healthPackage;
     const packageType = newPackage.packageType;
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -154,11 +161,11 @@ router.post('/addHealthPackage',protect, async (req, res) => {
 
 
 //requirement number 10
-router.put('/updateHealthPackage',protect, async (req, res) => {
+router.put('/updateHealthPackage', protect, async (req, res) => {
     const packageType = req.body.healthPackage.packageType;
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -190,11 +197,11 @@ router.put('/updateHealthPackage',protect, async (req, res) => {
 
 
 //requirement number 10
-router.delete('/deleteHealthPackage',protect, async (req, res) => {
+router.delete('/deleteHealthPackage', protect, async (req, res) => {
     const packageType = req.body.packageType;
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -225,10 +232,10 @@ router.delete('/deleteHealthPackage',protect, async (req, res) => {
 });
 
 //requirement number 10
-router.get('/viewHealthPackages',protect, async (req, res) => {
+router.get('/viewHealthPackages', protect, async (req, res) => {
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -257,10 +264,10 @@ router.get('/viewHealthPackages',protect, async (req, res) => {
     }
 });
 
-router.get('/fetchUsers', protect,async (req, res) => {
+router.get('/fetchUsers', protect, async (req, res) => {
     try {
-        const exist = await Admin.findOne({ Username: req.user });
-        if(!exist){
+        const exist = await Admin.findById(req.user);
+        if (!exist) {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"

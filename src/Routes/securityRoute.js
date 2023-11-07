@@ -69,43 +69,6 @@ router.post('/patient', async (req, res) => {
     }
 })
 
-//requirement number 7
-router.get('/createAdmin', async (req, res) => {
-    // Create the admin
-    try {
-        const { Username, Password } = req.body;
-        const userexist = await Admin.findOne({ Username });
-        if (!userexist) {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(Password, salt)
-            const admin = new Admin({ Username, hashedPassword });
-            const savedAdmin = await admin.save();
-
-            let savedAdminResult = JSON.parse(JSON.stringify(savedAdmin));
-            savedAdminResult["token"] = generateToken(savedAdmin._id);
-
-            res.status(200).json({
-                message: 'Admin created successfully',
-                success: true,
-                Result: savedAdminResult
-            });
-        }
-        else {
-            res.status(500).json({
-                success: false,
-                message: 'Username already exist'
-            });
-        }
-    }
-    catch (error) {
-        console.error('Error: ', error);
-        res.status(500).json({
-            success: false,
-            message: "General Error"
-        })
-    }
-});
-
 router.post('/doctor', async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate

@@ -14,9 +14,8 @@ const router = express.Router()
 //     res.status(200).render('doctorPage',doctors)
 // })
 
-router.get('/getCurrentDoctor',protect,async (req, res) => {
-    console.log('user',req.user);
-    const doctor = await doctorModel.findOne({ _id: req.user })
+router.get('/getCurrentDoctor', protect, async (req, res) => {
+    const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
         res.status(400).json({ message: "Doctor not found", success: false })
     }
@@ -25,10 +24,9 @@ router.get('/getCurrentDoctor',protect,async (req, res) => {
 })
 
 // requirement number 14 later
-router.get('/updateDoctor', async (req, res) => {
-    const doctor = await doctorModel.findOne({ _id: id });
+router.get('/updateDoctor', protect, async (req, res) => {
     try {
-        const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: id },
+        const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: req.user._id },
             {
                 Email: req.query.Email || doctor.Email,
                 HourlyRate: req.query.HourlyRate || doctor.HourlyRate,
@@ -47,10 +45,13 @@ router.get('/updateDoctor', async (req, res) => {
 
 // requirement number 25
 router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
-    console.log(req.params.id)
-    // return(res.render('../..views/home'))
     try {
-        const appointment = await appointmentModel.findOne({ PatientId: req.params.id });
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+
+        const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
 
         if (appointment.length == 0) {
             res.status(400).json({ message: "Not registered with you", success: false })
@@ -82,17 +83,17 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
             console.log(familyMembers[i].Name)
             patient.familyMember.push(familyMembers[i].Name)
         }
-        let list=[]
-        for (let x in healthRecords){
-           list.push(healthRecords[x].HealthDocument.binData.toString('base64'))
-           
+        let list = []
+        for (let x in healthRecords) {
+            list.push(healthRecords[x].HealthDocument.binData.toString('base64'))
+
         }
 
         //console.log(patient)
         const result = {
             "healthRecords": healthRecords,
             "patient": patient,
-            "healthDoc":list
+            "healthDoc": list
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -104,7 +105,7 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
 // requirement number 33
 router.get('/getPatientsList', async (req, res) => {
     try {
-        const appointments = await appointmentModel.find({ DoctorId: id });
+        const appointments = await appointmentModel.find({ DoctorId: req.user._id });
         if (appointments.length == 0) {
             res.status(400).json({ message: "No patients found", success: false })
             return;
@@ -138,7 +139,7 @@ router.get('/getPatientsList', async (req, res) => {
 // requirement number 34
 router.get('/getPatientName/:name', async (req, res) => {
     try {
-        const doctor = await doctorModel.findOne({ _id: id })
+        const doctor = await doctorModel.findOne({ _id: req.user._id })
 
         if (!doctor) {
             res.status(400).json({ message: "Doctor not found", success: false })
@@ -193,7 +194,7 @@ router.get('/getUpcomingAppointment', async (req, res) => {
         today = mm + '/' + dd + '/' + yyyy;
         today = new Date(today);
 
-        const getAppointments = await appointmentModel.find({ Date: { $gte: today }, DoctorId: id });
+        const getAppointments = await appointmentModel.find({ Date: { $gte: today }, DoctorId: req.user._id });
 
         if (getAppointments.length == 0)
             return res.status(400).json({ message: "No upcoming appointments found", success: false })
@@ -206,7 +207,7 @@ router.get('/getUpcomingAppointment', async (req, res) => {
             let patient = await patientsModel.findOne({ _id: getAppointments[i].PatientId })
             let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
 
-            patient = { ...patient._doc, "familyMember": [] ,"appointmentDate":getAppointments[i].Date}
+            patient = { ...patient._doc, "familyMember": [], "appointmentDate": getAppointments[i].Date }
 
             for (let j = 0; j < familyMembers.length; j++) {
                 patient.familyMember.push(familyMembers[j].Name)
@@ -233,7 +234,7 @@ router.get('/selectPatientName/:id', async (req, res) => {
             return;
         }
 
-        const appointment = await appointmentModel.find({ PatientId: req.params.id });
+        const appointment = await appointmentModel.find({ DoctorId: req.user._id, PatientId: req.params.id });
 
         if (appointment.length == 0) {
             res.status(400).json({ message: "No appointments found", success: false })
@@ -259,22 +260,27 @@ router.get('/selectPatientName/:id', async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 })
+
 router.post('/getAppointment', async (req, res) => {
-    const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
-    const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
+    const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+    const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
     let getAppointmentsbyDate;
-        getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
-        $lte: endDate } ,DoctorId: id});
-    
+    getAppointmentsbyDate = await appointmentModel.find({
+        Date: {
+            $gte: startDate,
+            $lte: endDate
+        }, DoctorId: id
+    });
+
     let getAppointmentsbyStatus;
     if (req.body.status) {
-        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status, DoctorId: id });
+        getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status, DoctorId: req.user._id });
     }
     else {
-        getAppointmentsbyStatus = await appointmentModel.find({ DoctorId: id });
+        getAppointmentsbyStatus = await appointmentModel.find({ DoctorId: req.user._id });
     }
-    var temp = getAppointmentsbyDate.filter((app) => {
+    let temp = getAppointmentsbyDate.filter((app) => {
         for (let y in getAppointmentsbyStatus) {
             if (getAppointmentsbyStatus[y]._id.equals(app._id)) {
                 return true;
@@ -283,14 +289,14 @@ router.post('/getAppointment', async (req, res) => {
         return false;
     }
     );
-    var final=[];
-    for(let x in temp){///if you need the patient's name in front end
-        var result={}
-        const patient=await patientsModel.find({_id:temp[x].PatientId})
-        if(patient.length>0)
-        result.Name=patient[0].Name;           
-        result.Date=temp[x].Date;
-        result.Status=temp[x].Status;
+    let final = [];
+    for (let x in temp) {///if you need the patient's name in front end
+        let result = {}
+        const patient = await patientsModel.find({ _id: temp[x].PatientId })
+        if (patient.length > 0)
+            result.Name = patient[0].Name;
+        result.Date = temp[x].Date;
+        result.Status = temp[x].Status;
         final.push(result);
 
     }
@@ -328,16 +334,16 @@ router.post('/getAppointment', async (req, res) => {
 //         res.status(200).json({status:"success"});
 //       });
 //     });
-    router.get('/test', (req, res) => {
-        healthModel.find({})
-        .then((data, err)=>{
-            if(err){
+router.get('/test', (req, res) => {
+    healthModel.find({})
+        .then((data, err) => {
+            if (err) {
                 console.log(err);
             }
             console.log(data)
-            res.render('../../views/imagepage',{items: data})
+            res.render('../../views/imagepage', { items: data })
             //return(res.render('../../views/home'));
 
         })
-    });
+});
 export default router;
