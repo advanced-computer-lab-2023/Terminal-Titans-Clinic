@@ -8,7 +8,8 @@ import fs from 'fs';
 import doctorModel from '../Models/doctorModel.js';
 import { pid } from 'process';
 import healthPackageModel from '../Models/healthPackageModel.js' ;
-
+import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
+import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 
 const router = express.Router();
 const pId='651c89b4a38c19dc5624ca5f';
@@ -34,14 +35,14 @@ router.post('/addFamilyMem', async (req,res)=>{
     if(famMember.length>0)
         return(res.status(400).send({message: "This National Id is already registered as a family member"}));
         
-    if((rel)==('wife') || (rel)==('husband')  ){  
-    const famMember = await familyMember.find({ PatientId: pId,Relation: req.body.relation.toLowerCase()});
-    if(famMember.length>0)
-        return(res.status(400).send({message: "a family member is already registered as your spouse"}));
-        }
+    // if((rel)==('wife') || (rel)==('husband')  ){  
+    // const famMember = await familyMember.find({ PatientId: pId,Relation: req.body.relation.toLowerCase()});
+    // if(famMember.length>0)
+    //     return(res.status(400).send({message: "a family member is already registered as your spouse"}));
+    //     }
 
     try{
-        const newFamilyMember = new familyMember({
+        const newFamilyMember = new unRegFamMem({
             Name : req.body.name,
             Age : req.body.age,
             NationalId:req.body.nId,
@@ -62,6 +63,33 @@ router.post('/addFamilyMem', async (req,res)=>{
     }
 })
 
+router.post('/addRegFamilyMem', async (req,res)=>{
+    req.body.relation=req.body.relation.toLowerCase();
+    if(!(req.body.relation==('wife') || (req.body.relation)==('husband')|| (req.body.relation)==('child')))
+        return(res.status(400).send({message: "family member can only be wife/husband or child"}));
+    const email=req.body.email;
+    var famMember = await patient.findOne({Email:email});
+    if(!famMember)
+        return(res.status(400).send({message: "This email is not registered as a patient"}));
+    if(famMember._id==pId)
+        return(res.status(400).send({message: "You can't add yourself as a family member"}));
+    var availFamMem = await familyMember.findOne({ $or: [{PatientId: pId, Patient2Id:famMember._id}, {PatientId: famMember._id, Patient2Id:pId}]});
+    if(availFamMem)
+        return(res.status(400).send({message: "This patient is not registered as a family member"}));
+    try{
+        const newFamilyMember = new RegFamMem({
+            PatientId: pId,
+            Patient2Id: famMember._id,
+            Relation:req.body.relation.toLowerCase()
+        });
+        newFamilyMember.save();
+        res.status(200).json({ Result: newFamilyMember, success: true })
+    }
+    catch(error){
+        res.status(400).send({error: error});
+    }
+
+})
 // requirement number 22
 router.get('/viewRegFamMem', async (req, res) => {
    
@@ -74,45 +102,6 @@ else {
 })
 
 // requirement number 23
-// router.GET('/getAppointment', async (req, res) => {
-//     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
-//     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
-
-//     let getAppointmentsbyDate;
-//     getAppointmentsbyDate = await appointmentModel.find({ Date: { $gte: startDate, 
-//         $lte: endDate } ,PatientId:pId });
-    
-//     let getAppointmentsbyStatus;
-//     if (req.body.status){
-//         getAppointmentsbyStatus = await appointmentModel.find({ Status: req.body.status,PatientId:pId });
-//     }
-//     else{
-//         getAppointmentsbyStatus = await appointmentModel.find({PatientId:pId});
-//     }
-//     var temp = getAppointmentsbyDate.filter((app) => {
-//         for(let y in getAppointmentsbyStatus){
-//         if(getAppointmentsbyStatus[y]._id .equals( app._id)){
-//             return true;
-//                 }
-//             }
-//        return false;
-//         }
-//     );
-//     let final=[]
-//     for(let x in temp){///if you need the patient's name in front end
-//         var result={}
-//         const doctor=await doctorModel.find({_id:temp[x].DoctorId})
-//         if(doctor.length>0)
-//         result.Name=doctor[0].Name;           
-//         //result.prescriptionDoc=temp[x].prescriptionDoc;
-//         result.Date=temp[x].Date;
-//         result.Status=temp[x].Status;
-//         final.push(result);
-
-//     }
-//     res.status(200).json(final);
-// });
-
 router.post('/getAppointment', async (req, res) => {
     const startDate=req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate=req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
@@ -263,6 +252,10 @@ catch(error){
     res.status(400).send({error: error,success: false });
 
 }
+})
+//get all available slots with a given Doctor._id
+router.get('/getDoctorAvailableSlots', async(req,res)=>{
+    const dId=req.body.dId
 })
 //requirement number 39
 
