@@ -18,11 +18,12 @@ const upload = multer({ storage: storage });
 const router = Router()
 
 
-router.post('/patient', async (req, res) => {
+router.post('/patient',upload.single('history'), async (req, res) => {
 
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
-        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender) {
+        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.file) {
+            console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -55,7 +56,11 @@ router.post('/patient', async (req, res) => {
             Mobile: req.body.mobile,
             EmergencyName: req.body.first + " " + req.body.last,
             EmergencyMobile: req.body.emergencyNumber,
-            Gender: req.body.gender
+            Gender: req.body.gender,
+            HealthRecords:{
+                data: req.file.buffer,
+                type:req.file.mimetype
+            }
         });
 
         newPatient.save();
@@ -75,7 +80,8 @@ router.post('/patient', async (req, res) => {
 router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License"}]), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
-        || !req.body.affiliation || !req.body.education || !req.body.speciality) {
+        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req.files.ID[0] || !req.files.Degree[0] 
+        || !req.files.License[0]) {
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
     }
     if (req.body.username.includes(' ')) {
