@@ -1,5 +1,6 @@
 import mongoose, { Schema as _Schema, model } from 'mongoose';
 import userModel from './userModel.js';
+import healthPackageModel from './healthPackageModel.js';
 
 // const User=require('./userModel');
 
@@ -36,7 +37,8 @@ const patientSchema = new _Schema({
     required: true,
   },
   PackageId:{ //if registered in any packages
-    type:String
+    type:mongoose.Schema.Types.ObjectId,
+    ref: 'healthPackage'
   }
 
 }, { timestamps: true });

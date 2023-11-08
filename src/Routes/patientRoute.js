@@ -1,6 +1,6 @@
 import express from 'express'
 import Doctor from '../Models/doctorModel.js';
-import patient from '../Models/patientsModel.js';
+import patientModel from '../Models/patientsModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import prescriptionsModel from '../Models/prescriptionsModel.js';
 import familyMember from '../Models/familyMemberModel.js'
@@ -11,6 +11,8 @@ import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
 import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
+import mongoose from 'mongoose'
+import familyMemberModel from '../Models/familyMemberModel.js';
 
 const router = express.Router();
 
@@ -75,7 +77,7 @@ router.post('/addRegFamilyMem', protect, async (req, res) => {
     if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')))
         return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
     const email = req.body.email;
-    var famMember = await patient.findOne({ Email: email });
+    var famMember = await patientModel.findOne({ Email: email });
     if (!famMember)
         return (res.status(400).send({ message: "This email is not registered as a patient", success: false }));
     if (famMember._id == req.user._id)
@@ -324,7 +326,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
     }
     const dId = req.body.dId;
     const date = req.body.date;
-    const aptmnt=await docAvailableSlots.findOne({DoctorId:dId,Date:date});
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: req.user._id, FamilyMemId: famId });
@@ -338,10 +340,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
             Date: date
         });
         newAppointment.save();
-        docAvailableSlots.findOneAndDelete({DoctorId:dId})
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId })
         res.status(200).json({ Result: newAppointment, success: true });
     }
-    if(aptmnt.length<1){
+    if (aptmnt.length < 1) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
     }
     const newAppointment = new appointmentModel({
@@ -351,10 +353,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
-    docAvailableSlots.findOneAndDelete({DoctorId:dId})
+    docAvailableSlots.findOneAndDelete({ DoctorId: dId })
     res.status(200).json({ Result: newAppointment, success: true });
 
-    
+
 })
 
 //requirement number 39
@@ -564,6 +566,120 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
         res.status(400).send({ error: error, success: false });
 
 
+    }
+})
+
+// hena ya seif
+router.get('/viewSubscribedPackagesPatient',protect,async(req,res)=>{
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const packageFound = await healthPackageModel.findOne(req.PackageId)
+    if(!packageFound){
+        return res.status(400).json({ message: "No subscribed packages", success: false })
+    }
+    else {
+        res.status(200).json({ Result: packageFound, success: true });
+    }
+})
+
+router.get('/viewSubscribedPackagesFam',async(req,res)=>{
+    //htshlha b3d elprotect
+    const id = await patientModel.find({Username:req.body.Username});
+    // 
+    const familyMember = await familyMemberModel.find({PatientId:id._id});
+    if (!familyMember) {
+        return res.status(400).json({ message: "Family Member not found", success: false })
+    }
+    const patient = await patientModel.findById(familyMember.Patient2Id)
+    console.log(familyMember.Patient2Id,patient);
+    if(!patient){
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const packageFound = await healthPackageModel.findById(patient.PackageId)
+    if(!packageFound){
+        return res.status(400).json({ message: "No subscribed packages", success: false })
+    }
+    else {
+        res.status(200).json({ Result: packageFound, success: true });
+    }
+})
+
+//cancellation for a patient  
+router.put('/cancelSubPatient', protect, async (req, res) => {
+    try {
+        const patient = await patientModel.findById(req.user)
+        if (patient && patient.PackageId != null) {
+
+            await patientModel.findOneAndUpdate({ Username: req.user.Username },
+                {
+                    PackageId: null
+                });
+            res.status(500).json({
+                success: true,
+                message: "The cancellation of package is done successfully"
+            })
+        }
+        else {
+            let message = ''
+            if (!patient)
+                message = 'Patient does not exist'
+            else
+                message = 'There is no package subscribed'
+            res.status(200).json({
+                success: false,
+                message: message
+            })
+        }
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+//cancellation for a family member  
+router.put('/cancelSubFam', protect, async (req, res) => {
+    try {
+        const familyMember = await RegFamMem.findOne({ PatientId: req.user,_id:req.body.Id })
+        if (familyMember) {
+            const patientFamilyMember = await patientModel.findOne(familyMember.Patient2Id)
+            if (patientFamilyMember && patientFamilyMember.PackageId != null) {
+                await patientModel.findOneAndUpdate({ _id: familyMember.Patient2Id },
+                    {
+                        PackageId: null
+                    });
+                res.status(200).json({
+                    success: true,
+                    message: "The cancellation of package is done successfully"
+                })
+            } else {
+                let message = ''
+                if (!patientFamilyMember)
+                    message = 'Patient does not exist'
+                else
+                    message = 'There is no package subscribed'
+                res.status(200).json({
+                    success: false,
+                    message: message
+                })
+            }
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: "The family Member does not exist"
+            })
+        }
+    } catch (error) {
+        // console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
     }
 })
 
