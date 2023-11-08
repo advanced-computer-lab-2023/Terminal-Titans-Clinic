@@ -26,6 +26,10 @@ router.get('/getCurrentDoctor', protect, async (req, res) => {
 // requirement number 14 later
 router.get('/updateDoctor', protect, async (req, res) => {
     try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(400).json({ message: "Doctor not found", success: false })
+        }
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: req.user._id },
             {
                 Email: req.query.Email || doctor.Email,
@@ -103,8 +107,13 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
 });
 
 // requirement number 33
-router.get('/getPatientsList', async (req, res) => {
+router.get('/getPatientsList', protect,async (req, res) => {
     try {
+        const doctor = await doctorModel.findOne({ _id: req.user._id })
+        if(!doctor){
+            res.status(400).json({ message: "Doctor not found", success: false })
+            return;
+        }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
         if (appointments.length == 0) {
             res.status(400).json({ message: "No patients found", success: false })
@@ -137,7 +146,7 @@ router.get('/getPatientsList', async (req, res) => {
 });
 
 // requirement number 34
-router.get('/getPatientName/:name', async (req, res) => {
+router.get('/getPatientName/:name',protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
 
@@ -183,8 +192,16 @@ router.get('/getPatientName/:name', async (req, res) => {
 })
 
 // requirement number 35 front lesa
-router.get('/getUpcomingAppointment', async (req, res) => {
+router.get('/getUpcomingAppointment', protect,async (req, res) => {
     try {
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+
         let today = new Date();
 
         let dd = String(today.getDate()).padStart(2, '0');
@@ -223,9 +240,16 @@ router.get('/getUpcomingAppointment', async (req, res) => {
 });
 
 // requirement number 36
-router.get('/selectPatientName/:id', async (req, res) => {
+router.get('/selectPatientName/:id', protect,async (req, res) => {
     try {
         // const getAppointment = await appointmentModel.find({ DoctorId: id });
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
 
         let patient = await patientsModel.findOne({ _id: req.params.id });
 
@@ -261,7 +285,15 @@ router.get('/selectPatientName/:id', async (req, res) => {
     }
 })
 
-router.post('/getAppointment', async (req, res) => {
+router.post('/getAppointment', protect,async (req, res) => {
+
+    const exists = await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    }
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 

@@ -1,9 +1,17 @@
 username:doctorSeif
 password:hello kitty
-token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NDk3ZGJkNTI0OTg0YTUxZTIzMjlhZiIsImlhdCI6MTY5OTMxOTU4MywiZXhwIjoxNzAxOTExNTgzfQ.SbfBT7DN-niGMGUrUBIB0OWtrLaIBi6XPnfXuChsWn0
+token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NDk3ZGJkNTI0OTg0YTUxZTIzMjlhZiIsImlhdCI6MTY5OTMxOTg0NywiZXhwIjoxNzAxOTExODQ3fQ.koVsT2_fHTmzyQf2mkC67udToFgcY_DfrFyXdBvQNeU
 
 ---------------
 
 username:admin
 password:admin
 token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NDk5N2I4NDIwN2ZiOTkwODY4OTk0NiIsImlhdCI6MTY5OTMyMTc4NSwiZXhwIjoxNzAxOTEzNzg1fQ.nDQepEbNfOe6NFrSjHq-4tkfFXOKsa4qRHi_AmZoGGE
+
+
+----------
+username:patient
+password:hello kitty
+token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NGE3YjAxZDM1ZWM0OWNjZWJmOTUyMiIsImlhdCI6MTY5OTM4MDAzNywiZXhwIjoxNzAxOTcyMDM3fQ.Iao8SKpmNz-UF8o9_fMk-K4upZgUOaoxFJ80_o_Krxg
+
+------------

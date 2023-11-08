@@ -5,9 +5,10 @@ const HealthRecSchema = new mongoose.Schema({
         binData:Buffer,
         contentType: String,
     },
-    PatientId:{
-        type:String,
-        required:true
+    PatientId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'patient',
+        required: true
     },
 });
 export default mongoose.model('healthRec',HealthRecSchema);
