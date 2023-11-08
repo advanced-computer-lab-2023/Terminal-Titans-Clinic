@@ -92,7 +92,7 @@ router.post('/doctor', async (req, res) => {
     try {
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
 
         const newDoctor = new reqdoctorModel({
             Username: req.body.username,
@@ -156,19 +156,23 @@ const generateToken = (id) => {
     })
 }
 router.post('/changePassword',protect, async(req,res)=>{
+console.log(req.user)
     const oldPass=req.user.Password;
     const oldPassEntered=req.body.oldPassword;
-    const newPass=req.body.Password;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPass, salt)
+    const newPass=req.body.password;
     try{
+    const salt = await bcrypt.genSalt(10);
+    console.log("ll");
+    const hashedPassword = await bcrypt.hash(newPass, salt)
+    console.log(oldPassEntered)
+   
         const isMatch = await bcrypt.compare(oldPassEntered, oldPass);
         if (!isMatch) { 
             return res.status(400).json({ message: 'Invalid password', success: false })
         }
         const updatedUser = await userModel.findOneAndUpdate({ _id: req.user._id },
             {
-                Password: newPass,
+                Password: hashedPassword,
             });
             res.status(200).json({ Result: updatedUser, success: true })
     }
@@ -177,9 +181,8 @@ router.post('/changePassword',protect, async(req,res)=>{
     }
 });
 
-router.post('/sendOTP',protect, async (req, res) => {
-    const { email } = req.user.Email
-
+router.post('/sendOTP', async (req, res) => {
+    const  email  = req.body.Email
     const user = await userModel.findOne({ Email: email })
     console.log(user)
     if (user) {
@@ -206,36 +209,45 @@ router.post('/sendOTP',protect, async (req, res) => {
     }
 
 })
-router.post('/verifyOTP',protect,async(req,res)=>{
-    const response = await otpModel.find({ id : req.user._id}).sort({ createdAt: -1 }).limit(1);
-    if (response.length === 0 || req.body.otp !== response[0].otp) {
+router.post('/verifyOTP',async(req,res)=>{
+    try{
+    const  email  = req.body.Email
+    console.log(req.body.otp)
+    const user = await userModel.findOne({ Email: email })
+    console.log(user)
+    const response = await otpModel.find({ userId : user._id}).sort({ createdAt: -1 }).limit(1);
+    if (response.length === 0 || req.body.otp !==response[0].otp) {
       return res.status(400).json({
         success: false,
         message: 'The OTP is not valid',
       });
     }
     else{
+        console.log("OTP is valid");
         const updateOtp = await otpModel.findOneAndUpdate({ _id: response[0]._id },
             {
                 isVerified: true,
             });
             res.status(200).json({ Result: updateOtp, success: true });
     }
+}catch (error) {    
+    res.status(400).json({ message: 'Error verifying OTP' })
+}
 
 })
-router.post('/forgotPassword', protect,async (req, res) => {
+router.post('/forgotPassword',async (req, res) => {
+    const  email  = req.body.Email
+
+    const user = await userModel.findOne({ Email: email })
     try{
-    const response = await otpModel.find({ id : req.user._id}).sort({ createdAt: -1 }).limit(1);
-    if (response.length === 0 || !response[0].isVerified){
-        return res.status(400).json({
-            success: false,
-            message: 'The OTP is not verified',
-          });
-    }
     const newPass=req.body.password;
-    const updatedUser = await userModel.findOneAndUpdate({ _id: req.user._id },
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPass, salt)
+
+    const updatedUser = await userModel.findOneAndUpdate({ _id: user._id },
         {
-            Password: newPass,
+            Password: hashedPassword,
         });
         res.status(200).json({ Result: updatedUser, success: true })
     }catch (error) {

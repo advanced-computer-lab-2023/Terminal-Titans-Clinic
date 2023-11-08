@@ -9,7 +9,7 @@ function RegistrationForm() {
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [dob, setDateOfBirth] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [mobile, setMobileNumber] = useState('');
   const [emergencyNumber, setEmergencyNumber] = useState('');
   const [first, setEmergencyFirtName] = useState('');
@@ -44,7 +44,7 @@ function RegistrationForm() {
     event.preventDefault(); // Prevent the default form submission behavior
 
     // Create a JSON object with the username and password
-    const data = { username, password ,dob,name,email,mobile,first,last,gender,emergencyNumber };
+    const data = { username, password ,dateOfBirth,name,email,mobile,first,last,gender,emergencyNumber };
 
     // Make a POST request to your backend register route
     fetch('http://localhost:8000/security/patient', {
@@ -110,10 +110,10 @@ function RegistrationForm() {
                     <span style={{ 
                         color: 'red', 
                     }}>{errorMessageEmail}</span>} 
-      <label htmlFor="dob">Date of Birth:</label>   
+      <label htmlFor="dateOfBirth">Date of Birth:</label>   
       <input
         type="Date"
-        value={dob}
+        value={dateOfBirth}
         onChange={(e) => setDateOfBirth(e.target.value)}
         />
         <label htmlFor="gender">Gender</label>
