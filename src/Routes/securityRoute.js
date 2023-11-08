@@ -8,6 +8,10 @@ import nodemailer from 'nodemailer';
 import otpModel from '../Models/otpModel.js';
 import protect from '../middleware/authMiddleware.js';
 
+import multer from 'multer' ;
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 
 // import validator from 'email-validator'
 
@@ -68,7 +72,7 @@ router.post('/patient', async (req, res) => {
     }
 })
 
-router.post('/doctor', async (req, res) => {
+router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License"}]), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
         || !req.body.affiliation || !req.body.education || !req.body.speciality) {
@@ -103,7 +107,19 @@ router.post('/doctor', async (req, res) => {
             HourlyRate: req.body.hourlyRate,
             Affiliation: req.body.affiliation,
             Education: req.body.education,
-            Speciality: req.body.speciality
+            Speciality: req.body.speciality,
+            ID: {
+                data: req.files.ID[0].buffer,
+                contentType: req.files.ID[0].mimetype,
+              },
+              Degree: {
+                data: req.files.Degree[0].buffer,
+                contentType: req.files.Degree[0].mimetype,
+              },
+              License: {
+                data: req.files.License[0].buffer,
+                contentType: req.files.License[0].mimetype,
+              },
         });
 
 
