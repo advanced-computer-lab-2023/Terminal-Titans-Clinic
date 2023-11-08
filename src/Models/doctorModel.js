@@ -39,8 +39,7 @@ const doctorSchema = new mongoose.Schema({
         data: Buffer,
         contentType:String,
         
-      }
-  ,
+      },
       License: {
         data: Buffer,
         contentType:String,

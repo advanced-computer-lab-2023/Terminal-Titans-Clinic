@@ -28,6 +28,25 @@ const requestedDoctorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    Speciality:{
+        type:String,
+        required:true
+   },
+   ID: {
+       data: Buffer,
+       contentType:String,
+     },
+     Degree: {
+       data: Buffer,
+       contentType:String,
+       
+     },
+     License: {
+       data: Buffer,
+       contentType:String,
+
+     }
+
 });
 const RequestedDoctor = userModel.discriminator('RequestedDoctor', requestedDoctorSchema);
 export default mongoose.model('RequestedDoctor');
