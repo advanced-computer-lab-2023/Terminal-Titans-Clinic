@@ -240,8 +240,20 @@ catch (error) {
 }
     });
 
+    router.get('/getWalletAmount', protect,async (req, res) => {
+        
+            const exists = await doctorModel.findById(req.user);
+            if (!exists) {
+                return res.status(500).json({
+                    success: false,
+                    message: "You are not a doctor"
+                });
+            }
+          const wallet= exists.wallet;
+            return res.status(200).json({ Amount: wallet, success: true })
 
-    
+        })
+
 // requirement number 35 front lesa
 router.get('/getUpcomingAppointment', protect,async (req, res) => {
     try {

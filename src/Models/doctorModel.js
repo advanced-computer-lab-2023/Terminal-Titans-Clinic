@@ -19,6 +19,10 @@ const doctorSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    Wallet: {
+        type: Number,
+        default: 0,
+      },
     Affiliation:{
         type:String,
         required:true

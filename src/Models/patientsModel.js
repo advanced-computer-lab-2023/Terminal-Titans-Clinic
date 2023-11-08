@@ -23,6 +23,10 @@ const patientSchema = new _Schema({
     type: String,
     required: true
   },
+  Wallet: {
+    type: Number,
+    default: 0,
+  },
   Mobile: {
     type: String,
     required: true,

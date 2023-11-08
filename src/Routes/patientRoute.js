@@ -65,6 +65,22 @@ router.post('/addFamilyMem', protect, async (req, res) => {
     }
 })
 
+router.get('/getWalletAmount', protect,async (req, res) => {
+        
+    const exists = await patientModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    }
+  const wallet= exists.wallet;
+    return res.status(200).json({ Amount: wallet, success: true })
+
+})
+
+
+
 router.post('/addRegFamilyMem', protect, async (req, res) => {
     const exist = patientModel.findOne(req.user);
     if (!exist) {
