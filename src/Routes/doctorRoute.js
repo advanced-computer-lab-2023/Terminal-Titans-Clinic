@@ -145,6 +145,36 @@ router.get('/getPatientsList', protect,async (req, res) => {
     }
 });
 
+//requirement number 51
+
+router.post('/asiignfollowUp', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "You are not a doctor", success: false })
+    }
+    const PID = req.body.PatientId;
+    const date = req.body.date;
+    const DID= req.user._id;
+    const aptmnt=await docAvailableSlots.findOne({DoctorId:DID,Date:date});
+   
+    if(aptmnt.length<1){
+        return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+    }
+  
+        const newAppointment = new appointmentModel({
+            PatientId: PID,
+            DoctorId: DID,
+            Status: "upcoming",
+            Date: date
+        });
+
+        newAppointment.save();
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
+        res.status(200).json({ Result: newAppointment, success: true });
+    
+    
+})
+
 // requirement number 34
 router.get('/getPatientName/:name',protect, async (req, res) => {
     try {

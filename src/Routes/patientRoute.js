@@ -356,7 +356,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
             Date: date
         });
         newAppointment.save();
-        docAvailableSlots.findOneAndDelete({ DoctorId: dId })
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
         res.status(200).json({ Result: newAppointment, success: true });
     }
     if (aptmnt.length < 1) {
@@ -369,7 +369,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
-    docAvailableSlots.findOneAndDelete({ DoctorId: dId })
+    docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
     res.status(200).json({ Result: newAppointment, success: true });
 
 
