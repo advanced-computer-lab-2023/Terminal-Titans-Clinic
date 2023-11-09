@@ -1,5 +1,6 @@
 import mongoose, { Schema as _Schema, model } from 'mongoose';
 import userModel from './userModel.js';
+import healthPackageModel from './healthPackageModel.js';
 
 // const User=require('./userModel');
 
@@ -23,6 +24,10 @@ const patientSchema = new _Schema({
     type: String,
     required: true
   },
+  Wallet: {
+    type: Number,
+    default: 0,
+  },
   Mobile: {
     type: String,
     required: true,
@@ -35,9 +40,6 @@ const patientSchema = new _Schema({
     type: String,
     required: true,
   },
-  PackageId: { //if registered in any packages
-    type: String
-  },
   HealthHistory: {
     data: Buffer,
     contentType: String
@@ -46,6 +48,10 @@ const patientSchema = new _Schema({
   HealthRecords: {
     data: Buffer,
     contentType: String
+  },
+  PackageId: { //if registered in any packages
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'healthPackage'
   }
 
 }, { timestamps: true });

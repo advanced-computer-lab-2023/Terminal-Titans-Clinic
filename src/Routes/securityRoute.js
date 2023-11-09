@@ -115,16 +115,16 @@ router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License
             Education: req.body.education,
             Speciality: req.body.speciality,
             ID: {
-                data: req.files.ID[0].buffer,
-                contentType: req.files.ID[0].mimetype,
+                data: req.files?.ID[0].buffer,
+                contentType: req.files?.ID[0].mimetype,
               },
               Degree: {
-                data: req.files.Degree[0].buffer,
-                contentType: req.files.Degree[0].mimetype,
+                data: req.files?.Degree[0].buffer,
+                contentType: req.files?.Degree[0].mimetype,
               },
               License: {
-                data: req.files.License[0].buffer,
-                contentType: req.files.License[0].mimetype,
+                data: req.files?.License[0].buffer,
+                contentType: req.files?.License[0].mimetype,
               },
         });
 
