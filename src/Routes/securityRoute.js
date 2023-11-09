@@ -6,6 +6,11 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import nodemailer from 'nodemailer';
 import otpModel from '../Models/otpModel.js';
+import protect from '../middleware/authMiddleware.js';
+
+import multer from 'multer' ;
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 
 // import validator from 'email-validator'
@@ -13,11 +18,12 @@ import otpModel from '../Models/otpModel.js';
 const router = Router()
 
 
-router.post('/patient', async (req, res) => {
+router.post('/patient',upload.single('history'), async (req, res) => {
 
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
-        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender) {
+        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.file) {
+            console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -50,12 +56,18 @@ router.post('/patient', async (req, res) => {
             Mobile: req.body.mobile,
             EmergencyName: req.body.first + " " + req.body.last,
             EmergencyMobile: req.body.emergencyNumber,
-            Gender: req.body.gender
+            Gender: req.body.gender,
+            HealthRecords:{
+                data: req.file.buffer,
+                type:req.file.mimetype
+            }
         });
 
         newPatient.save();
 
         let resultPatient = JSON.parse(JSON.stringify(newPatient));
+
+        resultPatient["token"] = generateToken(newPatient._id);
 
         return res.status(200).json({ message: "You have registered", success: true, Result: resultPatient })
 
@@ -65,10 +77,11 @@ router.post('/patient', async (req, res) => {
     }
 })
 
-router.post('/doctor', async (req, res) => {
+router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License"}]), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
-        || !req.body.affiliation || !req.body.education || !req.body.speciality) {
+        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req.files.ID[0] || !req.files.Degree[0] 
+        || !req.files.License[0]) {
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
     }
     if (req.body.username.includes(' ')) {
@@ -89,7 +102,7 @@ router.post('/doctor', async (req, res) => {
     try {
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
 
         const newDoctor = new reqdoctorModel({
             Username: req.body.username,
@@ -100,7 +113,19 @@ router.post('/doctor', async (req, res) => {
             HourlyRate: req.body.hourlyRate,
             Affiliation: req.body.affiliation,
             Education: req.body.education,
-            Speciality: req.body.speciality
+            Speciality: req.body.speciality,
+            ID: {
+                data: req.files?.ID[0].buffer,
+                contentType: req.files?.ID[0].mimetype,
+              },
+              Degree: {
+                data: req.files?.Degree[0].buffer,
+                contentType: req.files?.Degree[0].mimetype,
+              },
+              License: {
+                data: req.files?.License[0].buffer,
+                contentType: req.files?.License[0].mimetype,
+              },
         });
 
 
@@ -152,10 +177,34 @@ const generateToken = (id) => {
         expiresIn: '30d',
     })
 }
+router.post('/changePassword',protect, async(req,res)=>{
+console.log(req.user)
+    const oldPass=req.user.Password;
+    const oldPassEntered=req.body.oldPassword;
+    const newPass=req.body.password;
+    try{
+    const salt = await bcrypt.genSalt(10);
+    console.log("ll");
+    const hashedPassword = await bcrypt.hash(newPass, salt)
+    console.log(oldPassEntered)
+   
+        const isMatch = await bcrypt.compare(oldPassEntered, oldPass);
+        if (!isMatch) { 
+            return res.status(400).json({ message: 'Invalid password', success: false })
+        }
+        const updatedUser = await userModel.findOneAndUpdate({ _id: req.user._id },
+            {
+                Password: hashedPassword,
+            });
+            res.status(200).json({ Result: updatedUser, success: true })
+    }
+    catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
 
-router.post('/forgotPassword', async (req, res) => {
-    const { email } = req.body
-
+router.post('/sendOTP', async (req, res) => {
+    const  email  = req.body.Email
     const user = await userModel.findOne({ Email: email })
     console.log(user)
     if (user) {
@@ -182,19 +231,55 @@ router.post('/forgotPassword', async (req, res) => {
     }
 
 })
+router.post('/verifyOTP',async(req,res)=>{
+    try{
+    const  email  = req.body.Email
+    console.log(req.body.otp)
+    const user = await userModel.findOne({ Email: email })
+    console.log(user)
+    const response = await otpModel.find({ userId : user._id}).sort({ createdAt: -1 }).limit(1);
+    if (response.length === 0 || req.body.otp !==response[0].otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'The OTP is not valid',
+      });
+    }
+    else{
+        console.log("OTP is valid");
+        const updateOtp = await otpModel.findOneAndUpdate({ _id: response[0]._id },
+            {
+                isVerified: true,
+            });
+            res.status(200).json({ Result: updateOtp, success: true });
+    }
+}catch (error) {    
+    res.status(400).json({ message: 'Error verifying OTP' })
+}
+
+})
+router.post('/forgotPassword',async (req, res) => {
+    const  email  = req.body.Email
+
+    const user = await userModel.findOne({ Email: email })
+    try{
+    const newPass=req.body.password;
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPass, salt)
+
+    const updatedUser = await userModel.findOneAndUpdate({ _id: user._id },
+        {
+            Password: hashedPassword,
+        });
+        res.status(200).json({ Result: updatedUser, success: true })
+    }catch (error) {
+        res.status(400).json({ message: 'Error changing password' })
+    }
+
+    
+});
 const mailSender = async (email, title, body) => {
     try {
-        // Create a Transporter to send emails
-        // var smtpConfig = {
-        //     host: 'smtp.gmail.com',
-        //     port: 587,
-        //     secure: false, // use SSL
-        //     auth: {
-        //         user: process.env.MAIL_USER,
-        //         pass: process.env.MAIL_PASS,
-        //     }
-        // };
-        // var transporter = nodemailer.createTransport(smtpConfig);
         let transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,

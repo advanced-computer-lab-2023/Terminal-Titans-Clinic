@@ -145,6 +145,36 @@ router.get('/getPatientsList', protect,async (req, res) => {
     }
 });
 
+//requirement number 51
+
+router.post('/asiignfollowUp', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "You are not a doctor", success: false })
+    }
+    const PID = req.body.PatientId;
+    const date = req.body.date;
+    const DID= req.user._id;
+    const aptmnt=await docAvailableSlots.findOne({DoctorId:DID,Date:date});
+   
+    if(aptmnt.length<1){
+        return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+    }
+  
+        const newAppointment = new appointmentModel({
+            PatientId: PID,
+            DoctorId: DID,
+            Status: "upcoming",
+            Date: date
+        });
+
+        newAppointment.save();
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
+        res.status(200).json({ Result: newAppointment, success: true });
+    
+    
+})
+
 // requirement number 34
 router.get('/getPatientName/:name',protect, async (req, res) => {
     try {
@@ -190,6 +220,69 @@ router.get('/getPatientName/:name',protect, async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 })
+
+
+router.post('/addavailableslots', protect, async (req, res) => {
+
+
+    const doctor = await doctorModel.findById(req.user)
+    if (!doctor) {
+        res.status(500).json({ message: "You are not a doctor", success: false })
+    }
+    const flag= true
+    const startDate = req.body.Date
+
+    let endDate = new Date(startDate);
+    endDate.setMinutes(start.getMinutes() + 30);
+
+    const aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
+    if(aptmnts){
+
+
+for (let y in aptmnts) {
+    
+        let start = aptmnts[y].Date;
+        let end = new Date(start);
+        end.setMinutes(start.getMinutes() + 30);
+        if ( (startDate >=start && startDate < end) || endDate<=end && endDate>start)
+            flag=false;
+    
+    } }
+
+    if (flag==false) {
+        return res.status(500).json({ message: "you have an appointment during this slot", success: false });
+    }
+
+
+try {
+    const docAvailableSlots = new docAvailableSlots({
+        DoctorId: req.user._id ,
+        Date: req.body.Date,
+      
+    });
+    docAvailableSlots.save();
+    
+    res.status(200).json({ Result: docAvailableSlots, success: true })
+}
+catch (error) {
+    res.status(400).send({ error: error, success: false });
+
+}
+    });
+
+    router.get('/getWalletAmount', protect,async (req, res) => {
+        
+            const exists = await doctorModel.findById(req.user);
+            if (!exists) {
+                return res.status(500).json({
+                    success: false,
+                    message: "You are not a doctor"
+                });
+            }
+          const wallet= exists.wallet;
+            return res.status(200).json({ Amount: wallet, success: true })
+
+        })
 
 // requirement number 35 front lesa
 router.get('/getUpcomingAppointment', protect,async (req, res) => {

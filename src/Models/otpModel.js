@@ -14,5 +14,9 @@ const otpSchema = new mongoose.Schema({
       default: Date.now,
       expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
     },
+    isVerified:{
+      type:Boolean,
+      default:false
+    }
   });
 export default mongoose.model('otp',otpSchema);

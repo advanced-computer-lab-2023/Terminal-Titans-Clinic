@@ -3,6 +3,7 @@ import User from '../Models/userModel.js';
 import Admin from '../Models/adminModel.js';
 import DoctorApplication from '../Models/requestedDoctorModel.js';
 import HealthPackage from '../Models/healthPackageModel.js';
+import doctorModel from '../Models/doctorModel.js';
 import protect from '../middleware/authMiddleware.js';
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -10,7 +11,7 @@ import bcrypt from 'bcryptjs'
 const router = express.Router()
 
 //requirement number 7
-router.post('/createAdmin', protect,async (req, res) => {
+router.post('/createAdmin', protect, async (req, res) => {
     // Create the admin
     try {
         const exist = await Admin.findById(req.user);
@@ -309,6 +310,73 @@ router.get('/fetchUsers', protect, async (req, res) => {
         });
     }
 });
+
+router.post('/Acceptance/:username', protect, async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log(username, req.params.username);
+        const user = await DoctorApplication.findOne({ Username: username });
+        console.log(user);
+        if (user) {
+            await DoctorApplication.deleteOne(user);
+            const doctor = new doctorModel({
+                Username: user.Username,
+                Password: user.Password,
+                Name: user.Name,
+                Email: user.Email,
+                DateOfBirth: user.DateOfBirth,
+                HourlyRate: user.HourlyRate,
+                Affiliation: user.Affiliation,
+                Education: user.Education,
+                Speciality:user.Speciality
+            })
+            await doctor.save();
+            res.status(200).json({
+                success: true,
+                message: "Doctor accepted successfully"
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: "There is no doctor to accept"
+            });
+        }
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+router.delete('/Rejection/:username', protect, async (req, res) => {
+    try {
+        const { username } = req.params;
+        const user = await DoctorApplication.findOne({ Username: username });
+        if (user) {
+            await DoctorApplication.deleteOne(user);
+            res.status(200).json({
+                success: true,
+                message: "Doctor rejected successfully"
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: "Doctor doesn't exist"
+            });
+        }
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 
 
 export default router;
