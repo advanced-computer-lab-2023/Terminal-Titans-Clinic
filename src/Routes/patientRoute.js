@@ -662,6 +662,55 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
     }
 })
 
+//req 28 bas lesa msh akeed heya sah wala laa
+router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
+    const userId = req.user.id;
+    const healthPackageId = req.params.packageId;
+  
+    try {
+      const user = await patientModel.findById(userId);
+      if (!user) {
+        return res.status(500).json({ message: 'Patient not found' });
+      }
+      const healthPackage = await healthPackageModel.findById(healthPackageId);
+  
+      if (!healthPackage) {
+        return res.status(500).json({ message: 'Health package not found' });
+      }
+  
+      //hena yo3atabar ba3mel el subscription
+      user.PackageId = healthPackageId;
+      await user.save();
+  
+      //update baa el status bta3t el patient
+      await healthPackageStatus.findOneAndUpdate(
+        { patientId: userId },
+        { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
+        { upsert: true }
+      );
+    
+      const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+    // do the subscription for the fam members
+      for (const familyMember of registeredFamilyMembers) {
+        familyMember.PackageId = healthPackageId;
+        await familyMember.save();
+  
+      //update baa el status bta3t el fam members        
+        await healthPackageStatus.findOneAndUpdate(
+          { patientId: familyMember._id },
+          { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
+          { upsert: true }
+        );
+      }
+
+      return res.status(200).json({ message: 'Health package subscribed successfully' });
+
+    } catch (error) {
+      console.error('Error subscribing to health package:', error.message);
+      return res.status(500).json({ error: 'Error' });
+    }
+  });
+
 //test done here (req 30)
 router.get('/viewSubscriptions', protect, async (req, res) => {
     const userId = req.user.id;//bagib el id after authentication  
