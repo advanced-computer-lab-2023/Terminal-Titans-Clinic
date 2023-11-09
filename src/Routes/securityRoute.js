@@ -204,7 +204,7 @@ console.log(req.user)
 });
 
 router.post('/sendOTP', async (req, res) => {
-    const  email  = req.body.Email
+    const  email  = req.body.email
     const user = await userModel.findOne({ Email: email })
     console.log(user)
     if (user) {
@@ -223,18 +223,26 @@ router.post('/sendOTP', async (req, res) => {
                 `<h1>Please confirm your OTP</h1>
                  <p>Here is your OTP code: ${otp}</p>`
             );
+            if(mailResponse){
             console.log("Email sent successfully: ", mailResponse);
-            res.status(200).json({ message: 'Email sent' })
+            res.status(200).json({ message: 'Email sent' , success: true})
+            }
+            else{
+                res.status(400).json({ message: 'Error sending email', success: false });
+            }
         } catch (error) {
-            res.status(500).json({ message: 'Error sending email' })
+            res.status(500).json({ message: 'Error sending email' , success: false})
         }
+    }
+    else{
+        res.status(400).json({ message: 'Email not found', success: false })
+    
     }
 
 })
 router.post('/verifyOTP',async(req,res)=>{
     try{
-    const  email  = req.body.Email
-    console.log(req.body.otp)
+    const  email  = req.body.email
     const user = await userModel.findOne({ Email: email })
     console.log(user)
     const response = await otpModel.find({ userId : user._id}).sort({ createdAt: -1 }).limit(1);
@@ -253,13 +261,12 @@ router.post('/verifyOTP',async(req,res)=>{
             res.status(200).json({ Result: updateOtp, success: true });
     }
 }catch (error) {    
-    res.status(400).json({ message: 'Error verifying OTP' })
+    res.status(400).json({ message: 'Error verifying OTP' , success: false})
 }
 
 })
 router.post('/forgotPassword',async (req, res) => {
     const  email  = req.body.Email
-
     const user = await userModel.findOne({ Email: email })
     try{
     const newPass=req.body.password;
@@ -273,7 +280,7 @@ router.post('/forgotPassword',async (req, res) => {
         });
         res.status(200).json({ Result: updatedUser, success: true })
     }catch (error) {
-        res.status(400).json({ message: 'Error changing password' })
+        res.status(400).json({ message: 'Error changing password', success: false })
     }
 
     
