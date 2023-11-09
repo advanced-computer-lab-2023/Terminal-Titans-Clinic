@@ -5,6 +5,7 @@ import RegisterPatient from "./Pages/RegisterPatient";
 import RegisterDoctor from "./Pages/RegisterDoctor";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/login";
+import ForgotPassword from "./Pages/ForgotPassword";
 
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
        
           <Route path="/registerPatient" element={<RegisterPatient />} />
           <Route path="/registerDoctor" element={<RegisterDoctor/>} />
-          <Route path="/" element={<Login/>} />
+          <Route path="/forgotPassword" element={<ForgotPassword/>} />
 
         </Routes>
       </Router>
