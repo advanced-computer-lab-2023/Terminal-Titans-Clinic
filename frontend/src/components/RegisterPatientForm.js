@@ -1,9 +1,11 @@
 // import React from "react";
+import React, { useState, useEffect } from 'react';
 import "../Styles/LoginForm.css";
 import validator from 'validator'
-import React, { useState } from 'react';
 import axios from 'axios';
-import  * as fs from 'fs';
+// import * as fs from 'fs';
+// import { type } from "os";
+// import { Binary } from "mongodb";
 
 function RegistrationForm() {
   const [username, setUsername] = useState('');
@@ -23,19 +25,26 @@ function RegistrationForm() {
   const [errorMessageEmail, setErrorMessageEmail] = useState('')
 
 
-  const handleFileInputChange = (e) => {
-    const file = e.target.files[0];
-    const dataStream = fs.readFileSync(
-      `${file.name}`,
-      null
-    );
-    console.log(file);
-    // setHistory(URL.createObjectURL(e.target.files[0]));
+  const [file, setFile] = useState(null);
+  const [binaryData, setBinaryData] = useState(null);
+
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  const handleRemoveFile = () => {
-    setHistory(null);
-  };
+
+  useEffect(() => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const binaryString = e.target.result;
+        setBinaryData(binaryString);
+      };
+      reader.readAsBinaryString(file);
+      setHistory(file);
+    }
+  }, [file]);
 
   const validatePass = (value) => {
     setPassword(value);
@@ -73,7 +82,7 @@ function RegistrationForm() {
     formData.append('mobile', mobile);
     formData.append('first', first);
     formData.append('last', last);
-    formData.append('gender',gender)
+    formData.append('gender', gender)
     formData.append('emergencyNumber', emergencyNumber);
     formData.append('history', history);
     // const data = {
@@ -89,14 +98,14 @@ function RegistrationForm() {
     //   "emergencyNumber":emergencyNumber,
     //   "history": history,
     // };
-    
+
     // Make a POST request to your backend register route
     axios.post('http://localhost:8000/security/patient/', formData)
-    .catch(error => {
+      .catch(error => {
         console.log(error.response.data);
         console.log(error.response.status);
         console.log(error.response.headers);
-    });
+      });
   }
 
   //   await fetch('http://localhost:8000/security/patient/', {
@@ -201,14 +210,8 @@ function RegistrationForm() {
             onChange={(e) => setEmergencyLastName(e.target.value)}
           />
           <label htmlFor="history">Medical History:</label>
-          {/* <input
-        type="file"
-        name="History"
-        accept=".jpg , .png , .pdf , .jpeg"
-        value={history}
-        onChange={(e) => setHistory(e.target.value)}
-        /> */}
-          <input type="file" name="History" accept=".jpg , .png, .pdf, .jpeg" onChange={handleFileInputChange} />
+
+          {/* <input type="file" name="History" accept=".jpg , .png, .pdf, .jpeg" onChange={handleFileInputChange} />
           {history && (
             <p>
               <strong>{history.name}</strong> ({history.size} bytes)
@@ -218,7 +221,8 @@ function RegistrationForm() {
             <button type="button" onClick={handleRemoveFile}>
               X
             </button>
-          )}
+          )} */}
+          <input type="file" onChange={handleFileChange} />
 
 
 
