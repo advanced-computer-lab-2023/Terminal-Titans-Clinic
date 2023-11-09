@@ -404,6 +404,51 @@ router.get('/viewAppointments', protect, async (req, res) => {
     res.status(200).json({ final: final, success: true });
 })
 
+//filter appointments by date or status (upcoming, completed, cancelled, rescheduled)
+//req46
+router.post('/filterAppointments', protect, async (req, res) => {
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const status = req.body.status;
+    const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
+    const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
+    if (startDate > endDate)
+        return (res.status(400).send({ error: "please enter valid dates", success: false }));
+
+    let appointments;
+    if (!status) {
+        appointments = await appointmentModel.find({
+            Date: {
+                $gte: startDate,
+                $lte: endDate
+            }, PatientId: req.user._id
+        });
+    }
+    else {
+        appointments = await appointmentModel.find({ PatientId: req.user._id, Status: status });
+        if (appointments.length < 1) {
+            return (res.status(400).send({ error: "no appointments found", success: false }));
+        }
+    }
+    var final = [];
+    for (let x in appointments) {
+        var result = {};
+        const doc = await Doctor.find({ _id: appointments[x].DoctorId });
+        if (doc.length < 1) {
+            return (res.status(400).send({ error: "cant find doctor", success: false }));
+        }
+        result.Doctor = doc[0].Name;
+        result.Date = appointments[x].Date;
+        result.Status = appointments[x].Status;
+        result.id = appointments[x].id;
+        final.push(result);
+    }
+    res.status(200).json({ final: final, success: true });
+})
+
+
 
 
 //requirement number 39
