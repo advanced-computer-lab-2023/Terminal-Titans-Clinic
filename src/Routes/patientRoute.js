@@ -353,6 +353,37 @@ router.post('/bookAppointment', protect, async (req, res) => {
     res.status(200).json({ Result: newAppointment, success: true });
 })
 
+
+//view a list of all my upcoming / past appointments
+//req45
+router.get('/viewAppointments', protect, async (req, res) => {
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const status = req.body.status;
+    const allAppointments = await appointmentModel.find({ PatientId: req.user._id, Status: { $ne: "cancelled" } });
+    if (allAppointments.length < 1) {
+        return (res.status(400).send({ error: "no appointments found", success: false }));
+    }
+    var final = [];
+    for (let x in allAppointments) {
+        var result = {};
+        const doc = await Doctor.find({ _id: allAppointments[x].DoctorId });
+        if (doc.length < 1) {
+            return (res.status(400).send({ error: "cant find doctor", success: false }));
+        }
+        result.Doctor = doc[0].Name;
+        result.Date = allAppointments[x].Date;
+        result.Status = allAppointments[x].Status;
+        result.id = allAppointments[x].id;
+        final.push(result);
+    }
+    res.status(200).json({ final: final, success: true });
+})
+
+
+
 //requirement number 39
 router.post('/filterDoctors', async (req, res) => {
     let exists = await patientModel.findOne(req.user);
