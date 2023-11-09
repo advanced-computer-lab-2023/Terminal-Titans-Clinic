@@ -69,7 +69,7 @@ router.post('/patient',upload.single('history'), async (req, res) => {
 
         resultPatient["token"] = generateToken(newPatient._id);
 
-        return res.status(200).json({ message: "You have registered", success: true, Result: resultPatient })
+        return res.status(200).json({ message: "You have registered", success: true, resultPatient })
 
     }
     catch (error) {
@@ -133,7 +133,9 @@ router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License
 
         let resultDoctor = JSON.parse(JSON.stringify(newDoctor));
 
-        return res.status(200).json({ message: "You have registered", success: true, Result: resultDoctor })
+        resultDoctor["token"] = generateToken(newDoctor._id);
+
+        return res.status(200).json({ message: "You have registered", success: true, resultDoctor })
     }
     catch (error) {
         return res.status(400).json({ message: error.message, success: false })
@@ -149,6 +151,10 @@ router.post('/login', async (req, res) => {
     }
 
     const user = await userModel.findOne({ Username: username })
+
+    if(user.__t === 'RequestedDoctor'){
+        return res.status(400).json({ message: 'Please wait for admin approval', success: false })
+    }
 
     console.log(user);
     console.log(username);
