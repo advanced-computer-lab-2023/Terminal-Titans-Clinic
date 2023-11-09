@@ -100,7 +100,17 @@ function RegistrationForm() {
     // };
 
     // Make a POST request to your backend register route
-    axios.post('http://localhost:8000/security/patient/', formData)
+    axios.post('http://localhost:8000/security/patient/', formData).then((response) => {
+      console.log(response.data);
+      if (response.data.success) {
+        sessionStorage.setItem('token', response.data.token);
+        // go to page patient
+      }
+      else {
+        alert(response.data.message);
+
+      }
+    })
       .catch(error => {
         console.log(error.response.data);
         console.log(error.response.status);

@@ -131,37 +131,11 @@ function RegistrationForm() {
     formData.append('hourlyRate', hourlyRate);
     formData.append('affiliation', affiliation);
     formData.append('education', education);
-    formData.append('iD', iD)
-    formData.append('degree', degree);
-    formData.append('license', license);
+    formData.append('ID', iD)
+    formData.append('Degree', degree);
+    formData.append('License', license);
     formData.append('speciality', speciality);
     // Make a POST request to your backend register route
-    //   fetch('http://localhost:8000/security/doctor',FormData, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(data),
-    //   })
-    //     .then((response) => {
-    //       // Check the status code
-    //       console.log(response);
-
-    //         return response.json();
-
-    //     })
-    //     .then((data) => {
-    //       if(data.status !== 200){
-    //         alert(data.message)
-    //       }
-    //       // Handle the response data
-    //       console.log('Response data:', data);
-    //     })
-    //     .catch((error) => {
-    //       // Handle network errors or other issues
-    //       console.error('Error:', error);
-    //     });
-    // };
     axios.post('http://localhost:8000/security/doctor/', formData)
       .catch(error => {
         console.log(error.response.data);

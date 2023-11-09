@@ -65,11 +65,10 @@ router.post('/patient',upload.single('history'), async (req, res) => {
 
         newPatient.save();
 
-        let resultPatient = JSON.parse(JSON.stringify(newPatient));
 
-        resultPatient["token"] = generateToken(newPatient._id);
+        let token = generateToken(newPatient._id);
 
-        return res.status(200).json({ message: "You have registered", success: true, resultPatient })
+        return res.status(200).json({ message: "You have registered", success: true, token })
 
     }
     catch (error) {
@@ -131,11 +130,8 @@ router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License
 
         newDoctor.save();
 
-        let resultDoctor = JSON.parse(JSON.stringify(newDoctor));
 
-        resultDoctor["token"] = generateToken(newDoctor._id);
-
-        return res.status(200).json({ message: "You have registered", success: true, resultDoctor })
+        return res.status(200).json({ message: "You have registered", success: true, newDoctor })
     }
     catch (error) {
         return res.status(400).json({ message: error.message, success: false })
