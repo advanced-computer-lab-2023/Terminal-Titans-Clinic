@@ -664,7 +664,7 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
 
 //req 28 bas lesa msh akeed heya sah wala laa
 router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const healthPackageId = req.params.packageId;
 
     try {
@@ -678,29 +678,43 @@ router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
             return res.status(500).json({ message: 'Health package not found' });
         }
 
-        //hena yo3atabar ba3mel el subscription
-        user.PackageId = healthPackageId;
-        await user.save();
+        let renewalDate = new Date();
+        renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        console.log(renewalDate);
+
 
         //update baa el status bta3t el patient
-        await healthPackageStatus.findOneAndUpdate(
-            { patientId: userId },
-            { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
-            { upsert: true }
+        let myHealthStatus = await healthPackageStatus.findOne(
+            { patientId: userId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
         );
+
+        if (!myHealthStatus) {
+            let myHealthStatus = new healthPackageStatus({
+                patientId: userId,
+                status: 'Subscribed',
+                renewalDate: renewalDate,
+                endDate: renewalDate,
+                healthPackageId: healthPackage
+            })
+            await myHealthStatus.save();
+        }
 
         const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
         // do the subscription for the fam members
         for (const familyMember of registeredFamilyMembers) {
-            familyMember.PackageId = healthPackageId;
-            await familyMember.save();
-
-            //update baa el status bta3t el fam members        
-            await healthPackageStatus.findOneAndUpdate(
-                { patientId: familyMember._id },
-                { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
-                { upsert: true }
+            let healthStatusFamMember = await healthPackageStatus.findOne(
+                { patientId: familyMember.PatientId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
             );
+            if(!healthStatusFamMember){
+                let healthStatusFamMember = new healthPackageStatus({
+                    patientId: familyMember.PatientId,
+                    status: 'Subscribed',
+                    renewalDate: renewalDate,
+                    endDate: renewalDate,
+                    healthPackageId: healthPackage
+                })
+                await healthStatusFamMember.save();
+            }
         }
 
         return res.status(200).json({ message: 'Health package subscribed successfully' });
@@ -725,7 +739,7 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId });
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
 
-        let userHealth = await healthPackageModel.findById(userHealthPackage)??{};
+        let userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
 
         userHealth.PatientId = user?._id;
         userHealth.Name = user?.Name;
@@ -748,7 +762,7 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
             console.log(famMemberUser);
-            
+
             memberRes.PatientId = famMemberUser?._id;
             memberRes.Name = famMemberUser?.Name;
             memberRes.Email = famMemberUser?.Email;
@@ -839,12 +853,12 @@ router.put('/cancelSub', protect, async (req, res) => {
             return res.status(500).json({ message: 'Patient not found' });
         }
 
-        await healthPackageStatus.findOneAndUpdate({ patientId: userId},{status:'Cancelled',endDate:new Date(0),renewalDate:new Date(0)});
+        await healthPackageStatus.findOneAndUpdate({ patientId: userId }, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
 
         const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
 
         for (const familyMember of registeredFamilyMembers) {
-            await healthPackageStatus.findOneAndUpdate({ patientId: familyMember.PatientId},{status:'Cancelled',endDate:new Date(0),renewalDate:new Date(0)});
+            await healthPackageStatus.findOneAndUpdate({ patientId: familyMember.PatientId }, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
         }
 
         return res.status(200).json({ message: 'Health package subscription canceled successfully' });
