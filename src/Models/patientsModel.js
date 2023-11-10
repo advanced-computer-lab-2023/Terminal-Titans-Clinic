@@ -48,12 +48,7 @@ const patientSchema = new _Schema({
   HealthRecords: {
     data: Buffer,
     contentType: String
-  },
-  PackageId: { //if registered in any packages
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'healthPackage'
   }
-
 }, { timestamps: true });
 const patient = userModel.discriminator('patient', patientSchema);
 export default model('patient');

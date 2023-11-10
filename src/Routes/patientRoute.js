@@ -68,8 +68,8 @@ router.post('/addFamilyMem', protect, async (req, res) => {
     }
 })
 
-router.get('/getWalletAmount', protect,async (req, res) => {
-        
+router.get('/getWalletAmount', protect, async (req, res) => {
+
     const exists = await patientModel.findById(req.user);
     if (!exists) {
         return res.status(500).json({
@@ -77,7 +77,7 @@ router.get('/getWalletAmount', protect,async (req, res) => {
             message: "You are not a doctor"
         });
     }
-  const wallet= exists.wallet;
+    const wallet = exists.wallet;
     return res.status(200).json({ Amount: wallet, success: true })
 
 })
@@ -357,7 +357,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
             Date: date
         });
         newAppointment.save();
-        docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId, Date: date });
         res.status(200).json({ Result: newAppointment, success: true });
     }
     if (aptmnt.length < 1) {
@@ -370,7 +370,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
-    docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
+    docAvailableSlots.findOneAndDelete({ DoctorId: dId, Date: date });
     res.status(200).json({ Result: newAppointment, success: true });
 
 
@@ -666,156 +666,193 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
 router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
     const userId = req.user.id;
     const healthPackageId = req.params.packageId;
-  
-    try {
-      const user = await patientModel.findById(userId);
-      if (!user) {
-        return res.status(500).json({ message: 'Patient not found' });
-      }
-      const healthPackage = await healthPackageModel.findById(healthPackageId);
-  
-      if (!healthPackage) {
-        return res.status(500).json({ message: 'Health package not found' });
-      }
-  
-      //hena yo3atabar ba3mel el subscription
-      user.PackageId = healthPackageId;
-      await user.save();
-  
-      //update baa el status bta3t el patient
-      await healthPackageStatus.findOneAndUpdate(
-        { patientId: userId },
-        { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
-        { upsert: true }
-      );
-    
-      const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
-    // do the subscription for the fam members
-      for (const familyMember of registeredFamilyMembers) {
-        familyMember.PackageId = healthPackageId;
-        await familyMember.save();
-  
-      //update baa el status bta3t el fam members        
-        await healthPackageStatus.findOneAndUpdate(
-          { patientId: familyMember._id },
-          { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
-          { upsert: true }
-        );
-      }
 
-      return res.status(200).json({ message: 'Health package subscribed successfully' });
+    try {
+        const user = await patientModel.findById(userId);
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
+        }
+        const healthPackage = await healthPackageModel.findById(healthPackageId);
+
+        if (!healthPackage) {
+            return res.status(500).json({ message: 'Health package not found' });
+        }
+
+        //hena yo3atabar ba3mel el subscription
+        user.PackageId = healthPackageId;
+        await user.save();
+
+        //update baa el status bta3t el patient
+        await healthPackageStatus.findOneAndUpdate(
+            { patientId: userId },
+            { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
+            { upsert: true }
+        );
+
+        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        // do the subscription for the fam members
+        for (const familyMember of registeredFamilyMembers) {
+            familyMember.PackageId = healthPackageId;
+            await familyMember.save();
+
+            //update baa el status bta3t el fam members        
+            await healthPackageStatus.findOneAndUpdate(
+                { patientId: familyMember._id },
+                { healthPackageId, status: 'Subscribed', renewalDate: healthPackage.renewalDate, endDate: null },
+                { upsert: true }
+            );
+        }
+
+        return res.status(200).json({ message: 'Health package subscribed successfully' });
 
     } catch (error) {
-      console.error('Error subscribing to health package:', error.message);
-      return res.status(500).json({ error: 'Error' });
+        console.error('Error subscribing to health package:', error.message);
+        return res.status(500).json({ error: 'Error' });
     }
-  });
+});
 
 //test done here (req 30)
 router.get('/viewSubscriptions', protect, async (req, res) => {
-    const userId = req.user.id;//bagib el id after authentication  
+    const userId = req.user._id;//bagib el id after authentication  
     try {
-      // get the patient package
-      const user = await patientModel.findById(userId).populate('PackageId');
-  
-      if (!user) {
-        return res.status(500).json({ message: 'Patient not found' });
-      }
-      const userHealthPackage = user.PackageId;
-      //Get the health package details for registered family members
-      const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId }).populate('PackageId');
-      //hena ba3mel array ba store fi kol package le kol fam member
-      const familyMembersHealthPackages = registeredFamilyMembers.map(member => member.PackageId);
-  
-      //ba3mel a single array containing patient w fam members packages
-      const allHealthPackages = [userHealthPackage, ...familyMembersHealthPackages];
-  
-      return res.json({ userHealthPackage, familyMembersHealthPackages: allHealthPackages});
+        // get the patient package
+        const user = await patientModel.findById(userId);
+
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
+        }
+
+        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId });
+        let userHealthPackage = userHealthPackageStatus?.healthPackageId;
+
+        let userHealth = await healthPackageModel.findById(userHealthPackage)??{};
+
+        userHealth.PatientId = user?._id;
+        userHealth.Name = user?.Name;
+        userHealth.Email = user?.Email;
+        userHealth.Username = user?.Username;
+
+        let result = { 'myUser': userHealth, 'familyMembers': [] };
+
+        //Get the health package details for registered family members
+        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+
+        for (let member of registeredFamilyMembers) {
+            let famMemberUser = await patientModel.findById(member.PatientId);
+
+            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser });
+            let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
+
+            let famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage);
+
+            let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
+
+            console.log(famMemberUser);
+            
+            memberRes.PatientId = famMemberUser?._id;
+            memberRes.Name = famMemberUser?.Name;
+            memberRes.Email = famMemberUser?.Email;
+            memberRes.Username = famMemberUser?.Username;
+            result['familyMembers'].push(memberRes);
+        }
+        //hena ba3mel array ba store fi kol package le kol fam member
+        // const familyMembersHealthPackages = registeredFamilyMembers.map(member => member.PackageId);
+
+        // //ba3mel a single array containing patient w fam members packages
+        // const allHealthPackages = [userHealthPackage, ...familyMembersHealthPackages];
+
+        return res.json({ result });
 
     } catch (error) {
-      console.error('Error viewing health package subscriptions:', error.message);
-      return res.status(500).json({ error: 'Error' });
+        console.error('Error viewing health package subscriptions:', error.message);
+        return res.status(500).json({ error: 'Error' });
     }
-  });
+});
 
-//req 31
+//req 31 done
 router.get('/viewSubscriptionStatus', protect, async (req, res) => {
-    const userId = req.user.id;//bagib el id after authentication 
-  
-    try {
-     // get the patient package
-      const user = await patientModel.findById(userId);
-  
-      if (!user) {
-        return res.status(500).json({ message: 'Patient not found' });
-      }
-  
-      //patient
-      const userHealthPackageStatus = await healthPackageStatus.findOne({ patientId, status: { $in: ['Subscribed', 'Cancelled'] } });
-      //fam members
-      const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
-      const familyMembersHealthPackagesStatus = await healthPackageStatus.find({
-        patientId: { $in: registeredFamilyMembers.map(member => member._id) },
-        status: { $in: ['Subscribed', 'Cancelled'] }
-      });
+    const userId = req.user._id;//bagib el id after authentication 
 
-      const allHealthPackagesStatus = [userHealthPackageStatus, ...familyMembersHealthPackagesStatus];
-  
-      //bagib el status and renewal date for each health package law ana subscribed fe wahda
-      const subscriptionStatusDetails = allHealthPackagesStatus.map(packageStatus => {
-        if (!packageStatus) {
-          return { status: 'Unsubscribed' };
+
+    try {
+        // get the patient package
+        const user = await patientModel.findById(userId);
+
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
         }
-  
-        const renewalDate = packageStatus.renewalDate;
-  
-        if (!renewalDate || renewalDate < new Date()) {
-          return { status: 'Cancelled', endDate: packageStatus.endDate };
+
+        //patient
+        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId, status: { $in: ['Subscribed', 'Cancelled'] } });
+        //fam members
+        let registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+
+        console.log(userHealthPackageStatus);
+
+        let myUser = JSON.parse(JSON.stringify(req.user));
+
+        myUser.status = userHealthPackageStatus ?? 'Unsubscribed';
+
+        let result = { 'myUser': myUser, 'familyMembers': [] };
+
+
+        for (let member of registeredFamilyMembers) {
+            let healthPackage = await healthPackageStatus.findOne({
+                patientId: member.PatientId,
+                status: { $in: ['Subscribed', 'Cancelled'] }
+            });
+            if (!healthPackage) {
+                healthPackage = null;
+            }
+
+            let memberRes = JSON.parse(JSON.stringify(member));
+            delete memberRes['Patient2Id'];
+            delete memberRes['createdAt'];
+            delete memberRes['updatedAt'];
+            delete memberRes['__v'];
+
+            memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
+            memberRes['renewalDate'] = healthPackage?.renewalDate;
+            memberRes['endDate'] = healthPackage?.endDate;
+
+            result['familyMembers'].push(memberRes);
+
         }
-  
-        return { status: 'Subscribed', renewalDate };
-      });
-  
-      return res.status(200).json({ subscriptionStatusDetails });
+
+        return res.status(200).json({ success: true, result });
 
     } catch (error) {
-      console.error('Error viewing health package subscription status:', error.message);
-      return res.status(500).json({ error: 'Error' });
+        console.error('Error viewing health package subscription status:', error.message);
+        return res.status(500).json({ error: error.message, success: false });
     }
-  });
+});
 
 //hena bas msh mota2aked bet cancel sah wala laa (req 32)
 router.put('/cancelSub', protect, async (req, res) => {
-    const userId = req.user.id;//bagib el id after authentication
-  
+    const userId = req.user._id;//bagib el id after authentication
+
     try {
-    // get the patient package
-      const user = await patientModel.findById(userId).populate('PackageId');
-  
-      if (!user) {
-        return res.status(500).json({ message: 'Patient not found' });
-      }
-  
-      if (user.PackageId!= undefined) {
-        user.PackageId = undefined;// law 3ando package yeb2a shil el sub
-        await user.save();
-      }
-  
-      const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId }).populate('PackageId');
-  
-      for (const familyMember of registeredFamilyMembers) {
-        if (familyMember.PackageId!= undefined) {
-          familyMember.PackageId = undefined; // hena baa bashil le kol family member taba3 el patient el sub bta3to
-          await familyMember.save();
+        // get the patient package
+        const user = await patientModel.findById(userId);
+
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
         }
-      }
-  
-      return res.status(200).json({ message: 'Health package subscription canceled successfully' });
+
+        await healthPackageStatus.findOneAndUpdate({ patientId: userId},{status:'Cancelled',endDate:new Date(0),renewalDate:new Date(0)});
+
+        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+
+        for (const familyMember of registeredFamilyMembers) {
+            await healthPackageStatus.findOneAndUpdate({ patientId: familyMember.PatientId},{status:'Cancelled',endDate:new Date(0),renewalDate:new Date(0)});
+        }
+
+        return res.status(200).json({ message: 'Health package subscription canceled successfully' });
     } catch (error) {
-      console.error('Error canceling health package subscription:', error.message);
-      return res.status(500).json({ error: 'Error' });
+        console.error('Error canceling health package subscription:', error.message);
+        return res.status(500).json({ error: 'Error' });
     }
-  });
+});
 
 
 export default router;
