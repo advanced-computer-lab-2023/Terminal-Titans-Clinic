@@ -1,0 +1,39 @@
+body {
+    font-family: 'Roboto';
+  }
+  
+  .days {
+    width: 1000px;
+  }
+  
+  .day {
+    width: 120px;
+    height: 230px;
+    background-color: #efeff6;
+    padding:10px;
+    float:left;
+    margin-right:7px;
+    margin-bottom:5px;
+  }
+  
+  .datelabel {
+    margin-bottom: 15px;
+  }
+  
+  .timeslot {
+    background-color: #00c09d;
+    width: auto;
+    height: 20px;
+    color: white;
+    padding:7px;
+    margin-top: 5px;
+    font-size: 14px;
+    border-radius: 3px;
+    vertical-align: center;
+    text-align:center;
+  }
+  
+  .timeslot:hover { 
+    background-color: #2CA893;
+    cursor: pointer;
+  }
