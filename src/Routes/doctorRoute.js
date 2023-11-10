@@ -5,6 +5,7 @@ import healthModel from '../Models/healthModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import familyMemberModel from '../Models/familyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
+import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
 
 const router = express.Router()
 
@@ -227,50 +228,54 @@ router.post('/addavailableslots', protect, async (req, res) => {
 
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
-        res.status(500).json({ message: "You are not a doctor", success: false })
+       return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    const flag= true
-    const startDate = req.body.Date
+    console.log(doctor);
+    const flag= true;
+    let dTimeTemp = req.body.Date;
+    let startDate = new Date(dTimeTemp);
+    startDate.setHours(startDate.getHours() + 2)
+    //const startDate = req.body.Date
 
     let endDate = new Date(startDate);
-    endDate.setMinutes(start.getMinutes() + 30);
+    endDate.setMinutes(startDate.getMinutes() + 30);
 
     const aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
+    console.log(aptmnts);
     if(aptmnts){
 
 
-for (let y in aptmnts) {
-    
-        let start = aptmnts[y].Date;
-        let end = new Date(start);
-        end.setMinutes(start.getMinutes() + 30);
-        if ( (startDate >=start && startDate < end) || endDate<=end && endDate>start)
-            flag=false;
-    
-    } }
+        for (let y in aptmnts) {
+            
+                let start = aptmnts[y].Date;
+                if ( start==startDate )
+                    flag=false;
+            
+            } 
+        }
+        console.log(aptmnts);
+            if (flag==false) {
+                return res.status(500).json({ message: "you have an appointment during this slot", success: false });
+            }
+        
+        
+        try {
+            const availableSlots = new docAvailableSlots({
+                DoctorId: req.user._id ,
+                Date: req.body.Date,
+            });
+            availableSlots.save();
+            
+            res.status(200).json({ Result: docAvailableSlots, success: true })
+        }
+        catch (error) {
+            res.status(400).send({ error: error, success: false });
+        
+        }
+            });
+        
 
-    if (flag==false) {
-        return res.status(500).json({ message: "you have an appointment during this slot", success: false });
-    }
-
-
-try {
-    const docAvailableSlots = new docAvailableSlots({
-        DoctorId: req.user._id ,
-        Date: req.body.Date,
-      
-    });
-    docAvailableSlots.save();
-    
-    res.status(200).json({ Result: docAvailableSlots, success: true })
-}
-catch (error) {
-    res.status(400).send({ error: error, success: false });
-
-}
-    });
-
-    router.get('/getWalletAmount', protect,async (req, res) => {
+router.get('/getWalletAmount', protect,async (req, res) => {
         
             const exists = await doctorModel.findById(req.user);
             if (!exists) {
@@ -282,7 +287,7 @@ catch (error) {
           const wallet= exists.wallet;
             return res.status(200).json({ Amount: wallet, success: true })
 
-        })
+})
 
 // requirement number 35 front lesa
 router.get('/getUpcomingAppointment', protect,async (req, res) => {

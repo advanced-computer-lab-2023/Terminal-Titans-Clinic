@@ -1,87 +1,116 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useEffect } from 'react';
 import "../Styles/Appointments.css"
 
-function BookAppointmentsForm() {
-    const [blogs, setBlogs] = useState([]);
+import moment from 'moment';
 
-    const allAppointments = async () => {
-        await axios.get(`http://localhost:8000/getDoctorAvailableSlots`).then(
-            (res) => {
-                const blogs = res.data;
-                console.log(blogs);
-                setBlogs(blogs);
+function BookAppointmentsForm() {
+    const [doctors, setDoctors] = useState([]);
+    const [selectedDoctor, setSelectedDoctor] = useState('');
+    const [aptmnts,setAppointments] = useState([]);
+
+    const allAppointments = async (doctorId) => {
+        try {
+            const response = await axios.get(`http://localhost:8000/patient/getDoctorAvailableSlots/${doctorId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+            );
+            const aptmnts = response.data;
+                console.log(aptmnts);
+                setAppointments(aptmnts.final)
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    
+
+    const getDoctors = async () => {
+        // await axios
+        //     .get(`http://localhost:8000/getDoctors`)
+        //     .then((res) => {
+        //         const doctors = res.data;
+                
+        //     });
+            const response = await axios.post(
+                `http://localhost:8000/patient/getDoctors`,
+                {  },
+                { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+            );
+            if (response.status === 200) {
+                const doctors = response.data;
+                console.log(doctors.Doctors);
+                setDoctors(doctors.Doctors);
+
             }
-        );
     };
 
     useEffect(() => {
-        allAppointments();
+        getDoctors();
     }, []);
 
     const renderDays = () => {
-        const days = [
-            { name: "Friday", date: "August 23" },
-            { name: "Saturday", date: "August 24" },
-            { name: "Sunday", date: "August 25" },
-            { name: "Monday", date: "August 26" },
-            { name: "Tuesday", date: "August 27" },
-        ];
+        console.log(aptmnts.final);
+        const dates = [...new Set(aptmnts.map((aptmnt) => aptmnt.Date))];
 
-        return days.map((day) => {
-            const slots = blogs.filter((blog) => blog.day === day.name);
+        return dates.map((date) => {
+            const slots = aptmnts.filter((aptmnt) => aptmnt.Date === date);
+            //console.log( moment(date).format('HH:mm'));
+            const twoHoursAgo = moment(date).subtract(2, 'hours');
+            console.log(twoHoursAgo.format('HH:mm'));
+            
 
             return (
                 <div className="day">
-                    <div className="datelabel">
-                        <strong>{day.name}</strong>
+                    <div className="slot-container">
+                        <strong>{moment(date).format("dddd")}</strong>
                         <br />
-                        {day.date}
-                    </div>
-                    {slots.map((slot) => (
-                        <div className="timeslot">{slot.time}</div>
-                    ))}
+                        {moment(date).format("MMMM D")}
+                    </div>    
+                    <div className="timeslot">{twoHoursAgo.format('HH:mm')}</div>
                 </div>
             );
         });
+    }
+
+    const handleDoctorChange = (event) => {
+        setSelectedDoctor(event.target.value);
+        
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        // let doctorId = selectedOption.id;
+        // console.log('handleDoctorChange', doctorId, selectedOption.text);
+        // console.log(event.target.selectedIndex);
+        // console.log(doctors[(event.target.selectedIndex)-1]._id);
+        // const selectedOptionKey = selectedOption.key;
+        
+        // const selectedDoctorId = doctors.find(
+        //     (doctor) => doctor.name === event.target.value
+        // )._id;
+
+        allAppointments(doctors[(event.target.selectedIndex)-1]._id);
     };
 
     return (
-        <div style={{ height: "280px", width: "700px", overflow: "scroll", border: "1px solid #ddd" }}>
-            <div className="days">{renderDays()}</div>
+
+        <div>
+            <select value={selectedDoctor} onChange={handleDoctorChange}>
+                <option value="">Select a doctor</option>
+                {doctors.map((doctor) => (
+                    <option key={doctor._id} value={doctor.Name}>
+                        {doctor.Name}
+                    </option>
+                ))}
+            </select>
+            <div
+                style={{
+                    height: "280px",
+                    width: "700px",
+                    overflow: "scroll",
+                    border: "1px solid #ddd",
+                }}
+            >
+                <div className="days">{renderDays()}</div>
+            </div>
         </div>
     );
 }
-
-//     return(
-//     <div style="height:280px; width: 700px;overflow:scroll;border: 1px solid #ddd;">
-//     <div class="days">
-//     <div class="day">
-//       <div class="datelabel"><strong>Friday</strong><br/>August 23</div>
-//       <div class="timeslot">9:00am</div>
-//       <div class="timeslot">9:30am</div>
-//       <div class="timeslot">10:00am</div>
-//     </div>
-//     <div class="day">
-//       <div class="datelabel"><strong>Saturday</strong><br/>August 24</div>
-//       <div class="timeslot">10:30pm</div>
-//     </div>  
-//     <div class="day">
-//       <div class="datelabel"><strong>Sunday</strong><br/>August 25</div>
-//       <div class="timeslot">10:30pm</div>
-//     </div>
-//     <div class="day">
-//       <div class="datelabel"><strong>Monday</strong><br/>August 26</div>
-//       <div class="timeslot">10:30pm</div>
-//     </div>
-//     <div class="day">
-//       <div class="datelabel"><strong>Tuesday</strong><br/>August 27</div>
-//       <div class="timeslot">10:30pm</div>
-//     </div>
-//     </div>
-//   </div>
-//     )
-// }
-
 export default BookAppointmentsForm;
