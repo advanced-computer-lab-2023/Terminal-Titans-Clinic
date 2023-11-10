@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/login";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
+import HealthPackage from "./Pages/HealthPackages";
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/registerDoctor" element={<RegisterDoctor />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/" element={<Login />} />
+          <Route path="/healthPackages" element={<HealthPackage />} />
         </Routes>
       </Router>
     </div>
