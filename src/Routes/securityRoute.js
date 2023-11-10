@@ -149,6 +149,11 @@ router.post('/login', async (req, res) => {
 
         const user = await userModel.findOne({ Username: username })
 
+        if (!user) {
+            res.status(400).json({ message: 'Invalid username or password', success: false })
+            return;
+        }
+
         if (user?.__t === 'RequestedDoctor') {
             return res.status(400).json({ message: 'Please wait for admin approval', success: false })
         }
