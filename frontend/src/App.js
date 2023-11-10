@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/login";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
-import HealthPackage from "./Pages/HealthPackages";
 
 function App() {
 
@@ -21,7 +20,7 @@ function App() {
   return (
     <div className="App">
       {
-        window.location.pathname == '/Health-Plus/' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
+        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
           <></>
           : <div className="signoutButton">
             <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
@@ -36,7 +35,6 @@ function App() {
           <Route path="/registerDoctor" element={<RegisterDoctor />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/" element={<Login />} />
-          <Route path="/healthPackages" element={<HealthPackage />} />
         </Routes>
       </Router>
     </div>
