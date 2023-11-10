@@ -20,7 +20,7 @@ function App() {
   return (
     <div className="App">
       {
-        window.location.pathname == '/Health-Plus/' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
+        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
           <></>
           : <div className="signoutButton">
             <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
