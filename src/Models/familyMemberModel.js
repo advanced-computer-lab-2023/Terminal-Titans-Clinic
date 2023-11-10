@@ -6,10 +6,6 @@ const familyMemberOptions = {
   collection: 'familyMember'
 };
 const familyMemberSchema = new _Schema({
-  // PatientId: {
-  //   type: String,
-  //   required: true
-  // },
   PatientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'patient',

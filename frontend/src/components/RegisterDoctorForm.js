@@ -1,11 +1,10 @@
 // import React from "react";
 import "../Styles/LoginForm.css";
 import validator from 'validator'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function RegistrationForm() {
-  const formData = new FormData();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -19,6 +18,64 @@ function RegistrationForm() {
   const [degree, setDegree] = useState('');
   const [license, setLicense] = useState('');
   const [speciality, setSpeciality] = useState('');
+
+  const [file1, setFile1] = useState(null);
+  const [binaryData1, setBinaryData1] = useState(null);
+
+  const [file2, setFile2] = useState(null);
+  const [binaryData2, setBinaryData2] = useState(null);
+
+  const [file3, setFile3] = useState(null);
+  const [binaryData3, setBinaryData3] = useState(null);
+
+  const handleFile1Change = (e) => {
+    setFile1(e.target.files[0]);
+  };
+
+  const handleFile2Change = (e) => {
+    setFile2(e.target.files[0]);
+  };
+
+  const handleFile3Change = (e) => {
+    setFile3(e.target.files[0]);
+  };
+
+  useEffect(() => {
+    if (file1) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const binaryString = e.target.result;
+        setBinaryData1(binaryString);
+      };
+      reader.readAsBinaryString(file1);
+      setID(file1);
+    }
+  }, [file1]);
+
+  useEffect(() => {
+    if (file2) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const binaryString = e.target.result;
+        setBinaryData2(binaryString);
+      };
+      reader.readAsBinaryString(file2);
+      setDegree(file2);
+    }
+  }, [file2]);
+
+  useEffect(() => {
+    if (file3) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const binaryString = e.target.result;
+        setBinaryData3(binaryString);
+      };
+      reader.readAsBinaryString(file3);
+      setLicense(file3);
+    }
+  }, [file3]);
+
 
   const [errorMessagePass, setErrorMessagePass] = useState('')
   const [errorMessageEmail, setErrorMessageEmail] = useState('')
@@ -63,7 +120,7 @@ function RegistrationForm() {
 
   const handleRegister = (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
-
+    const formData = new FormData();
     // Create a JSON object with the username and password
     // const data = { username, password ,name,email,dateOfBirth,hourlyRate,affiliation,education,speciality,iD,degree,license };
     formData.append('username', username);
@@ -74,38 +131,12 @@ function RegistrationForm() {
     formData.append('hourlyRate', hourlyRate);
     formData.append('affiliation', affiliation);
     formData.append('education', education);
-    formData.append('iD', iD)
-    formData.append('degree', degree);
-    formData.append('license', license);
+    formData.append('ID', iD)
+    formData.append('Degree', degree);
+    formData.append('License', license);
     formData.append('speciality', speciality);
     // Make a POST request to your backend register route
-    //   fetch('http://localhost:8000/security/doctor',FormData, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(data),
-    //   })
-    //     .then((response) => {
-    //       // Check the status code
-    //       console.log(response);
-
-    //         return response.json();
-
-    //     })
-    //     .then((data) => {
-    //       if(data.status !== 200){
-    //         alert(data.message)
-    //       }
-    //       // Handle the response data
-    //       console.log('Response data:', data);
-    //     })
-    //     .catch((error) => {
-    //       // Handle network errors or other issues
-    //       console.error('Error:', error);
-    //     });
-    // };
-    axios.post('http://localhost:8000/security/patient/', formData)
+    axios.post('http://localhost:8000/security/doctor/', formData)
       .catch(error => {
         console.log(error.response.data);
         console.log(error.response.status);
@@ -217,26 +248,32 @@ function RegistrationForm() {
           </select>
 
           <label htmlFor="ID">ID:</label>
-          <input
+          <input type="file" name="ID" accept=".jpg , .png , .pdf" onChange={handleFile1Change} />
+          {/* <input
             type="file"
             name="ID"
             accept=".jpg , .png , .pdf"
             onChange={(e) => setID(URL.createObjectURL(e.target.files[0]))}
-        />
+        /> */}
           <label htmlFor="degree">Medical Degree:</label>
-          <input
+          <input type="file" name="Degree" accept=".jpg , .png , .pdf" onChange={handleFile2Change} />
+
+          {/* <input
             type="file"
             name="Degree"
             accept=".jpg , .png , .pdf"
             onChange={(e) => setDegree(URL.createObjectURL(e.target.files[0]))}
-          />
+          /> */}
+
+
           <label htmlFor="license">License:</label>
-          <input
+          <input type="file" name="License" accept=".jpg , .png , .pdf" onChange={handleFile3Change} />
+          {/* <input
             type="file"
             name="License"
             accept=".jpg , .png , .pdf"
             onChange={(e) => setLicense(URL.createObjectURL(e.target.files[0]))}
-          />
+          /> */}
 
 
           <button type="submit" onClick={handleRegister}>Register</button>
