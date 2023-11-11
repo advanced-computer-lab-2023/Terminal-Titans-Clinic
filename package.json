@@ -28,6 +28,7 @@
     "nodemailer": "^6.9.7",
     "nodemon": "^3.0.1",
     "routes": "^2.1.0",
-    "stream-browserify": "^3.0.0"
+    "stream-browserify": "^3.0.0",
+    "stripe": "^14.4.0"
   }
 }
