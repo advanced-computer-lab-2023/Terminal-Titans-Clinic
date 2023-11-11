@@ -107,6 +107,8 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
     }
 });
 
+
+
 // requirement number 33
 router.get('/getPatientsList', protect,async (req, res) => {
     try {
@@ -145,6 +147,32 @@ router.get('/getPatientsList', protect,async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 });
+
+router.post('/acceptContract', protect, async (req, res) => {
+    try {
+       
+        const doctor = await doctorModel.findOne({ _id: req.user });
+
+        if (!doctor) {
+            return res.status(400).json({ message: "You are not a doctor", success: false });
+        }
+
+      
+        doctor.employmentContract = "accepted";
+
+       
+        await doctor.save();
+
+        return res.status(200).json({ message: "Contract accepted successfully", success: true });
+    } catch (err) {
+        return res.status(500).json({ message: err.message, success: false });
+    }
+
+});
+
+
+
+
 
 //requirement number 51
 
