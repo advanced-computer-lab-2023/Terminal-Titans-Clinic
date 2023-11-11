@@ -116,6 +116,7 @@ router.post('/addRegFamilyMem', protect, async (req, res) => {
     }
 
 })
+
 // requirement number 22
 router.get('/viewRegFamMem', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
@@ -224,8 +225,9 @@ router.get('/viewPrescriptions', protect, async (req, res) => {
         return res.status(200).json({ Result: prescriptions, success: true })
     }
 })
+
 // requirement number 38
-router.post('/getDoctors', async (req, res) => {
+router.post('/getDoctors', protect, async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
@@ -263,7 +265,6 @@ router.post('/getDoctors', async (req, res) => {
 // })
 
 //requirement number 37 //get all doctors
-
 router.get('/getDoctorsInfo', protect, async (req, res) => {
 
     try {
@@ -320,14 +321,16 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
 
     }
 })
+
 //get all available slots with a given Doctor._id
 //req42
-router.get('/getDoctorAvailableSlots', async (req, res) => {
+router.get('/getDoctorAvailableSlots/:dId', async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-    const dId = req.body.dId;
+    const dId = req.params.dId;
+    console.log("dId");
     const Dr = await Doctor.find({ _id: dId });
     if (Dr.length < 1) {
         return (res.status(400).send({ error: "cant find doctor", success: false }));
@@ -387,7 +390,6 @@ router.post('/bookAppointment', protect, async (req, res) => {
 
 
 })
-
 
 //view a list of all my upcoming / past appointments
 //req45
@@ -460,9 +462,6 @@ router.post('/filterAppointments', protect, async (req, res) => {
     }
     res.status(200).json({ final: final, success: true });
 })
-
-
-
 
 //requirement number 39
 router.post('/filterDoctors', async (req, res) => {

@@ -8,7 +8,7 @@ import nodemailer from 'nodemailer';
 import otpModel from '../Models/otpModel.js';
 import protect from '../middleware/authMiddleware.js';
 
-import multer from 'multer' ;
+import multer from 'multer';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -18,12 +18,12 @@ const upload = multer({ storage: storage });
 const router = Router()
 
 
-router.post('/patient',upload.single('history'), async (req, res) => {
+router.post('/patient', upload.single('history'), async (req, res) => {
 
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
         || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.file) {
-            console.log(req);
+        console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -57,9 +57,9 @@ router.post('/patient',upload.single('history'), async (req, res) => {
             EmergencyName: req.body.first + " " + req.body.last,
             EmergencyMobile: req.body.emergencyNumber,
             Gender: req.body.gender,
-            HealthRecords:{
+            HealthRecords: {
                 data: req.file.buffer,
-                type:req.file.mimetype
+                type: req.file.mimetype
             }
         });
 
@@ -76,10 +76,10 @@ router.post('/patient',upload.single('history'), async (req, res) => {
     }
 })
 
-router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License"}]), async (req, res) => {
+router.post('/doctor', upload.fields([{ name: "ID" }, { name: "Degree" }, { name: "License" }]), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
-        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req.files.ID[0] || !req.files.Degree[0] 
+        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req.files.ID[0] || !req.files.Degree[0]
         || !req.files.License[0]) {
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
     }
@@ -116,15 +116,15 @@ router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License
             ID: {
                 data: req.files?.ID[0].buffer,
                 contentType: req.files?.ID[0].mimetype,
-              },
-              Degree: {
+            },
+            Degree: {
                 data: req.files?.Degree[0].buffer,
                 contentType: req.files?.Degree[0].mimetype,
-              },
-              License: {
+            },
+            License: {
                 data: req.files?.License[0].buffer,
                 contentType: req.files?.License[0].mimetype,
-              },
+            },
         });
 
 
@@ -139,42 +139,50 @@ router.post('/doctor',upload.fields([{name: "ID"},{name:"Degree"},{name:"License
 });
 
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body
+    try {
+        const { username, password } = req.body
 
-    if (!username || !password) {
-        res.status(400).json({ message: 'Please fill all fields', success: false })
-        return;
-    }
+        if (!username || !password) {
+            res.status(400).json({ message: 'Please fill all fields', success: false })
+            return;
+        }
 
-    const user = await userModel.findOne({ Username: username })
-    console.log(user)
-    if(user.__t === 'RequestedDoctor'){
-        return res.status(400).json({ message: 'Please wait for admin approval', success: false })
-    }
+        const user = await userModel.findOne({ Username: username })
 
-    console.log(user);
-    console.log(username);
-    console.log(password);
-    if (user && (await bcrypt.compare(password, user.Password))) {
-        // generate token
-        res.status(200).json({
-            Result:
-            {
-                _id: user._id,
-                name: user.Name,
-                email: user.Email,
-                type: user.__t,
-                token: generateToken(user._id)
-            },
-            success: true
-        })
-        console.log("here")
+        if (!user) {
+            res.status(400).json({ message: 'Invalid username or password', success: false })
+            return;
+        }
+
+        if (user?.__t === 'RequestedDoctor') {
+            return res.status(400).json({ message: 'Please wait for admin approval', success: false })
+        }
+
+        console.log(user);
+        console.log(username);
+        console.log(password);
+        if (user && (await bcrypt.compare(password, user.Password))) {
+            // generate token
+            res.status(200).json({
+                Result:
+                {
+                    _id: user._id,
+                    name: user.Name,
+                    email: user.Email,
+                    type: user.__t,
+                    token: generateToken(user._id)
+                },
+                success: true
+            })
+        }
+        else {
+            res.status(400).json({ message: 'Invalid username or password', success: false })
+        }
     }
-    else {
-        res.status(400).json({ message: 'Invalid username or password', success: false })
+    catch (err) {
+        res.status(400).json({ message: err.message, success: false })
     }
 })
-
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
@@ -192,14 +200,14 @@ router.post('/changePassword',protect, async(req,res)=>{
     console.log(oldPassEntered)
    
         const isMatch = await bcrypt.compare(oldPassEntered, oldPass);
-        if (!isMatch) { 
+        if (!isMatch) {
             return res.status(400).json({ message: 'Invalid password', success: false })
         }
         const updatedUser = await userModel.findOneAndUpdate({ _id: req.user._id },
             {
                 Password: hashedPassword,
             });
-            res.status(200).json({ Result: updatedUser, success: true })
+        res.status(200).json({ Result: updatedUser, success: true })
     }
     catch (err) {
         res.status(400).json({ message: err.message, success: false })
@@ -207,7 +215,7 @@ router.post('/changePassword',protect, async(req,res)=>{
 });
 
 router.post('/sendOTP', async (req, res) => {
-    const  email  = req.body.email
+    const email = req.body.email
     const user = await userModel.findOne({ Email: email })
     console.log(user)
     if (user) {
@@ -226,46 +234,46 @@ router.post('/sendOTP', async (req, res) => {
                 `<h1>Please confirm your OTP</h1>
                  <p>Here is your OTP code: ${otp}</p>`
             );
-            if(mailResponse){
-            console.log("Email sent successfully: ", mailResponse);
-            res.status(200).json({ message: 'Email sent' , success: true})
+            if (mailResponse) {
+                console.log("Email sent successfully: ", mailResponse);
+                res.status(200).json({ message: 'Email sent', success: true })
             }
-            else{
+            else {
                 res.status(400).json({ message: 'Error sending email', success: false });
             }
         } catch (error) {
-            res.status(500).json({ message: 'Error sending email' , success: false})
+            res.status(500).json({ message: 'Error sending email', success: false })
         }
     }
-    else{
+    else {
         res.status(400).json({ message: 'Email not found', success: false })
-    
+
     }
 
 })
-router.post('/verifyOTP',async(req,res)=>{
-    try{
-    const  email  = req.body.email
-    const user = await userModel.findOne({ Email: email })
-    console.log(user)
-    const response = await otpModel.find({ userId : user._id}).sort({ createdAt: -1 }).limit(1);
-    if (response.length === 0 || req.body.otp !==response[0].otp) {
-      return res.status(400).json({
-        success: false,
-        message: 'The OTP is not valid',
-      });
-    }
-    else{
-        console.log("OTP is valid");
-        const updateOtp = await otpModel.findOneAndUpdate({ _id: response[0]._id },
-            {
-                isVerified: true,
+router.post('/verifyOTP', async (req, res) => {
+    try {
+        const email = req.body.email
+        const user = await userModel.findOne({ Email: email })
+        console.log(user)
+        const response = await otpModel.find({ userId: user._id }).sort({ createdAt: -1 }).limit(1);
+        if (response.length === 0 || req.body.otp !== response[0].otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'The OTP is not valid',
             });
+        }
+        else {
+            console.log("OTP is valid");
+            const updateOtp = await otpModel.findOneAndUpdate({ _id: response[0]._id },
+                {
+                    isVerified: true,
+                });
             res.status(200).json({ Result: updateOtp, success: true });
+        }
+    } catch (error) {
+        res.status(400).json({ message: 'Error verifying OTP', success: false })
     }
-}catch (error) {    
-    res.status(400).json({ message: 'Error verifying OTP' , success: false})
-}
 
 })
 router.post('/forgotPassword',async (req, res) => {
@@ -282,24 +290,21 @@ router.post('/forgotPassword',async (req, res) => {
         {
             Password: hashedPassword,
         });
-        console.log("pp")
         console.log(updatedUser)
-        console.log("pp1")
-        user = await userModel.findOne({ Email: email })
-        console.log(user)
+        
         res.status(200).json({ Result: updatedUser, success: true })
-    }catch (error) {
+    } catch (error) {
         res.status(400).json({ message: 'Error changing password', success: false })
     }
 
-    
+
 });
 const mailSender = async (email, title, body) => {
     try {
         let transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,
-             secure: true,
+            secure: true,
             auth: {
                 user: process.env.MAIL_USER,
                 pass: process.env.MAIL_PASS,

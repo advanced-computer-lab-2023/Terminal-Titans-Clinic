@@ -22,6 +22,7 @@ function Login() {
         console.log('Form submitted:', formData);
 
         axios.post('http://localhost:8000/security/login', formData).then((response) => {
+            console.log(response);
             if (response.data.success) {
                 sessionStorage.setItem('token', response.data.Result.token);
                 if (response.data.type === 'Admin') {
