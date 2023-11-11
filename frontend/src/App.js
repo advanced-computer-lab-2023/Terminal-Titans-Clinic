@@ -9,6 +9,8 @@ import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
 import ChangePasswordForm from "./components/ChangePasswordForm";
+import Payment from "./Pages/Payment";
+
 
 function App() {
 
@@ -38,6 +40,7 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/bookAppointments" element={<BookAppointments/>} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="/" element={<Login />} />
         </Routes>
       </Router>
