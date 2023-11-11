@@ -23,7 +23,7 @@ function Login() {
 
         axios.post('http://localhost:8000/security/login', formData).then((response) => {
             if (response.data.success) {
-                sessionStorage.setItem('token', response.data.token);
+                sessionStorage.setItem('token', response.data.Result.token);
                 if (response.data.type === 'Admin') {
                     // go to admin page
                 }
@@ -98,7 +98,8 @@ function Login() {
             <Button variant="primary" type="submit">
                 Submit
             </Button>
-
+            <a href="http://localhost:3000/Health-Plus/forgotPassword">forgot Password?</a>
+            <br />
             <a href="http://localhost:3000/Health-Plus/registerPatient">Register as a patient</a>
             <br />
             <a href="http://localhost:3000/Health-Plus/registerDoctor">Register as a doctor</a>

@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/login";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
+import ChangePasswordForm from "./components/ChangePasswordForm";
 
 function App() {
 
@@ -34,6 +35,7 @@ function App() {
           <Route path="/registerPatient" element={<RegisterPatient />} />
           <Route path="/registerDoctor" element={<RegisterDoctor />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
+          <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/" element={<Login />} />
         </Routes>
       </Router>

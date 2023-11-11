@@ -222,6 +222,20 @@ router.get('/getPatientName/:name',protect, async (req, res) => {
 })
 
 
+router.get('/viewContract', protect, async (req, res) => {
+
+    const doctor = await doctorModel.findById(req.user)
+    if (!doctor) {
+       return res.status(500).json({ message: "You are not a doctor", success: false })
+    }
+
+    const salary= Math.floor(doctor.HourlyRate / 2);
+   /// const markup = Math.floor(salary/10);
+    const contact='Employee: '+doctor.Name+'\n'+' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor '+salary+' per appointment and that the clinic have a markup of 10% for the appointment' ;
+    return res.status(200).json({message:contact, success: true})
+
+});  
+
 router.post('/addavailableslots', protect, async (req, res) => {
 
 

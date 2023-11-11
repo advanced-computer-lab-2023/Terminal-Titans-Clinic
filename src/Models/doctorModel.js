@@ -44,11 +44,20 @@ const doctorSchema = new mongoose.Schema({
         contentType:String,
         
       },
+
+      employmentContract: {
+        type: String,
+        enum: ['accepted', 'rejected', 'pending'],
+        required: true
+      }, 
+
       License: {
         data: Buffer,
         contentType:String,
 
-      }
+      },
+
+
 });
 const Doctor=userModel.discriminator('Doctor',doctorSchema);
 export default mongoose.model('Doctor');

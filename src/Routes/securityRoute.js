@@ -147,7 +147,7 @@ router.post('/login', async (req, res) => {
     }
 
     const user = await userModel.findOne({ Username: username })
-
+    console.log(user)
     if(user.__t === 'RequestedDoctor'){
         return res.status(400).json({ message: 'Please wait for admin approval', success: false })
     }
@@ -168,6 +168,7 @@ router.post('/login', async (req, res) => {
             },
             success: true
         })
+        console.log("here")
     }
     else {
         res.status(400).json({ message: 'Invalid username or password', success: false })
@@ -180,13 +181,13 @@ const generateToken = (id) => {
     })
 }
 router.post('/changePassword',protect, async(req,res)=>{
-console.log(req.user)
-    const oldPass=req.user.Password;
+    //const oldPass=req.user.Password;
     const oldPassEntered=req.body.oldPassword;
     const newPass=req.body.password;
     try{
+    const user=await userModel.findOne({_id:req.user._id});
+    const oldPass=user.Password;    
     const salt = await bcrypt.genSalt(10);
-    console.log("ll");
     const hashedPassword = await bcrypt.hash(newPass, salt)
     console.log(oldPassEntered)
    
@@ -268,18 +269,24 @@ router.post('/verifyOTP',async(req,res)=>{
 
 })
 router.post('/forgotPassword',async (req, res) => {
-    const  email  = req.body.Email
-    const user = await userModel.findOne({ Email: email })
+    const  email  = req.body.email
+    let user = await userModel.findOne({ Email: email })
+    console.log('here')
     try{
     const newPass=req.body.password;
     
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPass, salt)
-
+    const hashedPassword = await bcrypt.hash(req.body.password, salt)
+        console.log(hashedPassword)
     const updatedUser = await userModel.findOneAndUpdate({ _id: user._id },
         {
             Password: hashedPassword,
         });
+        console.log("pp")
+        console.log(updatedUser)
+        console.log("pp1")
+        user = await userModel.findOne({ Email: email })
+        console.log(user)
         res.status(200).json({ Result: updatedUser, success: true })
     }catch (error) {
         res.status(400).json({ message: 'Error changing password', success: false })
