@@ -25,12 +25,6 @@ function BookAppointmentsForm() {
     
 
     const getDoctors = async () => {
-        // await axios
-        //     .get(`http://localhost:8000/getDoctors`)
-        //     .then((res) => {
-        //         const doctors = res.data;
-                
-        //     });
             const response = await axios.post(
                 `http://localhost:8000/patient/getDoctors`,
                 {  },
