@@ -35,6 +35,12 @@ const doctorSchema = new mongoose.Schema({
          type:String,
          required:true
     },
+    employmentContract:{
+        type: String,
+        enum: ['Accepted', 'Unaccepted', 'Pending'],
+        required: true,
+
+    },
     ID: {
         data: Buffer,
         contentType:String,
