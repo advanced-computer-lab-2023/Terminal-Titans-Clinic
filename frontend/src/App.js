@@ -9,7 +9,9 @@ import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import Payment from "./Pages/Payment";
+import ViewAppointments from "./Pages/ViewAppoitments";
 import SignIn from "./Pages/SignIn";
+import HealthPackages from "./Pages/HealthPackages";
 
 
 function App() {
@@ -39,7 +41,9 @@ function App() {
           <Route path="/registerDoctor" element={<RegisterDoctor />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/bookAppointments" element={<BookAppointments/>} />
+          <Route path="/viewAppointments" element={<ViewAppointments/>} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
+          <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
