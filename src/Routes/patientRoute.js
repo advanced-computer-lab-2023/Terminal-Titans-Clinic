@@ -127,14 +127,26 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-
-    const famMembers = await familyMember.find({ PatientId: req.user._id });
-    if (!famMembers) {
-        return res.status(400).json({ message: "no family members found", success: false })
+    var unRegFamMemebers = await unRegFamMem.findOne({ PatientId: req.user._id  });
+    var regFamMemebers = await RegFamMem.findOne({ PatientId: req.user._id  });
+    var list=[]
+    for  (var x in regFamMemebers){
+        var patientFam=await patientModel.findOne({_id:regFamMemebers[x].Patient2Id})
+        list.push(patientFam)
     }
-    else {
+    var regFamMemebers = await RegFamMem.findOne({ Patient2Id: req.user._id  });
+    for( var x in regFamMemebers)   {
+        var patientFam=await patientModel.findOne({_id:regFamMemebers[x].PatientId})
+        list.push(patientFam)
+    } 
+   
+        famMembers={
+            registered:list,
+            unregistered:unRegFamMemebers
+        }
+    
         res.status(200).json({ Result: famMembers, success: true });
-    }
+    
 })
 
 // requirement number 23
@@ -217,8 +229,9 @@ router.get('/viewPrescriptions', protect, async (req, res) => {
         return res.status(200).json({ Result: prescriptions, success: true })
     }
 })
+
 // requirement number 38
-router.post('/getDoctors', async (req, res) => {
+router.post('/getDoctors', protect, async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
@@ -256,7 +269,6 @@ router.post('/getDoctors', async (req, res) => {
 // })
 
 //requirement number 37 //get all doctors
-
 router.get('/getDoctorsInfo', protect, async (req, res) => {
 
     try {
@@ -313,14 +325,16 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
 
     }
 })
+
 //get all available slots with a given Doctor._id
 //req42
-router.get('/getDoctorAvailableSlots', async (req, res) => {
+router.get('/getDoctorAvailableSlots/:dId', async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-    const dId = req.body.dId;
+    const dId = req.params.dId;
+    console.log("dId");
     const Dr = await Doctor.find({ _id: dId });
     if (Dr.length < 1) {
         return (res.status(400).send({ error: "cant find doctor", success: false }));
@@ -380,7 +394,6 @@ router.post('/bookAppointment', protect, async (req, res) => {
 
 
 })
-
 
 //view a list of all my upcoming / past appointments
 //req45
@@ -453,9 +466,6 @@ router.post('/filterAppointments', protect, async (req, res) => {
     }
     res.status(200).json({ final: final, success: true });
 })
-
-
-
 
 //requirement number 39
 router.post('/filterDoctors', async (req, res) => {
@@ -704,23 +714,85 @@ router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
             await myHealthStatus.save();
         }
 
-        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
-        // do the subscription for the fam members
-        for (const familyMember of registeredFamilyMembers) {
-            let healthStatusFamMember = await healthPackageStatus.findOne(
-                { patientId: familyMember.PatientId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
-            );
-            if(!healthStatusFamMember){
-                let healthStatusFamMember = new healthPackageStatus({
-                    patientId: familyMember.PatientId,
-                    status: 'Subscribed',
-                    renewalDate: renewalDate,
-                    endDate: renewalDate,
-                    healthPackageId: healthPackage
-                })
-                await healthStatusFamMember.save();
-            }
+        // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        // // do the subscription for the fam members
+        // for (const familyMember of registeredFamilyMembers) {
+        //     let healthStatusFamMember = await healthPackageStatus.findOne(
+        //         { patientId: familyMember.PatientId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        //     );
+        //     if(!healthStatusFamMember){
+        //         let healthStatusFamMember = new healthPackageStatus({
+        //             patientId: familyMember.PatientId,
+        //             status: 'Subscribed',
+        //             renewalDate: renewalDate,
+        //             endDate: renewalDate,
+        //             healthPackageId: healthPackage
+        //         })
+        //         await healthStatusFamMember.save();
+        //     }
+        //}
+
+        return res.status(200).json({ message: 'Health package subscribed successfully' });
+
+    } catch (error) {
+        console.error('Error subscribing to health package:', error.message);
+        return res.status(500).json({ error: 'Error' });
+    }
+});
+router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
+    const userId = req.user._id;
+    const healthPackageId = req.body.packageId;
+    const familyMemberId = req.body.familyMemberId;
+
+    try {
+        const user = await patientModel.findById(familyMemberId);
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
         }
+        const healthPackage = await healthPackageModel.findById(healthPackageId);
+
+        if (!healthPackage) {
+            return res.status(500).json({ message: 'Health package not found' });
+        }
+
+        let renewalDate = new Date();
+        renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        console.log(renewalDate);
+
+
+        //update baa el status bta3t el patient
+        let myHealthStatus = await healthPackageStatus.findOne(
+            { patientId: userId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        );
+
+        if (!myHealthStatus) {
+            let myHealthStatus = new healthPackageStatus({
+                patientId: userId,
+                status: 'Subscribed',
+                renewalDate: renewalDate,
+                endDate: renewalDate,
+                healthPackageId: healthPackage
+            })
+            await myHealthStatus.save();
+        }
+
+        // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        // // do the subscription for the fam members
+        // for (const familyMember of registeredFamilyMembers) {
+        //     let healthStatusFamMember = await healthPackageStatus.findOne(
+        //         { patientId: familyMember.PatientId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        //     );
+        //     if(!healthStatusFamMember){
+        //         let healthStatusFamMember = new healthPackageStatus({
+        //             patientId: familyMember.PatientId,
+        //             status: 'Subscribed',
+        //             renewalDate: renewalDate,
+        //             endDate: renewalDate,
+        //             healthPackageId: healthPackage
+        //         })
+        //         await healthStatusFamMember.save();
+        //     }
+        // }
 
         return res.status(200).json({ message: 'Health package subscribed successfully' });
 
