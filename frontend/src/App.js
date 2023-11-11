@@ -4,7 +4,6 @@ import "./App.css";
 import RegisterPatient from "./Pages/RegisterPatient";
 import RegisterDoctor from "./Pages/RegisterDoctor";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Login from "./components/login";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
