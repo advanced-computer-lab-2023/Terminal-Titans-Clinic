@@ -10,6 +10,7 @@ import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import Payment from "./Pages/Payment";
+import SignIn from "./Pages/SignIn";
 
 
 function App() {
@@ -41,7 +42,7 @@ function App() {
           <Route path="/bookAppointments" element={<BookAppointments/>} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/payment" element={<Payment />} />
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
     </div>
