@@ -173,11 +173,7 @@ router.post('/acceptContract', protect, async (req, res) => {
 });
 
 
-
-
-
 //requirement number 51
-
 router.post('/asiignfollowUp', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {

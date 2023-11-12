@@ -37,9 +37,10 @@ const AptmntsList = () => {
   const [endDate, setEndDate] = useState(null);
   const [status, setStatus] = useState('');
 
-  const getAptmnts = async () => {
+  const getAptmnts = async (userType = "patient") => {
+    const endpoint = userType === "doctor" ? "/doctor/getAppointment" : "/patient/getAppointment";
     const response = await axios.post(
-      `http://localhost:8000/patient/getAppointment`,
+      `http://localhost:8000${endpoint}`,
       { startDate, endDate, status },
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
