@@ -6,7 +6,7 @@ const DoctorHome = () => {
   const [wltAmnt, setWltAmnt] = useState([]);
  // const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
 
-  const fetchwltAmnt = async () => {
+  const fetchwltAmnt = async () => {    
     try {
       const response = await axios.get("http://localhost:8000/doctor/getWalletAmount", {
         headers: {
