@@ -82,31 +82,65 @@ router.get('/getWalletAmount', protect, async (req, res) => {
             message: "You are not a doctor"
         });
     }
-    const wallet = exists.wallet;
-    return res.status(200).json({ Amount: wallet, success: true })
-
+    var result={};
+    result.Amount=exists.Wallet;
+    return res.status(200).json(result);
 })
 
-
-
-router.post('/addRegFamilyMem', protect, async (req, res) => {
+router.post('/addRegFamilyMembyNum', protect, async (req, res) => {
     const exist = patientModel.findOne(req.user);
     if (!exist) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
 
     req.body.relation = req.body.relation.toLowerCase();
-    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')))
+    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child') || (req.body.relation) == ('spouse')))
+        return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
+    const mobile = req.body.phoneNum;
+    var famMember = await patientModel.findOne({ Mobile: mobile });
+    if (!famMember)
+        return (res.status(400).send({ message: "This phone num is not registered as a patient", success: false }));
+    if (famMember._id == req.user._id)
+        return (res.status(400).send({ message: "You can't add yourself as a family member", success: false }));
+    var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
+    if (availFamMem)
+        return (res.status(400).send({ message: "This patient is already registered as a family member" }));
+    try {
+        const newFamilyMember = new RegFamMem({
+            PatientId: req.user._id,
+            Patient2Id: famMember._id,
+            Relation: req.body.relation.toLowerCase()
+        });
+        newFamilyMember.save();
+        res.status(200).json({ Result: newFamilyMember, success: true })
+    }
+    catch (error) {
+        res.status(400).send({ error: error });
+    }
+
+})
+
+router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
+    console.log('l')
+    const exist = patientModel.findOne(req.user);
+    if (!exist) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+
+    req.body.relation = req.body.relation.toLowerCase();
+    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')|| (req.body.relation) == ('spouse')))
         return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
     const email = req.body.email;
     var famMember = await patientModel.findOne({ Email: email });
+    console.log(famMember)
     if (!famMember)
         return (res.status(400).send({ message: "This email is not registered as a patient", success: false }));
     if (famMember._id == req.user._id)
         return (res.status(400).send({ message: "You can't add yourself as a family member", success: false }));
     var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
+    
     if (availFamMem)
-        return (res.status(400).send({ message: "This patient is not registered as a family member" }));
+        return (res.status(400).send({ message: "This patient is alreadt registered as a family member" }));
     try {
         const newFamilyMember = new RegFamMem({
             PatientId: req.user._id,
