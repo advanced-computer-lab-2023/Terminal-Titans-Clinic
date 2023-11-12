@@ -8,6 +8,9 @@ const HealthPackageSubscriptionPage = () => {
   const [patientHealthPackageStatus, setPatientHealthPackageStatus] = useState({});
   const [familyHealthPackageStatus, setfamilyHealthPackageStatus] = useState([]);
 
+  const [patientHealthPackageCancel, setPatientHealthPackageCancel] = useState({});
+  const [familyHealthPackageCancel, setfamilyHealthPackageCancel] = useState([]);
+
   const fetchHealthPackageData = async () => {
     try {
       const response = await axios.get("http://localhost:8000/patient/viewSubscriptions", {
@@ -38,7 +41,24 @@ const HealthPackageSubscriptionPage = () => {
       setfamilyHealthPackageStatus(result.familyMembers);
 
     } catch (error) {
-      console.error('Error fetching health package data:', error.message);
+      console.error('Error fetching health package status:', error.message);
+    }
+  };
+
+  const cancelHeathPackage = async () => {
+    try {
+      const response = await axios.put("http://localhost:8000/patient/cancelSub", {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
+
+      const result = response.data.result;
+      setPatientHealthPackageCancel(result.myUser);
+      setfamilyHealthPackageCancel(result.familyMembers);
+
+    } catch (error) {
+      console.error('Error cancelling health package:', error.message);
     }
   };
 
@@ -49,7 +69,7 @@ const HealthPackageSubscriptionPage = () => {
         onClick={fetchHealthPackageData}>
         View Subscribed HealthPackages
       </button>
-
+    {/* subscribed health package front */}
       <div style={{ marginTop: '20px' }}>
         <h4>Patient HealthPackage Data:</h4>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -73,7 +93,7 @@ const HealthPackageSubscriptionPage = () => {
           </tbody>
         </table>
       </div>
-
+        {/*status patient front  */}
       <div style={{ marginTop: '20px' }}>
         <h4>FamilyMembers HealthPackage Data:</h4>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -103,7 +123,7 @@ const HealthPackageSubscriptionPage = () => {
           </tbody>
         </table>
       </div>
-
+        {/* family members status front */}
       <div style={{ marginTop: '20px' }}>
         <button
           style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
@@ -144,6 +164,59 @@ const HealthPackageSubscriptionPage = () => {
             </thead>
             <tbody>
               {familyHealthPackageStatus.map((familyMembers, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.Relation}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.status}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.renewalDate || 'Nothing'}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.endDate || 'Nothing'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {/* cancellation front */}
+      <div style={{ marginTop: '20px' }}>
+        <button
+          style={{ background: 'red', color: 'white', padding: '8px', cursor: 'pointer' }}
+          onClick={cancelHeathPackage}>
+          Cancel Subscription
+        </button>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4>Patient HealthPackage:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.status}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.renewalDate || 'Nothing'}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.endDate || 'Nothing'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4>FamilyMembers HealthPackage:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Relation</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {familyHealthPackageCancel.map((familyMembers, index) => (
                 <tr key={index}>
                   <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.Relation}</td>
                   <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.status}</td>
