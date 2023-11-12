@@ -38,22 +38,22 @@ const DoctorHome = () => {
         <p><strong>Amount:</strong> {wltAmnt}EGP</p>
         </div>
 
-      {/* <div>
-        <h3>FamilyMembers HealthPackage Data:</h3>
-        {familyHealthPackageData.map((familyMember, index) => (
-          <div key={index}>
-            <p><strong>Family Member ID:</strong> {familyMember._id}</p>
-            <p><strong>Name:</strong> {familyMember.Name}</p>
-            <p><strong>Email:</strong> {familyMember.Email}</p>
-            <p><strong>Package_Type:</strong> {familyMember.packageType ? familyMember.packageType : 'No sub'}</p>
-            <p><strong>Subscription_fees:</strong> {familyMember.subsriptionFeesInEGP ? familyMember.subsriptionFeesInEGP : 'No sub'}</p>
-            <p><strong>medicin Discount:</strong> {familyMember.medicinDiscountInPercentage ? familyMember.medicinDiscountInPercentage : 'No sub'}</p>
-            <p><strong>family Discount:</strong> {familyMember.familyDiscountInPercentage ? familyMember.familyDiscountInPercentage : 'No sub'}</p>
-            <p><strong>doctor Discount:</strong> {familyMember.doctorDiscountInPercentage ? familyMember.doctorDiscountInPercentage : 'No sub'}</p>
-            <hr />
-          </div>
-        ))}
-      </div> */}
+      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={() => window.location.pathname = '/Health-Plus/docViewAppointments'}>
+        View Appointments
+      </button>
+      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={() => window.location.pathname = '/Health-Plus/viewMyPatientHealthRecords'}>
+        View Patient's Health Records
+      </button>
+      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={() => window.location.pathname = '/Health-Plus/changePassword'}>
+        Change Password
+      </button>
+      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={() => window.location.pathname = '/Health-Plus/forgotPassword'}>
+        Forgot Password
+      </button>
     </div>
   );
 };

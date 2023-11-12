@@ -8,7 +8,7 @@ import axios from 'axios';
 function ViewmyHealthRecords() {
     
     const [userHealthRecord, setUserHealthRecord] = useState([]);
-const [userHealthHistory, setUserHealthHistory] = useState('');
+const [userHealthHistory, setUserHealthHistory] = useState([]);
 useEffect(() => {
     const fetchData = async () => {
         console.log(sessionStorage.getItem("token") )
@@ -20,7 +20,7 @@ useEffect(() => {
                console.log(data.Result)
                console.log(data.Result.healthRecords);
                setUserHealthRecord(data.Result.healthRecords)
-               console.log(userHealthRecord)
+               console.log(data.Result.medicalHistory)
                setUserHealthHistory(data.Result.medicalHistory)
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -51,21 +51,25 @@ useEffect(() => {
                     {userHealthRecord.map((record, index) => (
                         <div key={index}>
                             <h3>Record {index + 1}</h3>
-                            
+                            {console.log(record.data)}
                             <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(record.data)}`}  width="800" height="600"></iframe>
                             
                             {/* Add any other fields you want to display */}
                         </div>
                     ))}
                     <h2>Medical History</h2>
-                    {userHealthHistory.data ? (
-                        <>
-                            <h2>Medical History</h2>
-                            <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(userHealthHistory.data)}`}  width="800" height="600"></iframe>
-                        </>
-                    ) : (
-                        <p>No medical history available.</p>
-                    )}
+                    {userHealthHistory.map((record, index) => (
+                        <div key={index}>
+                            <h3>Record {index + 1}</h3>
+                         {console.log(record)}   
+                         <img
+                          src={`data:image/jpeg;base64,${arrayBufferToBase64(record.data.data)}`}
+                          
+                      />
+                            {/* Add any other fields you want to display */}
+                        </div>
+                    ))}
+                   
 
             
 

@@ -45,15 +45,16 @@ export default function SignIn() {
             console.log(response);
             if (response.data.success) {
                 sessionStorage.setItem('token', response.data.Result.token);
-                if (response.data.type === 'Admin') {
+                if (response.data.Result.type === 'Admin') {
                     // go to admin page
                 }
-                else if (response.data.type === 'Doctor') {
+                else if (response.data.Result.type === 'Doctor') {
                     // go to doctor page
+                    window.location.pathname= '/Health-Plus/doctorHome'
                 }
                 else {
                     // go to patient page
-                    window.location.pathname= '/Health-Plus/healthPackages'
+                    window.location.pathname= '/Health-Plus/patientHome'
                 }
             }
             else {

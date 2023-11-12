@@ -23,7 +23,25 @@ const PatientHome = () => {
       console.error('Error fetching wallet data:', error.message);
     }
   };
+  function handlePackagesClick() {
+    window.location.pathname = '/Health-Plus/healthPackages';
+  }
+  function handleAppointmentsClick() {
+    window.location.pathname = '/Health-Plus/bookAppointments';
+  }
 
+  function handleHealthRecordsClick() {
+    window.location.pathname = '/Health-Plus/viewHealthRecords';
+  }
+  function handleChangePasswordClick() {
+    window.location.pathname = '/Health-Plus/changePassword';
+  }
+  function handleAddFamilyMemberClick() {
+    window.location.pathname = '/Health-Plus/addRegFamilymember';
+  }
+  function handleForgotPassClick() {
+    window.location.pathname = '/Health-Plus/forgotPassword';
+  }
   return (
     <div>
       <button
@@ -38,22 +56,44 @@ const PatientHome = () => {
         <p><strong>Amount:</strong> {wltAmnt}EGP</p>
         </div>
 
-      {/* <div>
-        <h3>FamilyMembers HealthPackage Data:</h3>
-        {familyHealthPackageData.map((familyMember, index) => (
-          <div key={index}>
-            <p><strong>Family Member ID:</strong> {familyMember._id}</p>
-            <p><strong>Name:</strong> {familyMember.Name}</p>
-            <p><strong>Email:</strong> {familyMember.Email}</p>
-            <p><strong>Package_Type:</strong> {familyMember.packageType ? familyMember.packageType : 'No sub'}</p>
-            <p><strong>Subscription_fees:</strong> {familyMember.subsriptionFeesInEGP ? familyMember.subsriptionFeesInEGP : 'No sub'}</p>
-            <p><strong>medicin Discount:</strong> {familyMember.medicinDiscountInPercentage ? familyMember.medicinDiscountInPercentage : 'No sub'}</p>
-            <p><strong>family Discount:</strong> {familyMember.familyDiscountInPercentage ? familyMember.familyDiscountInPercentage : 'No sub'}</p>
-            <p><strong>doctor Discount:</strong> {familyMember.doctorDiscountInPercentage ? familyMember.doctorDiscountInPercentage : 'No sub'}</p>
-            <hr />
-          </div>
-        ))}
-      </div> */}
+        <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={ handlePackagesClick}>
+        View My Health Packages
+      </button>
+
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={ handleChangePasswordClick}>
+        Change Password
+      </button>
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={handleAddFamilyMemberClick}>
+        Link family Member's account
+      </button>
+
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={ handleAppointmentsClick}>
+        View available slots and Book
+      </button>
+
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={ handleHealthRecordsClick}>
+        Health Records
+      </button>
+
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={ handleForgotPassClick}>
+        forgot password
+      </button>
+
+
+
+      
     </div>
   );
 };
