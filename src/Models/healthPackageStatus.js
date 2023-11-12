@@ -13,7 +13,7 @@ const HealthPackageStatusSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Subscribed', 'Unsubscribed', 'Cancelled'],
+    enum: ['Subscribed', 'UnSubscribed', 'Cancelled'],
     required: true,
   },
   renewalDate: {

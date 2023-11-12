@@ -22,7 +22,7 @@ router.post('/patient', upload.single('history'), async (req, res) => {
 
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
-        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.file) {
+        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender) {
         console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
@@ -61,8 +61,8 @@ router.post('/patient', upload.single('history'), async (req, res) => {
             EmergencyMobile: req.body.emergencyNumber,
             Gender: req.body.gender,
             HealthRecords: {
-                data: req.file.buffer,
-                type: req.file.mimetype
+                data: null,
+                type: null
             }
         });
 

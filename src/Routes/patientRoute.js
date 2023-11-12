@@ -4,7 +4,6 @@ import patientModel from '../Models/patientsModel.js';
 import appointmentModel from '../Models/appointmentModel.js';
 import prescriptionsModel from '../Models/prescriptionsModel.js';
 import familyMember from '../Models/familyMemberModel.js'
-import fs from 'fs';
 import doctorModel from '../Models/doctorModel.js';
 import healthPackageModel from '../Models/healthPackageModel.js';
 import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
@@ -16,8 +15,10 @@ import familyMemberModel from '../Models/familyMemberModel.js';
 import healthPackageStatus from '../Models/healthPackageStatus.js';
 import stripe from "stripe";
 import healthModel from '../Models/healthModel.js';
-import { Console } from 'console';
 
+import multer from 'multer';
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 const stripeInstance = stripe('sk_test_51OAmglE5rOvAFcqVk714zBO64pgCArV8MfP0BWTnycXGzLnWqkX5cP37OvMffUIDt6DdoKif93x9PfiC39XvkhJr00LuYVmMyv');
@@ -61,6 +62,7 @@ router.post('/addFamilyMem', protect, async (req, res) => {
             Gender: req.body.gender,
             Relation: req.body.relation.toLowerCase(),
             PatientId: req.user._id,
+            FamilyMemId: req.body.fMemId
         });
         newFamilyMember.save();
         // console.log(req.body.pId)
@@ -83,8 +85,8 @@ router.get('/getWalletAmount', protect, async (req, res) => {
             message: "You are not a doctor"
         });
     }
-    var result={};
-    result.Amount=exists.Wallet;
+    var result = {};
+    result.Amount = exists.Wallet;
     return res.status(200).json(result);
 })
 
@@ -129,7 +131,7 @@ router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
     }
 
     req.body.relation = req.body.relation.toLowerCase();
-    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')|| (req.body.relation) == ('spouse')))
+    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child') || (req.body.relation) == ('spouse')))
         return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
     const email = req.body.email;
     var famMember = await patientModel.findOne({ Email: email });
@@ -139,7 +141,7 @@ router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
     if (famMember._id == req.user._id)
         return (res.status(400).send({ message: "You can't add yourself as a family member", success: false }));
     var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
-    
+
     if (availFamMem)
         return (res.status(400).send({ message: "This patient is alreadt registered as a family member" }));
     try {
@@ -162,36 +164,35 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-    var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id  });
-    var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id  });
-    var list=[]
+    var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id });
+    var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id });
+    var list = []
     console.log(regFamMemebers)
 
-    for  (var x in regFamMemebers){
-        var patientFam=await patientModel.findOne({_id:regFamMemebers[x].Patient2Id})
-        if(patientFam)
-        list.push(patientFam)
+    for (var x in regFamMemebers) {
+        var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].Patient2Id })
+        if (patientFam)
+            list.push(patientFam)
     }
-     regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id  });
-    for( var x in regFamMemebers)   {
-        var patientFam=await patientModel.findOne({_id:regFamMemebers[x].PatientId})
-        if(patientFam)
-        list.push(patientFam)
-    } 
-   
-        let famMembers={
-            registered:list,
-            unregistered:unRegFamMemebers
-        }
-    
-        res.status(200).json({ Result: famMembers, success: true });
-    
+    regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id });
+    for (var x in regFamMemebers) {
+        var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].PatientId })
+        if (patientFam)
+            list.push(patientFam)
+    }
+
+    let famMembers = {
+        registered: list,
+        unregistered: unRegFamMemebers
+    }
+
+    res.status(200).json({ Result: famMembers, success: true });
+
 })
 
 // requirement number 23
 router.post('/getAppointment', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
-    console.log(exists);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
@@ -224,12 +225,10 @@ router.post('/getAppointment', protect, async (req, res) => {
     }
     );
     var final = [];
-
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-        console.log(doctor);
-        if (doctor.length > 0)
+        if (patient.length > 0)
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
@@ -404,26 +403,25 @@ router.post('/bookAppointment', protect, async (req, res) => {
     }
     const dId = req.body.dId;
     const date = req.body.date;
-    const aptmnt = await docAvailableSlots.find({ DoctorId: dId, Date: date });
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: req.user._id, FamilyMemId: famId });
-        if (!famMember ) {
+        if (!famMember) {
             return (res.status(400).send({ error: "cant find family member", success: false }));
         }
         const newAppointment = new appointmentModel({
-            PatientId:  req.user._id,
+            PatientId: req.user._id,
             FamilyMemId: famId,
             DoctorId: dId,
             Status: "upcoming",
             Date: date
         });
         newAppointment.save();
-       await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
-       return res.status(200).json({ Result: newAppointment, success: true });
+        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+        return res.status(200).json({ Result: newAppointment, success: true });
     }
-
-    if (!aptmnt) {
+    if (aptmnt.length < 1) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
     }
     const newAppointment = new appointmentModel({
@@ -433,7 +431,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
-   await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+    await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
     res.status(200).json({ Result: newAppointment, success: true });
 
 
@@ -853,14 +851,12 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         // get the patient package
         const user = await patientModel.findById(userId);
 
-        if (!user) {
-            return res.status(500).json({ message: 'Patient not found' });
-        }
-
         let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId });
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
+        let userHealth = {}
 
-        let userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
+        if (userHealthPackage.status == 'Subscribed')
+            userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
 
         userHealth.PatientId = user?._id;
         userHealth.Name = user?.Name;
@@ -878,11 +874,12 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser });
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
 
-            let famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage);
+            let famMemberUserHealth = {};
+            if(famMemberUserHealthPackage.status == 'Subscribed')
+                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage)??{};
 
             let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
-            console.log(famMemberUser);
 
             memberRes.PatientId = famMemberUser?._id;
             memberRes.Name = famMemberUser?.Name;
@@ -1000,13 +997,61 @@ router.get('/viewHealthCarePackages', protect, async (req, res) => {
         }
 
         return res.status(200).json({
-        message: 'Gettng Health Packages Details',
-        success: true,
-        Result: healthPackages});
+            message: 'Gettng Health Packages Details',
+            success: true,
+            Result: healthPackages
+        });
 
     } catch (error) {
         console.error('Error getting Health Packages:', error.message);
         return res.status(400).send({ error: 'Error' });
+    }
+});
+
+router.post('/addHistory', upload.array('files', 10), protect, async (req, res) => {
+    try {
+        const files = req.files;
+
+        const pat = await patientModel.findById(req.user);
+        if (!pat) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not authorised "
+            });
+        }
+
+        let medical = pat.HealthHistory;
+
+        if (files) {
+            for (const file of files) {
+                const newHistoryEntry = {
+                    data: file.buffer,
+                    type: file.mimetype,
+                    // Add any other properties you need for the file entry
+                };
+
+                medical.push(newHistoryEntry);
+            }
+        }
+
+        const updatedPatient = await patientModel.findByIdAndUpdate(
+            req.user,
+            { HealthHistory: medical },
+            { new: true }
+        );
+
+        console.log(updatedPatient.HealthHistory);
+        res.status(200).json({
+            success: true,
+            message: "Health history updated successfully",
+            data: updatedPatient,
+        });
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: "General Error",
+        });
     }
 });
 
@@ -1157,7 +1202,7 @@ const processWalletPayment = async (req, res, userId, fees, doctor) => {
 
 router.post("/payForAppointment", async (req, res) => {
     const { userType, paymentType } = req.query;
-    try{
+    try {
         return await processPayment(req, res, userType, paymentType);
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1190,7 +1235,7 @@ const processPayment = async (req, res, userType, paymentType) => {
     }
 
     const fees = calculateFees(doctor.HourlyRate, discount);
-    try{
+    try {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
         } else {
@@ -1204,7 +1249,7 @@ const processPayment = async (req, res, userType, paymentType) => {
 
 router.post("/subscribeForPackage", async (req, res) => {
     const { userType, paymentType } = req.query;
-    try{
+    try {
         const result = await processSubscription(req, res, userType, paymentType);
         return result;
     } catch (e) {
@@ -1229,7 +1274,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
     }
 
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
-    try{
+    try {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
@@ -1241,29 +1286,29 @@ const processSubscription = async (req, res, userType, paymentType) => {
     }
 };
 
-    router.get('/viewmyHealthRecords',protect,async(req,res)=>{ 
-        const patient = await patientModel.findOne(req.user);
-        
+router.get('/viewmyHealthRecords', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+
     if (!patient) {
-    return    res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Patient not found", success: false })
     }
-    try{
-    const healthRecord = await healthModel.find({PatientId:patient._id});
-    let list=[]
-    console.log(healthRecord)
-    for( var x in healthRecord){
-        const data=healthRecord[x].HealthDocument.binData
-        list.push(data)
+    try {
+        const healthRecord = await healthModel.find({ PatientId: patient._id });
+        let list = []
+        console.log(healthRecord)
+        for (var x in healthRecord) {
+            const data = healthRecord[x].HealthDocument.binData
+            list.push(data)
+        }
+        let Result = {
+            "healthRecords": list,
+            "medicalHistory": patient.HealthHistory
+        }
+        return res.status(200).json({ Result: Result, success: true });
     }
-    let Result={
-        "healthRecords":list,
-        "medicalHistory":patient.HealthHistory
+    catch (error) {
+        console.error('Error getting health records', error.message);
     }
-    return res.status(200).json({Result:Result,success:true});
-}
-catch(error){
-    console.error('Error getting health records', error.message);
-}
-    });
-    
+});
+
 export default router;

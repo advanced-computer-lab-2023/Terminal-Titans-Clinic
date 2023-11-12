@@ -42,8 +42,7 @@ function App() {
 
         <Routes>
 
-          {/* <Route path="/registerPatient" element={<RegisterPatient />} />
-          <Route path="/registerDoctor" element={<RegisterDoctor />} /> */}
+          <Route path="/patient" element={<Patient />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<Patient/>} />
