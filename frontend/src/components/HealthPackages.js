@@ -15,23 +15,12 @@ const HealthPackageSubscriptionPage = () => {
       });
 
       const result = response.data.result;
-
+      // console.log(result);
       // Extract patient health package data
-      setPatientHealthPackageData({
-        patientId: result.myUser._id,
-        Package_Type: result.myUser.packageType,
-        Subscription_fees: result.myUser.subsriptionFeesInEGP,
-        // Add more fields as needed
-      });
+      setPatientHealthPackageData(result.myUser);
 
-      // Extract family members health package data
-      const familyMembersData = result.familyMembers.map((member) => ({
-        patientId: member.PatientId,
-        name: member.Name,
-        email: member.Email,
-        // Add more fields as needed
-      }));
-      setFamilyHealthPackageData(familyMembersData);
+      setFamilyHealthPackageData(result.familyMembers);
+      console.log(familyHealthPackageData);
     } catch (error) {
       console.error('Error fetching health package data:', error.message);
     }
@@ -47,20 +36,27 @@ const HealthPackageSubscriptionPage = () => {
 
       <div>
         <h2>Patient Health Package Data:</h2>
-        <p><strong>Patient ID:</strong> {patientHealthPackageData.patientId}</p>
-        <p><strong>Package_Type:</strong> {patientHealthPackageData.Package_Type}</p>
-        <p><strong>Subscription_fees:</strong> {patientHealthPackageData.Subscription_fees}</p>
-        {/* Add more fields as needed */}
+        <p><strong>Patient ID:</strong> {patientHealthPackageData._id}</p>
+        <p><strong>Package_Type:</strong> {patientHealthPackageData.packageType}</p>
+        <p><strong>Subscription_fees:</strong> {patientHealthPackageData.subsriptionFeesInEGP}</p>
+        <p><strong>medicin Discount:</strong> {patientHealthPackageData.medicinDiscountInPercentage}</p>
+        <p><strong>family Discount:</strong> {patientHealthPackageData.familyDiscountInPercentage}</p>
+        <p><strong>doctor Discount:</strong> {patientHealthPackageData.doctorDiscountInPercentage}</p>
       </div>
 
       <div>
         <h2>Family Members Health Package Data:</h2>
         {familyHealthPackageData.map((familyMember, index) => (
           <div key={index}>
-            <p><strong>Family Member ID:</strong> {familyMember.patientId}</p>
-            <p><strong>Name:</strong> {familyMember.name}</p>
-            <p><strong>Email:</strong> {familyMember.email}</p>
-            {/* Add more fields as needed */}
+            <p><strong>Family Member ID:</strong> {familyMember._id}</p>
+            <p><strong>Name:</strong> {familyMember.Name}</p>
+            <p><strong>Email:</strong> {familyMember.Email}</p>
+            <p><strong>Package_Type:</strong> {familyMember.packageType ? familyMember.packageType : 'No sub'}</p>
+            <p><strong>Subscription_fees:</strong> {familyMember.subsriptionFeesInEGP ? familyMember.subsriptionFeesInEGP : 'No sub'}</p>
+            <p><strong>medicin Discount:</strong> {familyMember.medicinDiscountInPercentage ? familyMember.medicinDiscountInPercentage : 'No sub'}</p>
+            <p><strong>family Discount:</strong> {familyMember.familyDiscountInPercentage ? familyMember.familyDiscountInPercentage : 'No sub'}</p>
+            <p><strong>doctor Discount:</strong> {familyMember.doctorDiscountInPercentage ? familyMember.doctorDiscountInPercentage : 'No sub'}</p>
+            <hr />
           </div>
         ))}
       </div>
