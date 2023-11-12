@@ -1,10 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const HealthPackageSubscriptionPage = () => {
   const [patientHealthPackageData, setPatientHealthPackageData] = useState({});
   const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
+
+  const [patientHealthPackageStatus, setPatientHealthPackageStatus] = useState({});
+  const [familyHealthPackageStatus, setfamilyHealthPackageStatus] = useState([]);
 
   const fetchHealthPackageData = async () => {
     try {
@@ -23,39 +25,135 @@ const HealthPackageSubscriptionPage = () => {
     }
   };
 
+  const fetchHealthPackageStatus = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/patient/viewSubscriptionStatus", {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
+
+      const result = response.data.result;
+      setPatientHealthPackageStatus(result.myUser.status);
+      setfamilyHealthPackageStatus(result.familyMembers);
+
+    } catch (error) {
+      console.error('Error fetching health package data:', error.message);
+    }
+  };
+
   return (
     <div>
       <button
-        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
         onClick={fetchHealthPackageData}>
         View Subscribed HealthPackages
       </button>
 
-      <div>
-        <h3>Patient HealthPackage Data:</h3>
-        {/* <p><strong>Patient ID:</strong> {patientHealthPackageData._id}</p> */}
-        <p><strong>Package_Type:</strong> {patientHealthPackageData.packageType}</p>
-        <p><strong>Subscription_fees:</strong> {patientHealthPackageData.subsriptionFeesInEGP}EGP</p>
-        <p><strong>medicin Discount:</strong> {patientHealthPackageData.medicinDiscountInPercentage}%</p>
-        <p><strong>family Discount:</strong> {patientHealthPackageData.familyDiscountInPercentage}%</p>
-        <p><strong>doctor Discount:</strong> {patientHealthPackageData.doctorDiscountInPercentage}%</p>
+      <div style={{ marginTop: '20px' }}>
+        <h4>Patient HealthPackage Data:</h4>
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Package Type</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Subscription Fees</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Medicine Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Family Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Doctor Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.packageType}</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.subsriptionFeesInEGP} EGP</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.medicinDiscountInPercentage}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.familyDiscountInPercentage}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.doctorDiscountInPercentage}%</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div>
-        <h3>FamilyMembers HealthPackage Data:</h3>
-        {familyHealthPackageData.map((familyMember, index) => (
-          <div key={index}>
-            {/* <p><strong>Family Member ID:</strong> {familyMember._id}</p> */}
-            <p><strong>Name:</strong> {familyMember.Name}</p>
-            <p><strong>Email:</strong> {familyMember.Email}</p>
-            <p><strong>Package_Type:</strong> {familyMember.packageType ? familyMember.packageType : 'No sub'}</p>
-            <p><strong>Subscription_fees:</strong> {familyMember.subsriptionFeesInEGP ? familyMember.subsriptionFeesInEGP : 'No sub'}</p>
-            <p><strong>medicin Discount:</strong> {familyMember.medicinDiscountInPercentage ? familyMember.medicinDiscountInPercentage : 'No sub'}</p>
-            <p><strong>family Discount:</strong> {familyMember.familyDiscountInPercentage ? familyMember.familyDiscountInPercentage : 'No sub'}</p>
-            <p><strong>doctor Discount:</strong> {familyMember.doctorDiscountInPercentage ? familyMember.doctorDiscountInPercentage : 'No sub'}</p>
-            <hr />
-          </div>
-        ))}
+      <div style={{ marginTop: '20px' }}>
+        <h4>FamilyMembers HealthPackage Data:</h4>
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Name</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Email</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Package Type</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Subscription Fees</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Medicine Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Family Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Doctor Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {familyHealthPackageData.map((familyMember, index) => (
+              <tr key={index}>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.Name}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.Email}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.packageType || 'No sub'}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.subsriptionFeesInEGP || 'No sub'} EGP</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.medicinDiscountInPercentage || 'No sub'}%</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.familyDiscountInPercentage || 'No sub'}%</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.doctorDiscountInPercentage || 'No sub'}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ marginTop: '20px' }}>
+        <button
+          style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
+          onClick={fetchHealthPackageStatus}>
+          View HealthPackages Status
+        </button>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4>Patient HealthPackage Status:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.status}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.renewalDate || 'Nothing'}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.endDate || 'Nothing'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4>FamilyMembers HealthPackage Status:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Relation</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {familyHealthPackageStatus.map((familyMembers, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.Relation}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.status}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.renewalDate || 'Nothing'}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.endDate || 'Nothing'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
