@@ -53,7 +53,11 @@ const HealthPackageSubscriptionPage = () => {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem('token')
         }
-      })
+      }).then((response) => {
+        alert(response.data.message + " Please refresh the page to see the changes")
+      }).catch((error) => {
+        alert(error.response.data.message)
+      });
 
       const result = response.data.result;
       setPatientHealthPackageCancel(result.myUser);
@@ -185,50 +189,6 @@ const HealthPackageSubscriptionPage = () => {
           onClick={cancelHeathPackage}>
           Cancel Subscription
         </button>
-
-        <div style={{ marginTop: '20px' }}>
-          <h4>Patient HealthPackage:</h4>
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.status}</td>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.renewalDate || 'Nothing'}</td>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageCancel.endDate || 'Nothing'}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ marginTop: '20px' }}>
-          <h4>FamilyMembers HealthPackage:</h4>
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Relation</th>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
-                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {familyHealthPackageCancel.map((familyMembers, index) => (
-                <tr key={index}>
-                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.Relation}</td>
-                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.status}</td>
-                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.renewalDate || 'Nothing'}</td>
-                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.endDate || 'Nothing'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );

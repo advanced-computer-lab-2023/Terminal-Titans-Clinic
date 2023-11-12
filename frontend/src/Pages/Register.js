@@ -9,6 +9,7 @@ function Register() {
           defaultActiveKey="profile"
           id="uncontrolled-tab-example"
           className="mb-3 d-flex justify-content-center"
+          transition={true}
         >
           <Tab eventKey="home" title="Register Doctor">
             <RegisterDoctorForm />
