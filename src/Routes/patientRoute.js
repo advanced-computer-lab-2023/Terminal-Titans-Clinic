@@ -15,8 +15,6 @@ import mongoose from 'mongoose'
 import familyMemberModel from '../Models/familyMemberModel.js';
 import healthPackageStatus from '../Models/healthPackageStatus.js';
 import stripe from "stripe";
-import healthModel from '../Models/healthModel.js';
-import { Console } from 'console';
 
 
 const router = express.Router();
@@ -61,6 +59,7 @@ router.post('/addFamilyMem', protect, async (req, res) => {
             Gender: req.body.gender,
             Relation: req.body.relation.toLowerCase(),
             PatientId: req.user._id,
+            FamilyMemId: req.body.fMemId
         });
         newFamilyMember.save();
         // console.log(req.body.pId)
@@ -88,26 +87,60 @@ router.get('/getWalletAmount', protect, async (req, res) => {
     return res.status(200).json(result);
 })
 
-
-
-router.post('/addRegFamilyMem', protect, async (req, res) => {
+router.post('/addRegFamilyMembyNum', protect, async (req, res) => {
     const exist = patientModel.findOne(req.user);
     if (!exist) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
 
     req.body.relation = req.body.relation.toLowerCase();
-    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')))
+    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child') || (req.body.relation) == ('spouse')))
+        return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
+    const mobile = req.body.phoneNum;
+    var famMember = await patientModel.findOne({ Mobile: mobile });
+    if (!famMember)
+        return (res.status(400).send({ message: "This phone num is not registered as a patient", success: false }));
+    if (famMember._id == req.user._id)
+        return (res.status(400).send({ message: "You can't add yourself as a family member", success: false }));
+    var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
+    if (availFamMem)
+        return (res.status(400).send({ message: "This patient is already registered as a family member" }));
+    try {
+        const newFamilyMember = new RegFamMem({
+            PatientId: req.user._id,
+            Patient2Id: famMember._id,
+            Relation: req.body.relation.toLowerCase()
+        });
+        newFamilyMember.save();
+        res.status(200).json({ Result: newFamilyMember, success: true })
+    }
+    catch (error) {
+        res.status(400).send({ error: error });
+    }
+
+})
+
+router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
+    console.log('l')
+    const exist = patientModel.findOne(req.user);
+    if (!exist) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+
+    req.body.relation = req.body.relation.toLowerCase();
+    if (!(req.body.relation == ('wife') || (req.body.relation) == ('husband') || (req.body.relation) == ('child')|| (req.body.relation) == ('spouse')))
         return (res.status(400).send({ message: "family member can only be wife/husband or child", success: false }));
     const email = req.body.email;
     var famMember = await patientModel.findOne({ Email: email });
+    console.log(famMember)
     if (!famMember)
         return (res.status(400).send({ message: "This email is not registered as a patient", success: false }));
     if (famMember._id == req.user._id)
         return (res.status(400).send({ message: "You can't add yourself as a family member", success: false }));
     var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
+    
     if (availFamMem)
-        return (res.status(400).send({ message: "This patient is not registered as a family member" }));
+        return (res.status(400).send({ message: "This patient is alreadt registered as a family member" }));
     try {
         const newFamilyMember = new RegFamMem({
             PatientId: req.user._id,
@@ -128,24 +161,20 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-    var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id  });
-    var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id  });
+    var unRegFamMemebers = await unRegFamMem.findOne({ PatientId: req.user._id  });
+    var regFamMemebers = await RegFamMem.findOne({ PatientId: req.user._id  });
     var list=[]
-    console.log(regFamMemebers)
-
     for  (var x in regFamMemebers){
         var patientFam=await patientModel.findOne({_id:regFamMemebers[x].Patient2Id})
-        if(patientFam)
         list.push(patientFam)
     }
-     regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id  });
+    var regFamMemebers = await RegFamMem.findOne({ Patient2Id: req.user._id  });
     for( var x in regFamMemebers)   {
         var patientFam=await patientModel.findOne({_id:regFamMemebers[x].PatientId})
-        if(patientFam)
         list.push(patientFam)
     } 
    
-        let famMembers={
+        famMembers={
             registered:list,
             unregistered:unRegFamMemebers
         }
@@ -157,7 +186,6 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
 // requirement number 23
 router.post('/getAppointment', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
-    console.log(exists);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
@@ -190,12 +218,10 @@ router.post('/getAppointment', protect, async (req, res) => {
     }
     );
     var final = [];
-
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-        console.log(doctor);
-        if (doctor.length > 0)
+        if (patient.length > 0)
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
@@ -370,26 +396,24 @@ router.post('/bookAppointment', protect, async (req, res) => {
     }
     const dId = req.body.dId;
     const date = req.body.date;
-    const aptmnt = await docAvailableSlots.find({ DoctorId: dId, Date: date });
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: req.user._id, FamilyMemId: famId });
-        if (!famMember ) {
+        if (famMember.length < 1) {
             return (res.status(400).send({ error: "cant find family member", success: false }));
         }
         const newAppointment = new appointmentModel({
-            PatientId:  req.user._id,
-            FamilyMemId: famId,
+            PatientId: famId,
             DoctorId: dId,
             Status: "upcoming",
             Date: date
         });
         newAppointment.save();
-       await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
-       return res.status(200).json({ Result: newAppointment, success: true });
+        docAvailableSlots.findOneAndDelete({ DoctorId: dId, Date: date });
+        res.status(200).json({ Result: newAppointment, success: true });
     }
-
-    if (!aptmnt) {
+    if (aptmnt.length < 1) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
     }
     const newAppointment = new appointmentModel({
@@ -399,7 +423,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
         Date: date
     });
     newAppointment.save();
-   await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+    docAvailableSlots.findOneAndDelete({ DoctorId: dId, Date: date });
     res.status(200).json({ Result: newAppointment, success: true });
 
 
@@ -1207,29 +1231,6 @@ const processSubscription = async (req, res, userType, paymentType) => {
     }
 };
 
-    router.get('/viewmyHealthRecords',protect,async(req,res)=>{ 
-        const patient = await patientModel.findOne(req.user);
-        
-    if (!patient) {
-    return    res.status(400).json({ message: "Patient not found", success: false })
-    }
-    try{
-    const healthRecord = await healthModel.find({PatientId:patient._id});
-    let list=[]
-    console.log(healthRecord)
-    for( var x in healthRecord){
-        const data=healthRecord[x].HealthDocument.binData
-        list.push(data)
-    }
-    let Result={
-        "healthRecords":list,
-        "medicalHistory":patient.HealthHistory
-    }
-    return res.status(200).json({Result:Result,success:true});
-}
-catch(error){
-    console.error('Error getting health records', error.message);
-}
-    });
+    
     
 export default router;

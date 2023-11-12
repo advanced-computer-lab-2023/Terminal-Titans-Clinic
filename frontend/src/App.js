@@ -16,6 +16,7 @@ import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
 import Doctor from "./Pages/Doctor";
+import AddRegFamMem from "./components/addRegFamilymember";
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
+          <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
