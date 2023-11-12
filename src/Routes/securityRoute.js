@@ -38,6 +38,9 @@ router.post('/patient', upload.single('history'), async (req, res) => {
     unqiueUser = await userModel.find({ Email: req.body.email });
     if (unqiueUser.length > 0)
         return res.status(400).json({ message: 'email has to be unique', success: false })
+        unqiueUser = await userModel.find({ Mobile: req.body.mobile });
+        if (unqiueUser.length > 0)
+            return res.status(400).json({ message: 'Mobile num has to be unique', success: false })
 
     // if (!validator.validate(req.body.email))
     //     return res.status(400).json({ message: 'Please enter a valid email', success: false })
