@@ -1,6 +1,5 @@
 import mongoose, { Schema as _Schema, model } from 'mongoose';
 import userModel from './userModel.js';
-import healthPackageModel from './healthPackageModel.js';
 
 // const User=require('./userModel');
 
@@ -40,15 +39,13 @@ const patientSchema = new _Schema({
     type: String,
     required: true,
   },
-  HealthHistory: {
-    data: Buffer,
-    contentType: String
-  }
-  ,
-  // HealthRecords: {
-  //   data: Buffer,
-  //   contentType: String
-  // }
+  HealthHistory: [
+    {
+      data: Buffer,
+      contentType: String
+    }
+  ]
+
 }, { timestamps: true });
 const patient = userModel.discriminator('patient', patientSchema);
 export default model('patient');
