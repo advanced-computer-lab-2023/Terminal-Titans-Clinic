@@ -265,23 +265,24 @@ router.get('/viewContract', protect, async (req, res) => {
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
-
+    console.log('k')
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    console.log(doctor);
+   // console.log(doctor);
     const flag= true;
-    let dTimeTemp = req.body.Date;
+    let dTimeTemp = req.body.date; 
+    console.log(dTimeTemp); 
     let startDate = new Date(dTimeTemp);
     startDate.setHours(startDate.getHours() + 2)
     //const startDate = req.body.Date
-
+console.log(startDate)
     let endDate = new Date(startDate);
     endDate.setMinutes(startDate.getMinutes() + 30);
-
+console.log('p')
     const aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
-    console.log(aptmnts);
+    //console.log(aptmnts);
     if(aptmnts){
 
 
@@ -293,7 +294,7 @@ router.post('/addavailableslots', protect, async (req, res) => {
             
             } 
         }
-        console.log(aptmnts);
+       // console.log(aptmnts);
             if (flag==false) {
                 return res.status(500).json({ message: "you have an appointment during this slot", success: false });
             }
@@ -302,12 +303,13 @@ router.post('/addavailableslots', protect, async (req, res) => {
         try {
             const availableSlots = new docAvailableSlots({
                 DoctorId: req.user._id ,
-                Date: req.body.Date,
+                Date: startDate,
             });
             availableSlots.save();
-            
-            res.status(200).json({ Result: docAvailableSlots, success: true })
+            console.log('ho')
+           return  res.status(200).json({ Result: availableSlots, success: true })
         }
+
         catch (error) {
             res.status(400).send({ error: error, success: false });
         
