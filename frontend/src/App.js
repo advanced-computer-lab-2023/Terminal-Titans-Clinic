@@ -12,6 +12,8 @@ import Payment from "./Pages/Payment";
 import ViewAppointments from "./Pages/ViewAppoitments";
 import SignIn from "./Pages/SignIn";
 import HealthPackages from "./Pages/HealthPackages";
+import ViewmyHealthRecords from "./components/viewHealthRecords";
+import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
+          <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>

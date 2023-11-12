@@ -4,12 +4,35 @@ import axios from 'axios';
 import "../Styles/Appointments.css"
 
 import moment from 'moment';
+import { set } from 'mongoose';
 
 function BookAppointmentsForm() {
     const [doctors, setDoctors] = useState([]);
     const [selectedDoctor, setSelectedDoctor] = useState('');
     const [aptmnts,setAppointments] = useState([]);
+    const [unRegFamily,setUnRegFamily] = useState([]);
+    const [famMemId,setFamMemId] = useState(null);
+    const [selectedFam,setSelectedFam] = useState('');
+    const [selectedDate,setSelectedDate] = useState('');
 
+    useEffect(() => {
+        const fetchData = async () => {
+            console.log(sessionStorage.getItem("token") )
+            try {
+                const response = await axios.get(`http://localhost:8000/patient/viewRegFamMem`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+                );
+                const data = response.data;
+                   // console.log(aptmnts);
+                  setUnRegFamily(data.Result.unregistered)
+                     console.log(data.Result)
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                alert(error.response.data.message)
+            }
+        };
+      
+        fetchData();
+    }, []);
     const allAppointments = async (doctorId) => {
         try {
             const response = await axios.get(`http://localhost:8000/patient/getDoctorAvailableSlots/${doctorId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
@@ -19,6 +42,8 @@ function BookAppointmentsForm() {
                 setAppointments(aptmnts.final)
         } catch (error) {
             console.error('Error fetching data:', error);
+            alert('cant find available slots')
+
         }
     };
 
@@ -43,16 +68,15 @@ function BookAppointmentsForm() {
     }, []);
 
     const renderDays = () => {
-        console.log(aptmnts.final);
+        //console.log(aptmnts.final);
         const dates = [...new Set(aptmnts.map((aptmnt) => aptmnt.Date))];
 
         return dates.map((date) => {
             const slots = aptmnts.filter((aptmnt) => aptmnt.Date === date);
             //console.log( moment(date).format('HH:mm'));
             const twoHoursAgo = moment(date).subtract(2, 'hours');
-            console.log(twoHoursAgo.format('HH:mm'));
-            
-
+           
+            //console.log(date)
             return (
                 <div className="day">
                     <div className="slot-container">
@@ -60,11 +84,16 @@ function BookAppointmentsForm() {
                         <br />
                         {moment(date).format("MMMM D")}
                     </div>    
-                    <div className="timeslot">{twoHoursAgo.format('HH:mm')}</div>
-                </div>
+                    <div className="timeslot" onClick={async() => {
+                        setSelectedDate(date);
+                        bookAppointment(date)
+    }} value={date}>
+        {twoHoursAgo.format('HH:mm')}
+    </div>                </div>
             );
         });
     }
+    
 
     const handleDoctorChange = (event) => {
         setSelectedDoctor(event.target.value);
@@ -82,6 +111,21 @@ function BookAppointmentsForm() {
 
         allAppointments(doctors[(event.target.selectedIndex)-1]._id);
     };
+    const handleFamilyChange = (event) => {
+        setSelectedFam(event.target.value);
+        if(event.target.value !== 'myself')
+        setFamMemId(unRegFamily[(event.target.selectedIndex)-1]._id);
+        else
+        setFamMemId(null);
+        
+    };
+    const bookAppointment = async (date) => {
+        const response = await axios.post(
+            `http://localhost:8000/patient/bookAppointment`,
+            { dId: selectedDoctor, date: date, famId: famMemId},
+            { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+        );
+    }
 
     return (
 
@@ -89,8 +133,17 @@ function BookAppointmentsForm() {
             <select value={selectedDoctor} onChange={handleDoctorChange}>
                 <option value="">Select a doctor</option>
                 {doctors.map((doctor) => (
-                    <option key={doctor._id} value={doctor.Name}>
+                    <option key={doctor._id} value={doctor._id}>
                         {doctor.Name}
+                    </option>
+                ))}
+            </select>
+            <label>Patient:</label>
+            <select value={selectedFam} onChange={handleFamilyChange}>
+                <option value='myself'>myslef</option>
+                {unRegFamily.map((famMem) => (
+                    <option key={famMem._id} value={famMem.Name}>
+                        {famMem.Name}
                     </option>
                 ))}
             </select>
