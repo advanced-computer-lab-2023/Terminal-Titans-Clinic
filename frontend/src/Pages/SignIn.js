@@ -53,6 +53,7 @@ export default function SignIn() {
                 }
                 else {
                     // go to patient page
+                    window.location.pathname= '/Health-Plus/healthPackages'
                 }
             }
             else {
