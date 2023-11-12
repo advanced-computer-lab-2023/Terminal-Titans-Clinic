@@ -4,12 +4,14 @@ import "./App.css";
 import RegisterPatient from "./Pages/RegisterPatient";
 import RegisterDoctor from "./Pages/RegisterDoctor";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Login from "./components/login";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import Payment from "./Pages/Payment";
+import ViewAppointments from "./Pages/ViewAppoitments";
+import SignIn from "./Pages/SignIn";
+import HealthPackages from "./Pages/HealthPackages";
 import ViewmyHealthRecords from "./components/viewHealthRecords";
 import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 
@@ -41,11 +43,13 @@ function App() {
           <Route path="/registerDoctor" element={<RegisterDoctor />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/bookAppointments" element={<BookAppointments/>} />
+          <Route path="/viewAppointments" element={<ViewAppointments/>} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
+          <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
     </div>

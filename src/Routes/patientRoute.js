@@ -157,6 +157,7 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
 // requirement number 23
 router.post('/getAppointment', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
+    console.log(exists);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
@@ -189,10 +190,12 @@ router.post('/getAppointment', protect, async (req, res) => {
     }
     );
     var final = [];
+
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-        if (patient.length > 0)
+        console.log(doctor);
+        if (doctor.length > 0)
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;

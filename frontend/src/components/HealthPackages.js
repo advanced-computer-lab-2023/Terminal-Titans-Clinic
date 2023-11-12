@@ -1,78 +1,71 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const HealthPackageSubscription = () => {
-  const [userHealthPackage, setUserHealthPackage] = useState(null);
-  const [familyMembersHealthPackages, setFamilyMembersHealthPackages] = useState([]);
+const HealthPackageSubscriptionPage = () => {
+  const [patientHealthPackageData, setPatientHealthPackageData] = useState({});
+  const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch user's health package
-        const userResponse = await axios.get('http://localhost:8000/patient/viewSubscriptions');
-        setUserHealthPackage(userResponse.data.userHealthPackage);
+  const fetchHealthPackageData = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/patient/viewSubscriptions", {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
 
-        // Fetch health packages for registered family members
-        const familyResponse = await axios.get('http://localhost:8000/patient/viewSubscriptions');
-        setFamilyMembersHealthPackages(familyResponse.data.familyMembersHealthPackages);
-      } catch (error) {
-        console.error('Error fetching health package subscriptions:', error.message);
-      }
-    };
+      const result = response.data.result;
 
-    fetchData();
-  }, []); // Empty dependency array ensures the effect runs once on mount
+      // Extract patient health package data
+      setPatientHealthPackageData({
+        patientId: result.myUser._id,
+        Package_Type: result.myUser.packageType,
+        Subscription_fees: result.myUser.subsriptionFeesInEGP,
+        // Add more fields as needed
+      });
+
+      // Extract family members health package data
+      const familyMembersData = result.familyMembers.map((member) => ({
+        patientId: member.PatientId,
+        name: member.Name,
+        email: member.Email,
+        // Add more fields as needed
+      }));
+      setFamilyHealthPackageData(familyMembersData);
+    } catch (error) {
+      console.error('Error fetching health package data:', error.message);
+    }
+  };
 
   return (
-    <div className="surface-ground px-4 py-8 md:px-6 lg:px-8">
-      <div className="text-900 font-bold text-6xl mb-4 text-center">Health Package Subscriptions</div>
+    <div>
+      <button
+        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        onClick={fetchHealthPackageData}>
+        View Subscribed HealthPackages
+      </button>
 
-      <div className="grid">
-        {/* Render user's health package */}
-        {userHealthPackage && (
-          <div className="col-12 lg:col-4">
-            <div className="p-3 h-full">
-              <div className="shadow-2 p-3 h-full flex flex-column surface-card" style={{ borderRadius: '6px' }}>
-                <div className="text-900 font-medium text-xl mb-2">{userHealthPackage.name}</div>
-                {/* Add other health package details */}
-                <hr className="my-3 mx-0 border-top-1 border-none surface-border" />
-                <div className="flex align-items-center">
-                  <span className="font-bold text-2xl text-900">{userHealthPackage.price}</span>
-                  <span className="ml-2 font-medium text-600">per month</span>
-                </div>
-                <hr className="my-3 mx-0 border-top-1 border-none surface-border" />
-                {/* Add other health package features */}
-                <hr className="mb-3 mx-0 border-top-1 border-none surface-border mt-auto" />
-                <button className="p-3 w-full mt-auto">Buy Now</button>
-              </div>
-            </div>
+      <div>
+        <h2>Patient Health Package Data:</h2>
+        <p><strong>Patient ID:</strong> {patientHealthPackageData.patientId}</p>
+        <p><strong>Package_Type:</strong> {patientHealthPackageData.Package_Type}</p>
+        <p><strong>Subscription_fees:</strong> {patientHealthPackageData.Subscription_fees}</p>
+        {/* Add more fields as needed */}
+      </div>
+
+      <div>
+        <h2>Family Members Health Package Data:</h2>
+        {familyHealthPackageData.map((familyMember, index) => (
+          <div key={index}>
+            <p><strong>Family Member ID:</strong> {familyMember.patientId}</p>
+            <p><strong>Name:</strong> {familyMember.name}</p>
+            <p><strong>Email:</strong> {familyMember.email}</p>
+            {/* Add more fields as needed */}
           </div>
-        )}
-
-        {/* Render health packages for registered family members */}
-        {familyMembersHealthPackages.length > 0 &&
-          familyMembersHealthPackages.map((packages, index) => (
-            <div className="col-12 lg:col-4" key={index}>
-              <div className="p-3 h-full">
-                <div className="shadow-2 p-3 h-full flex flex-column surface-card" style={{ borderRadius: '6px' }}>
-                  <div className="text-900 font-medium text-xl mb-2">{packages.name}</div>
-                  {/* Add other health package details */}
-                  <hr className="my-3 mx-0 border-top-1 border-none surface-border" />
-                  <div className="flex align-items-center">
-                    <span className="font-bold text-2xl text-900">{packages.price}</span>
-                    <span className="ml-2 font-medium text-600">per month</span>
-                  </div>
-                  <hr className="my-3 mx-0 border-top-1 border-none surface-border" />
-                  {/* Add other health package features */}
-                  <hr className="mb-3 mx-0 border-top-1 border-none surface-border" />
-                  <button className="p-3 w-full">Buy Now</button>
-                </div>
-              </div>
-            </div>
-          ))}
+        ))}
       </div>
     </div>
   );
 };
 
-export default HealthPackageSubscription;
+export default HealthPackageSubscriptionPage;
