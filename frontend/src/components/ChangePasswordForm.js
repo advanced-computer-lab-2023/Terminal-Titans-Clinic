@@ -59,6 +59,8 @@ function ChangePasswordForm() {
       .catch((error) => {
         
         console.error('Error:', error);
+        alert(error.response.data.message)
+
       });
         // Make a POST request to your backend register route
         

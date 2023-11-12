@@ -10,6 +10,8 @@ import Button from 'react-bootstrap/Button';
 import BookAppointments from "./Pages/BookAppointments";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import Payment from "./Pages/Payment";
+import ViewmyHealthRecords from "./components/viewHealthRecords";
+import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 
 
 function App() {
@@ -41,6 +43,8 @@ function App() {
           <Route path="/bookAppointments" element={<BookAppointments/>} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
+          <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/" element={<Login />} />
         </Routes>
       </Router>

@@ -49,7 +49,7 @@ router.get('/updateDoctor', protect, async (req, res) => {
 });
 
 // requirement number 25
-router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
+router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findById(req.user)
         if (!doctor) {
@@ -67,10 +67,9 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
         let healthRecords = await healthModel.find({ PatientId: appointment.PatientId })
 
 
-        if (healthRecords.length == 0) {
-            res.status(400).json({ message: "No health records found", success: false })
-            return;
-        }
+        // if (healthRecords.length == 0) {
+        //     res.status(400).json({ message: "No health records found", success: false })
+        // }
 
         let patient = await patientsModel.findOne({ _id: req.params.id });
 
@@ -90,7 +89,7 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
         }
         let list = []
         for (let x in healthRecords) {
-            list.push(healthRecords[x].HealthDocument.binData.toString('base64'))
+            list.push(healthRecords[x].HealthDocument.binData)
 
         }
 
@@ -98,7 +97,8 @@ router.get('/getPatientInfoAndHealth/:id', async (req, res) => {
         const result = {
             "healthRecords": healthRecords,
             "patient": patient,
-            "healthDoc": list
+            "healthDoc": list,
+            "medicalHistory": patient.MedicalHistory
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -128,7 +128,7 @@ router.get('/getPatientsList', protect,async (req, res) => {
         for (let i = 0; i < appointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
             let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-
+            if(!result.find((pat) => pat._id.equals(patient._id))){
             patient = { ...patient._doc, "familyMember": [] }
 
             for (let i = 0; i < familyMembers.length; i++) {
@@ -137,6 +137,8 @@ router.get('/getPatientsList', protect,async (req, res) => {
 
             result = [...result, patient];
         }
+    }
+    console.log(result)
 
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })

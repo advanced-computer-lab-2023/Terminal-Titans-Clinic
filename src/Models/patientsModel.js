@@ -45,10 +45,10 @@ const patientSchema = new _Schema({
     contentType: String
   }
   ,
-  HealthRecords: {
-    data: Buffer,
-    contentType: String
-  }
+  // HealthRecords: {
+  //   data: Buffer,
+  //   contentType: String
+  // }
 }, { timestamps: true });
 const patient = userModel.discriminator('patient', patientSchema);
 export default model('patient');
