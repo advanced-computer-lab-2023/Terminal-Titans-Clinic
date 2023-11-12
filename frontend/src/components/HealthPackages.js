@@ -90,11 +90,11 @@ const HealthPackageSubscriptionPage = () => {
           </thead>
           <tbody>
             <tr>
-              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.packageType}</td>
-              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.subsriptionFeesInEGP} EGP</td>
-              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.medicinDiscountInPercentage}%</td>
-              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.familyDiscountInPercentage}%</td>
-              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.doctorDiscountInPercentage}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.packageType || 'No sub'}</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.subsriptionFeesInEGP || 'No sub'} EGP</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.medicinDiscountInPercentage || 'No sub'}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.familyDiscountInPercentage || 'No sub'}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.doctorDiscountInPercentage || 'No sub'}%</td>
             </tr>
           </tbody>
         </table>
