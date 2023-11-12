@@ -28,7 +28,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 const { useState } = require("react");
 
-const AptmntsList = () => { 
+const DocAptmntsList = () => { 
 
   const params=new URLSearchParams(window.location.search);
 
@@ -36,10 +36,11 @@ const AptmntsList = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [status, setStatus] = useState('');
+  const [availableTime, setAvailableTime]= useState('');
 
   const getAptmnts = async () => {
     const response = await axios.post(
-      `http://localhost:8000/patient/getAppointment`,
+      `http://localhost:8000/doctor/getAppointment`,
       { startDate, endDate, status },
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
@@ -49,29 +50,31 @@ const AptmntsList = () => {
       setAptmnts(aptmnts);
     }
   }
+//addavailableSlot with the dateTime picked using availableDateTime
+  const addAvailableSlot = async () => {
+    const date = document.getElementById("availableDateTime").value;
+    console.log(date);
+    setAvailableTime(date);
+    const response = await axios.post(
+      `http://localhost:8000/doctor/addavailableslots`,
+      { date },
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    if (response.status === 200) {
+      console.log(response.data);
+    }
+  }
+
 
   return(
     <div className="UsersList">
       <Box sx={{marginBottom: 2}}>
         <Stack spacing={3} direction="row">
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            {/* <DatePicker
-              label="Select Start Date"
-              value={startDate}
-              onChange={(newValue) => {
-                setStartDate(newValue);
-              }}
-              renderInput={(params) => <TextField {...params} />}
-            />
-            <DatePicker
-              label="Select End Date"
-              value={endDate}
-              onChange={(newValue) => {
-                setEndDate(newValue);
-              }}
-              renderInput={(params) => <TextField {...params} />}
-            /> */}
-          </LocalizationProvider>
+          <form action="/action_page.php">
+            <label htmlFor="availableSlots">Enter your available time slots:</label>
+            <input type="datetime-local" id="availableDateTime" name="availableTime" />
+            <input type="submit" onClick={addAvailableSlot} margin="normal" padding="normal"/>
+          </form>
           <TextField
             select
             label="Select Status"
@@ -107,7 +110,7 @@ const AptmntsList = () => {
             <TableRow>
               <StyledTableCell align="center">Date</StyledTableCell>
               <StyledTableCell align="center">Status</StyledTableCell>
-              <StyledTableCell align="center">Doctor</StyledTableCell>
+              <StyledTableCell align="center">Patient</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -136,4 +139,4 @@ const AptmntsList = () => {
   )
 }
 
-export default AptmntsList;
+export default DocAptmntsList;
