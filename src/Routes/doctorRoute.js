@@ -324,8 +324,10 @@ router.get('/getWalletAmount', protect,async (req, res) => {
                     message: "You are not a doctor"
                 });
             }
-          const wallet= exists.wallet;
-            return res.status(200).json({ Amount: wallet, success: true })
+          
+    var result={};
+    result.Amount=exists.Wallet;
+    return res.status(200).json(result);
 
 })
 
@@ -440,7 +442,7 @@ router.post('/getAppointment', protect,async (req, res) => {
         Date: {
             $gte: startDate,
             $lte: endDate
-        }, DoctorId: id
+        }, DoctorId: req.user._id
     });
 
     let getAppointmentsbyStatus;

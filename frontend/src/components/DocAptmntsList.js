@@ -28,7 +28,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 const { useState } = require("react");
 
-const AptmntsList = () => { 
+const DocAptmntsList = () => { 
 
   const params=new URLSearchParams(window.location.search);
 
@@ -39,7 +39,7 @@ const AptmntsList = () => {
 
   const getAptmnts = async () => {
     const response = await axios.post(
-      `http://localhost:8000/patient/getAppointment`,
+      `http://localhost:8000/doctor/getAppointment`,
       { startDate, endDate, status },
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
@@ -107,7 +107,7 @@ const AptmntsList = () => {
             <TableRow>
               <StyledTableCell align="center">Date</StyledTableCell>
               <StyledTableCell align="center">Status</StyledTableCell>
-              <StyledTableCell align="center">Doctor</StyledTableCell>
+              <StyledTableCell align="center">Patient</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -136,4 +136,4 @@ const AptmntsList = () => {
   )
 }
 
-export default AptmntsList;
+export default DocAptmntsList;
