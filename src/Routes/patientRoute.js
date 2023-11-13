@@ -189,7 +189,7 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
         unregistered: unRegFamMemebers
     }
 
-console.log(famMembers);
+    console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
 })
@@ -879,8 +879,8 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
 
             let famMemberUserHealth = {};
-            if(famMemberUserHealthPackage.status == 'Subscribed')
-                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage)??{};
+            if (famMemberUserHealthPackage.status == 'Subscribed')
+                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage) ?? {};
 
             let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
@@ -1073,7 +1073,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
             for (const file of files) {
                 const newHistoryEntry = {
                     data: file.buffer,
-                    type: file.mimetype,
+                    contentType: file.mimetype,
                     // Add any other properties you need for the file entry
                 };
 
@@ -1087,14 +1087,12 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
             { new: true }
         );
 
-        console.log(updatedPatient.HealthHistory);
         res.status(200).json({
             success: true,
             message: "Health history updated successfully",
             data: updatedPatient,
         });
     } catch (error) {
-        console.error('Error: ', error);
         res.status(500).json({
             success: false,
             message: "General Error",
@@ -1151,7 +1149,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
 
 const getUserOrFamilyMember = async (req, res, userType, registered) => {
     const userId = req.user._id;
-    
+
     const familyMemberId = userType === "familyMember" ? req.body.familyMember._id : null;
 
     try {
@@ -1160,11 +1158,11 @@ const getUserOrFamilyMember = async (req, res, userType, registered) => {
             console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
             return user;
         } else if (userType === "familyMember") {
-            if(!registered){
+            if (!registered) {
                 const familyMember = await NotRegisteredFamilyMemberModel.findById(familyMemberId);
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
-            }else{
+            } else {
                 const familyMember = await patientModel.findById(familyMemberId);
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
@@ -1255,8 +1253,8 @@ const processCardPayment = async (req, res, fees, description, doctor, subscribt
                 },
                 quantity: 1,
             }],
-            success_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}?success=true`,
-            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}`,
+            success_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}?success=true`,
+            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
         });
 
         if (doctor) {
@@ -1301,7 +1299,7 @@ const processWalletPayment = async (req, res, userId, fees, doctor) => {
     }
 };
 
-router.post("/payForAppointment", protect,async (req, res) => {
+router.post("/payForAppointment", protect, async (req, res) => {
     console.log(req);
     const { userType, paymentType } = req.query;
     try {
@@ -1336,7 +1334,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
         } else {
-            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor,false);
+            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor, false);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1344,7 +1342,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
     }
 };
 
-router.post("/subscribeForPackage", protect,async (req, res) => {
+router.post("/subscribeForPackage", protect, async (req, res) => {
     const { userType, paymentType } = req.query;
     try {
         const result = await processSubscription(req, res, userType, paymentType);
@@ -1369,7 +1367,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
             return res.status(900).send({ error: "This patient is already subscribed to a health package" });
         }
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
-        if(subscribedHealthPackage)
+        if (subscribedHealthPackage)
             discount = subscribedHealthPackage.familyDiscountInPercentage;
     }else{
         let packageStatus = await healthPackageStatus.find({ patientId: userId, status: 'Subscribed' });
@@ -1385,7 +1383,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
-            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null,true);
+            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1418,17 +1416,37 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
     }
 });
 
-router.get('/viewMedicalHistory', protect, async (req, res) => {
+// router.get('/viewMedicalHistory', protect, async (req, res) => {
+//     const patient = await patientModel.findOne(req.user);
+
+//     if (!patient) {
+//         return res.status(400).json({ message: "Patient not found", success: false })
+//     }
+//     try {
+//         let Result = {
+//             "medicalHistory": patient.HealthHistory
+//         }
+//         return res.status(200).json({ Result: Result, success: true });
+//     }
+//     catch (error) {
+//         console.error('Error getting health history', error.message);
+//     }
+// });
+
+router.delete('/deleteMedicalHistory/:medicalHistoryId', protect, async (req, res) => {
     const patient = await patientModel.findOne(req.user);
 
     if (!patient) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     try {
-        let Result = {
-            "medicalHistory": patient.HealthHistory
+        for (let i = 0; i < patient.HealthHistory.length; i++) {
+            if (patient.HealthHistory[i]._id == req.params.medicalHistoryId) {
+                patient.HealthHistory.splice(i, 1)
+            }
         }
-        return res.status(200).json({ Result: Result, success: true });
+        await patient.save();
+        return res.status(200).json({ Result: patient, message: "Delete successfully", success: true });
     }
     catch (error) {
         console.error('Error getting health history', error.message);

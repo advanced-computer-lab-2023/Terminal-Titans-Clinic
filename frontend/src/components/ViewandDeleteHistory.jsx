@@ -86,7 +86,7 @@ export default function ViewandDeleteHistory() {
             console.log(response +"RESPONSEEEE");
             setHistory(response);
         }).catch((error) => {
-            alert("No History Found");
+            // alert("No History Found");
             console.log(error);
         });
     }

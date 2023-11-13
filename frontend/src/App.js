@@ -23,6 +23,10 @@ import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 
 
+import Form from 'react-bootstrap/Form';
+import axios from 'axios';
+import { useState } from 'react';
+
 function App() {
 
   const signoutButtonFunc = () => {
@@ -35,7 +39,7 @@ function App() {
   return (
     <div className="App">
       {
-        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
+        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
           <></>
           : <div className="signoutButton">
             <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
@@ -49,11 +53,11 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<Patient/>} />
-          <Route path="/doctorHome" element={<Doctor/>} />
-          <Route path="/bookAppointments" element={<BookAppointments/>} />
-          <Route path="/viewAppointments" element={<ViewAppointments/>} />
-          <Route path="/docViewAppointments" element={<DocViewAppointments/>} />
+          <Route path="/patientHome" element={<Patient />} />
+          <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/bookAppointments" element={<BookAppointments />} />
+          <Route path="/viewAppointments" element={<ViewAppointments />} />
+          <Route path="/docViewAppointments" element={<DocViewAppointments />} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
@@ -61,7 +65,7 @@ function App() {
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
-          <Route path="/EmploymentContract" element={<EmploymentContract/>} />
+          <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
           <Route path="/" element={<SignIn />} />
         </Routes>
