@@ -1393,7 +1393,7 @@ router.delete('/deleteMedicalHistory/:medicalHistoryId', protect, async (req, re
             }
         }
         await patient.save();
-        return res.status(200).json({ message: "Delete successfully", success: true });
+        return res.status(200).json({ Result: patient, message: "Delete successfully", success: true });
     }
     catch (error) {
         console.error('Error getting health history', error.message);
