@@ -15,6 +15,11 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import React ,{useEffect,useState} from 'react';
+
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -26,21 +31,35 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const { useState } = require("react");
+// const { useState } = require("react");
 
 const DocAptmntsList = () => { 
 
   const params=new URLSearchParams(window.location.search);
-
+  const [file, setFile] = useState(null);
+  const [bData, setBData] = useState(null);
+  const [Pt, setPt] = useState([]);
+  const[id,setID]=useState(null);
   const [aptmnts,setAptmnts] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [status, setStatus] = useState('');
   const [availableTime, setAvailableTime]= useState('');
-  const [followUpDate, setfollowUpDate]= useState(null);
-  const [patientID, setpatientID]= useState('');
-  const [selectedPatient, setSelectedPatient] = useState('');
-const [patients, setPatients] = useState([]); 
+  const [buttonColor, setButtonColor] = useState('primary');
+  
+
+  useEffect(() => {
+    // setID(aptmnts.PatientId)
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const binaryString = e.target.result;
+        setBData(binaryString);
+      };
+      reader.readAsBinaryString(file);
+      setFile(file);
+    }
+  }, [file]);
 
   const getAptmnts = async () => {
     const response = await axios.post(
@@ -50,26 +69,13 @@ const [patients, setPatients] = useState([]);
     );
     if (response.status === 200) {
       const aptmnts = response.data;
+      //  id=response.data.PatientId;
+      //  console.log(id);
+      //  setID(id);
       console.log(aptmnts);
       setAptmnts(aptmnts);
     }
   }
-
-  //get list of my patients
-  const getPatients = async () => {
-    const response = await axios.get(
-      `http://localhost:8000/doctor/getPatientsList`,
-      null,
-      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-    );
-    if (response.status === 200) {
-      const patients = response.data;
-      console.log(patients);
-      setPatients(patients);
-    }
-  }
-
-
 //addavailableSlot with the dateTime picked using availableDateTime
   const addAvailableSlot = async () => {
     const date = document.getElementById("availableDateTime").value;
@@ -84,20 +90,32 @@ const [patients, setPatients] = useState([]);
       console.log(response.data);
     }
   }
+// const handleAddClick = (event) => {
+//       const row = event.target.closest('tr');
+//       const patientId = row.dataset.patientId;
+//       setID(patientId);
+//       console.log("PAAAATTTTIIIEEENNNTTTT "+patientId);
+// }
+  const addrec = async (PatientId) => {
+   // handleAddClick();
+    const formData = new FormData();
+    // const pat=aptmnts.PatientId;
 
-  // assign a follow up
-  const assignFollowup = async () => {
-    const date = document.getElementById("assignFollowUp").value;
-    console.log(date);
-    setAvailableTime(date);
+      formData.append('file', file);
+      // formData.append('id',idd);
+    //  axios.post(
+    //   `http://localhost:8000/doctor/addrecord/${aptmnts.PatientId}`,
+    //   formData,
+    //   { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    // );
     const response = await axios.post(
-      `http://localhost:8000/doctor/asiignfollowUp`,
-      { date },
+      `http://localhost:8000/doctor/addrecord/${PatientId}`,
+      formData,
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-    );
-    if (response.status === 200) {
-      console.log(response.data);
-    }
+  );
+    // if (response.status === 200) {
+      // console.log(response.data);
+    // }
   }
 
 
@@ -110,31 +128,6 @@ const [patients, setPatients] = useState([]);
             <input type="datetime-local" id="availableDateTime" name="availableTime" />
             <input type="submit" onClick={addAvailableSlot} margin="normal" padding="normal"/>
           </form>
-
-          
-     
-          <form action="/action_page.php">
-            <label htmlFor="availableSlots">select the date of the next followup</label>
-            <input type="datetime-local" id="followupDate" name="followupDate" />
-            <input type="submit" onClick={assignFollowup} margin="normal" padding="normal"/>
-          </form>
-
-          <TextField
-  select
-  label="Select Patient"
-  value={selectedPatient}
-  onChange={(event) => {
-    setSelectedPatient(event.target.value);
-  }}
-  helperText="Please select the patient for the next followup"
->
-  {patients.map((patients) => (
-    <MenuItem key={patients.Email} value={patients.Name}>
-      {patients.Name}
-    </MenuItem>
-  ))}
-</TextField>
-
           <TextField
             select
             label="Select Status"
@@ -171,6 +164,8 @@ const [patients, setPatients] = useState([]);
               <StyledTableCell align="center">Date</StyledTableCell>
               <StyledTableCell align="center">Status</StyledTableCell>
               <StyledTableCell align="center">Patient</StyledTableCell>
+              <StyledTableCell align="center">Patient ID</StyledTableCell>
+              <StyledTableCell align="center">health Records</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -190,6 +185,36 @@ const [patients, setPatients] = useState([]);
                 <TableCell align="center">{aptmnts.Date}</TableCell>
                 <TableCell align="center">{aptmnts.Status}</TableCell>
                 <TableCell align="center">{aptmnts.Name}</TableCell>
+                <TableCell align="center">{aptmnts.PatientId}</TableCell>
+                <TableCell align="center"> 
+                <InputGroup className="mb-3">
+        {/* <Form.Control
+          type="file"
+          name="file"
+          accept=".pdf"
+          onChange={(e) => {
+            console.log(e.target.files[0]);
+            setFile(e.target.files[0]);
+            console.log(file); // Check if files state is updated
+          }}
+        /> */}
+
+        <Form.Control 
+        type="file"
+         size="md" 
+        name="file"
+        justify="center"
+        accept=".pdf"
+        onChange={(e) => {
+          console.log(e.target.files[0]);
+          setFile(e.target.files[0]);
+          console.log(file); // Check if files state is updated
+        }}
+        />
+
+        <Button variant="primary" size="sm" onClick={() => addrec(aptmnts.PatientId)}>Add</Button>
+      </InputGroup>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
