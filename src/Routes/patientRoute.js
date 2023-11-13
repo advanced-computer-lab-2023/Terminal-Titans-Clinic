@@ -1311,4 +1311,21 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
     }
 });
 
+router.get('/viewMedicalHistory', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        let Result = {
+            "medicalHistory": patient.HealthHistory
+        }
+        return res.status(200).json({ Result: Result, success: true });
+    }
+    catch (error) {
+        console.error('Error getting health history', error.message);
+    }
+});
+
 export default router;
