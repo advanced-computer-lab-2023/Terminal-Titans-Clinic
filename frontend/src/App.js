@@ -27,27 +27,7 @@ import axios from 'axios';
 import { useState } from 'react';
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleFileChange = (e) => {
-    // Handle file selection
-    const file = e.target.files[0];
-    setSelectedFile(file);
-  };
-
-  const handleSubmit = () => {
-    // Handle file upload
-    const formData = new FormData();
-    formData.append('files', selectedFile);
-    axios.post('http://localhost:8000/patient/addHistory', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: 'Bearer ' + sessionStorage.getItem("token")
-      }
-    }).then(() => {
-      alert('File uploaded successfully');
-    }).catch((err) => alert(err.message));
-  }
   const signoutButtonFunc = () => {
     sessionStorage.removeItem('token');
     window.location.href = '/Health-Plus';
@@ -57,15 +37,6 @@ function App() {
 
   return (
     <div className="App">
-      <Form.Group controlId="formFile" className="mb-3">
-        <Form.Label>Default file input example</Form.Label>
-        <Form.Control type="file" onChange={handleFileChange} />
-      </Form.Group>
-
-      <Button variant="primary" onClick={handleSubmit}>
-        Submit
-      </Button>
-
       {
         window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
           <></>
