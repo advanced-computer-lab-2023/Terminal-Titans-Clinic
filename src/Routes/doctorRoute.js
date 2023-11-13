@@ -6,6 +6,11 @@ import appointmentModel from '../Models/appointmentModel.js';
 import familyMemberModel from '../Models/familyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
 import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
+import { escape } from 'querystring';
+
+import multer from 'multer';
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const router = express.Router()
 
@@ -265,7 +270,8 @@ router.get('/viewContract', protect, async (req, res) => {
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
-    console.log('k')
+    console.log('k')    
+    console.log(req.user);
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
        return res.status(500).json({ message: "You are not a doctor", success: false })
@@ -469,6 +475,8 @@ router.post('/getAppointment', protect,async (req, res) => {
         const patient = await patientsModel.find({ _id: temp[x].PatientId })
         if (patient.length > 0)
             result.Name = patient[0].Name;
+        result.PatientId=temp[x].PatientId;
+        result.DoctorId=temp[x].DoctorId;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
         final.push(result);
@@ -520,4 +528,44 @@ router.get('/test', (req, res) => {
 
         })
 });
+
+router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)=>{
+  try { const exists = await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    } 
+    console.log("Abl el patient ID")
+    const patientID = req.params.PatientId;
+    console.log(patientID);
+    console.log(req.file);
+    const existingpatient = await patientsModel.findById(patientID);
+    if(!existingpatient){
+        res.status(400).json({
+            success: false,
+            message:"patient doesn't exist"
+        })
+        }
+    else{
+        const newrecord = new healthModel( {
+            HealthDocument:{
+                data:req.file.buffer,
+                contentType:req.file.mimetype
+            } ,
+            PatientId: patientID
+        } );
+        newrecord.save();
+    }}
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success:false,
+            messsage: "Internal error mate2refnash"
+        })
+    }
+})
+
+
 export default router;
