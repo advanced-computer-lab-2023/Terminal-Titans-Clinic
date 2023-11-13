@@ -1,8 +1,8 @@
 import React from "react";
-import viewEmploymentContract from "../components/viewEmploymentContract";
+import ViewEmploymentContract from "../components/viewEmploymentContract";
 
 function EmploymentContract() {
-  return <viewEmploymentContract/>;
+  return <ViewEmploymentContract/>;
 }
 
 export default EmploymentContract;

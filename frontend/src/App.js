@@ -60,6 +60,9 @@ function App() {
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
+          <Route path="/packageSubscribtion" element={<SubPackage />} />
+          <Route path="/EmploymentContract" element={<EmploymentContract/>} />
+          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
