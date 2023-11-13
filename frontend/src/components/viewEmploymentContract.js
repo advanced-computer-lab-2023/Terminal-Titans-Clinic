@@ -1,9 +1,9 @@
 // import React, { useState, useEffect } from 'react';
 // import axios from 'axios';
 
-// const viewEmploymentContract = () => {
-//     const [contractText, setContractText] = useState('');
-//     const [decision, setDecision] = useState('');
+const ViewEmploymentContract = () => {
+    const [contractText, setContractText] = useState('');
+    const [decision, setDecision] = useState('');
   
 //     // Other necessary state variables can be added based on your requirements
 //     // ...
@@ -37,4 +37,4 @@
 //     );
 //   };
   
-//   export default viewEmploymentContract;
+  export default ViewEmploymentContract;
