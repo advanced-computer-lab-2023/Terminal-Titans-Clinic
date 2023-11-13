@@ -37,6 +37,10 @@ const DocAptmntsList = () => {
   const [endDate, setEndDate] = useState(null);
   const [status, setStatus] = useState('');
   const [availableTime, setAvailableTime]= useState('');
+  const [followUpDate, setfollowUpDate]= useState(null);
+  const [patientID, setpatientID]= useState('');
+  const [selectedPatient, setSelectedPatient] = useState('');
+const [patients, setPatients] = useState([]); 
 
   const getAptmnts = async () => {
     const response = await axios.post(
@@ -50,6 +54,22 @@ const DocAptmntsList = () => {
       setAptmnts(aptmnts);
     }
   }
+
+  //get list of my patients
+  const getPatients = async () => {
+    const response = await axios.get(
+      `http://localhost:8000/doctor/getPatientsList`,
+      null,
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    if (response.status === 200) {
+      const patients = response.data;
+      console.log(patients);
+      setPatients(patients);
+    }
+  }
+
+
 //addavailableSlot with the dateTime picked using availableDateTime
   const addAvailableSlot = async () => {
     const date = document.getElementById("availableDateTime").value;
@@ -57,6 +77,21 @@ const DocAptmntsList = () => {
     setAvailableTime(date);
     const response = await axios.post(
       `http://localhost:8000/doctor/addavailableslots`,
+      { date },
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    if (response.status === 200) {
+      console.log(response.data);
+    }
+  }
+
+  // assign a follow up
+  const assignFollowup = async () => {
+    const date = document.getElementById("assignFollowUp").value;
+    console.log(date);
+    setAvailableTime(date);
+    const response = await axios.post(
+      `http://localhost:8000/doctor/asiignfollowUp`,
       { date },
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
@@ -75,6 +110,31 @@ const DocAptmntsList = () => {
             <input type="datetime-local" id="availableDateTime" name="availableTime" />
             <input type="submit" onClick={addAvailableSlot} margin="normal" padding="normal"/>
           </form>
+
+          
+     
+          <form action="/action_page.php">
+            <label htmlFor="availableSlots">select the date of the next followup</label>
+            <input type="datetime-local" id="followupDate" name="followupDate" />
+            <input type="submit" onClick={assignFollowup} margin="normal" padding="normal"/>
+          </form>
+
+          <TextField
+  select
+  label="Select Patient"
+  value={selectedPatient}
+  onChange={(event) => {
+    setSelectedPatient(event.target.value);
+  }}
+  helperText="Please select the patient for the next followup"
+>
+  {patients.map((patients) => (
+    <MenuItem key={patients.Email} value={patients.Name}>
+      {patients.Name}
+    </MenuItem>
+  ))}
+</TextField>
+
           <TextField
             select
             label="Select Status"
