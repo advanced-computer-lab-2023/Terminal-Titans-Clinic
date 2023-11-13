@@ -19,6 +19,12 @@ body {
   .datelabel {
     margin-bottom: 15px;
   }
+
+  .timeslot.selected {
+    background-color: blue;
+    color: white;
+  }
+  
   
   .timeslot {
     background-color: #00c09d;

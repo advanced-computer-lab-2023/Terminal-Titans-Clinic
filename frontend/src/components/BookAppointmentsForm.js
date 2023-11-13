@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import "../Styles/Appointments.css"
-
 import moment from 'moment';
+import PaymentPage from '../components/ChoosePaymentMethod';
+// ... (other imports)
 import { set } from 'mongoose';
 
 function BookAppointmentsForm() {
@@ -14,6 +15,11 @@ function BookAppointmentsForm() {
     const [famMemId,setFamMemId] = useState(null);
     const [selectedFam,setSelectedFam] = useState('');
     const [selectedDate,setSelectedDate] = useState('');
+    const [showPaymentButtons, setShowPaymentButtons] = useState(false);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+
+    
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -63,6 +69,8 @@ function BookAppointmentsForm() {
             }
     };
 
+    
+
     useEffect(() => {
         getDoctors();
     }, []);
@@ -84,9 +92,11 @@ function BookAppointmentsForm() {
                         <br />
                         {moment(date).format("MMMM D")}
                     </div>    
-                    <div className="timeslot" onClick={async() => {
+                    <div className={`timeslot ${selectedTimeSlot === date ? 'selected' : ''}`}onClick={async() => {
                         setSelectedDate(date);
-                        bookAppointment(date)
+                        setSelectedTimeSlot(date);
+                        choosePayment();
+                        
     }} value={date}>
         {twoHoursAgo.format('HH:mm')}
     </div>                </div>
@@ -119,13 +129,12 @@ function BookAppointmentsForm() {
         setFamMemId(null);
         
     };
-    const bookAppointment = async (date) => {
-        const response = await axios.post(
-            `http://localhost:8000/patient/bookAppointment`,
-            { dId: selectedDoctor, date: date, famId: famMemId},
-            { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-        );
-    }
+    
+
+    const choosePayment = () => {
+        setShowPaymentButtons(true);
+      };
+      
 
     return (
 
@@ -157,6 +166,14 @@ function BookAppointmentsForm() {
             >
                 <div className="days">{renderDays()}</div>
             </div>
+            {showPaymentButtons && (
+      <PaymentPage
+        selectedDoctor={selectedDoctor}
+        selectedDate={selectedDate}
+        famMemId={famMemId}
+        packageId={null}
+      />
+    )}
         </div>
     );
 }

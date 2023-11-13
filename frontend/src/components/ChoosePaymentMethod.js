@@ -2,50 +2,119 @@ import "../Styles/LoginForm.css";
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
-const PaymentPage = () => {
+
+
+const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handlePayment = async (paymentMethod) => {
     try {
-      const response = await axios.post(
-        `http://localhost:8000/Patient/payForAppointment/`,
-        {
-          user: {
-            _id: "654a7b01d35ec49ccebf9522"
+      if(packageId===null){
+        const response = await axios.post(
+          `http://localhost:8000/Patient/payForAppointment/`,
+          {
+            familyMember: {
+              _id: famMemId
+            },
+            doctor: {
+              _id: selectedDoctor
+            },
+            date: selectedDate
           },
-          familyMember: {
-            _id: "6525ca2d0c32bc7c0e726d84"
-          },
-          doctor: {
-            _id: "652323f2050647d6c71d8758"
-          },
-          date: "2031-10-10T00:00:00.000+00:00"
-        },
-        {
-          headers: {
-            Authorization: 'Bearer ' + sessionStorage.getItem("token")
-          },
-          params: {
-            userType: "patient",
-            paymentType: paymentMethod
-          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + sessionStorage.getItem("token") 
+            },
+            params: {
+              userType: famMemId==null?"patient":"familyMember",
+              paymentType: paymentMethod
+            },
+          }
+        );
+        if (response.status === 200) {
+          if(paymentMethod==="card"){
+            const url = response.data.url;
+            window.location = url;
+          }else{
+            setErrorMessage("Success");
+            alert('Successfull payment');
+          }
+          bookAppointment();
+        } else {
+          setErrorMessage(response.data.message);
+          alert('Unsuccessfull payment');
         }
-      );
-      if (response.status === 200) {
-        if(response.data.url){
-          const url = response.data.url;
-          window.location = url;
-        }else{
-          setErrorMessage("Success");
+      }
+      else{
+        const response = await axios.post(
+          `http://localhost:8000/Patient/subscribeForPackage/`,
+          {
+            familyMember: {
+              _id: famMemId
+            },
+            healthPackage: {
+              _id: packageId
+            }
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + sessionStorage.getItem("token") 
+            },
+            params: {
+              userType: famMemId==null?"patient":"familyMember",
+              paymentType: paymentMethod
+            },
+          }
+        );
+        if (response.status === 200) {
+          if(paymentMethod==="card"){
+            const url = response.data.url;
+            window.location = url;
+          }else{
+            setErrorMessage("Success");
+            alert('Successfull payment');
+          }
+          subscribePackage();
+        } else {
+          setErrorMessage(response.data.message);
+          alert('Unsuccessfull payment');
         }
-      } else {
-        setErrorMessage(response.data.message);
       }
     } catch (error) {
       console.error('Error in payment:', error.message);
+      alert('Unsuccessfull payment');
       setErrorMessage(error.message);
     }
   };
+
+  const bookAppointment = async () => {
+    const response = await axios.post(
+        `http://localhost:8000/patient/bookAppointment`,
+        { dId: selectedDoctor, date: selectedDate, famId: famMemId},
+        { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+
+    
+}
+
+  const subscribePackage = async () => {
+    if(famMemId===null){
+      const response = await axios.post(
+          `http://localhost:8000/patient/subscribeHealthPackage`,
+          { packageId: packageId},
+          { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") }
+           }
+      );
+    }else{
+      const response = await axios.post(
+          `http://localhost:8000/patient/subscribeHealthPackageforFamily`,
+          { packageId: packageId, familyMemberId: famMemId},
+          { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+      );
+    }
+
+
+}
 
   useEffect(() => {
   }, []);

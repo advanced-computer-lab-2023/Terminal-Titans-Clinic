@@ -15,6 +15,10 @@ import familyMemberModel from '../Models/familyMemberModel.js';
 import healthPackageStatus from '../Models/healthPackageStatus.js';
 import stripe from "stripe";
 import healthModel from '../Models/healthModel.js';
+import { Console } from 'console';
+
+import RegisteredFamilyMemberModel from '../Models/RegisteredFamilyMemberModel.js';
+import NotRegisteredFamilyMemberModel from '../Models/NotRegisteredFamilyMemberModel.js';
 
 import multer from 'multer';
 const storage = multer.memoryStorage();
@@ -185,6 +189,7 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
         unregistered: unRegFamMemebers
     }
 
+console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
 })
@@ -719,10 +724,9 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
 })
 
 //req 28 bas lesa msh akeed heya sah wala laa
-router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
+router.post('/subscribeHealthPackage', protect, async (req, res) => {
     const userId = req.user._id;
-    const healthPackageId = req.params.packageId;
-
+    const healthPackageId = req.body.packageId;
     try {
         const user = await patientModel.findById(userId);
         if (!user) {
@@ -987,7 +991,6 @@ router.put('/cancelSub', protect, async (req, res) => {
 
 //req 27
 router.get('/viewHealthCarePackages', protect, async (req, res) => {
-
     try {
         const healthPackages = await healthPackageModel.find({});
 
@@ -1054,9 +1057,56 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
     }
 });
 
-const getUserOrFamilyMember = async (req, res, userType) => {
-    console.log(req.body.user);
-    const userId = req.body.user._id;
+router.post('/addHistory', upload.array('files', 10), protect, async (req, res) => {
+    try {
+        const files = req.files;
+
+        const pat = await patientModel.findById(req.user);
+        if (!pat) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not authorised "
+            });
+        }
+
+        let medical = pat.HealthHistory;
+
+        if (files) {
+            for (const file of files) {
+                const newHistoryEntry = {
+                    data: file.buffer,
+                    type: file.mimetype,
+                    // Add any other properties you need for the file entry
+                };
+
+                medical.push(newHistoryEntry);
+            }
+        }
+
+        const updatedPatient = await patientModel.findByIdAndUpdate(
+            req.user,
+            { HealthHistory: medical },
+            { new: true }
+        );
+
+        console.log(updatedPatient.HealthHistory);
+        res.status(200).json({
+            success: true,
+            message: "Health history updated successfully",
+            data: updatedPatient,
+        });
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({
+            success: false,
+            message: "General Error",
+        });
+    }
+});
+
+const getUserOrFamilyMember = async (req, res, userType, registered) => {
+    const userId = req.user._id;
+    
     const familyMemberId = userType === "familyMember" ? req.body.familyMember._id : null;
 
     try {
@@ -1065,10 +1115,17 @@ const getUserOrFamilyMember = async (req, res, userType) => {
             console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
             return user;
         } else if (userType === "familyMember") {
-            const familyMember = await familyMemberModel.findById(familyMemberId);
-            console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
-            return familyMember;
+            if(!registered){
+                const familyMember = await NotRegisteredFamilyMemberModel.findById(familyMemberId);
+                console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
+                return familyMember;
+            }else{
+                const familyMember = await patientModel.findById(familyMemberId);
+                console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
+                return familyMember;
+            }
         }
+
 
         return null;
     } catch (error) {
@@ -1138,7 +1195,7 @@ const giveDoctorMoney = async (req, res, doctor, fees) => {
     }
 };
 
-const processCardPayment = async (req, res, fees, description, doctor) => {
+const processCardPayment = async (req, res, fees, description, doctor, subscribtion) => {
     try {
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ["card"],
@@ -1153,8 +1210,8 @@ const processCardPayment = async (req, res, fees, description, doctor) => {
                 },
                 quantity: 1,
             }],
-            success_url: "http://localhost:3000/Health-Plus/payment?success=true",
-            cancel_url: "http://localhost:3000/Health-Plus/payment",
+            success_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}?success=true`,
+            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}`,
         });
 
         if (doctor) {
@@ -1170,7 +1227,7 @@ const processCardPayment = async (req, res, fees, description, doctor) => {
 };
 
 const processWalletPayment = async (req, res, userId, fees, doctor) => {
-    const user = await getUserOrFamilyMember(req, res, "patient");
+    const user = await getUserOrFamilyMember(req, res, "patient", true);
     if (!user) return;
 
     user.Wallet = user.Wallet - fees;
@@ -1199,38 +1256,34 @@ const processWalletPayment = async (req, res, userId, fees, doctor) => {
     }
 };
 
-router.post("/payForAppointment", async (req, res) => {
+router.post("/payForAppointment", protect,async (req, res) => {
+    console.log(req);
     const { userType, paymentType } = req.query;
     try {
-        return await processPayment(req, res, userType, paymentType);
+        return await processAppointmentPayment(req, res, userType, paymentType);
     } catch (e) {
         console.error('Error processing payment', e.message);
         return res.status(400).send({ error: e.message });
     }
 });
 
-const processPayment = async (req, res, userType, paymentType) => {
-    const { _id: userId } = req.body.user;
+const processAppointmentPayment = async (req, res, userType, paymentType) => {
+    const userId = req.user._id;
     const familyMemberId = userType === "familyMember" ? req.body.familyMember._id : null;
     const doctorId = req.body.doctor._id;
     const date = req.body.date;
 
-    const user = await getUserOrFamilyMember(req, res, userType);
+    const user = await getUserOrFamilyMember(req, res, userType, false);
     if (!user) return;
 
     const doctor = await getDoctor(req, res, doctorId);
     if (!doctor) return;
 
-    const healthPackage = await getSubscribedHealthPackage(req, res, userType == "familyMember" ? familyMemberId : userId);
+    const healthPackage = await getSubscribedHealthPackage(req, res, userId);
 
     let discount = 0;
     if (healthPackage) {
         discount = healthPackage.doctorDiscountInPercentage;
-    } else if (userType == "familyMember") {
-        healthPackage = await getHealthPackage(req, res, userId, familyMemberId, "patient");
-        if (healthPackage) {
-            discount = healthPackage.familyDiscountInPercentage;
-        }
     }
 
     const fees = calculateFees(doctor.HourlyRate, discount);
@@ -1238,7 +1291,7 @@ const processPayment = async (req, res, userType, paymentType) => {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
         } else {
-            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor);
+            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor,false);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1246,7 +1299,7 @@ const processPayment = async (req, res, userType, paymentType) => {
     }
 };
 
-router.post("/subscribeForPackage", async (req, res) => {
+router.post("/subscribeForPackage", protect,async (req, res) => {
     const { userType, paymentType } = req.query;
     try {
         const result = await processSubscription(req, res, userType, paymentType);
@@ -1258,10 +1311,10 @@ router.post("/subscribeForPackage", async (req, res) => {
 });
 
 const processSubscription = async (req, res, userType, paymentType) => {
-    const { _id: userId } = req.body.user;
+    const userId = req.user._id;
     const healthPackageId = req.body.healthPackage._id;
 
-    const user = await getUserOrFamilyMember(req, res, userType);
+    const user = await getUserOrFamilyMember(req, res, userType, true);
     if (!user) return;
 
     const healthPackage = await getHealthPackage(req, res, healthPackageId);
@@ -1269,7 +1322,8 @@ const processSubscription = async (req, res, userType, paymentType) => {
     let discount = 0;
     if (userType == "familyMember") {
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
-        discount = subscribedHealthPackage.familyDiscountInPercentage;
+        if(subscribedHealthPackage)
+            discount = subscribedHealthPackage.familyDiscountInPercentage;
     }
 
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
@@ -1277,7 +1331,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
-            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null);
+            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null,true);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1307,6 +1361,23 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
     }
     catch (error) {
         console.error('Error getting health records', error.message);
+    }
+});
+
+router.get('/viewMedicalHistory', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        let Result = {
+            "medicalHistory": patient.HealthHistory
+        }
+        return res.status(200).json({ Result: Result, success: true });
+    }
+    catch (error) {
+        console.error('Error getting health history', error.message);
     }
 });
 

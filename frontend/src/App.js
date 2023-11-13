@@ -18,6 +18,8 @@ import Patient from "./Pages/Patient";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
+import SubPackage from "./Pages/packageSubscribtion";
+import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 
 
@@ -58,7 +60,6 @@ function App() {
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
-          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
