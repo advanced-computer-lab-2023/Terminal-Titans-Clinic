@@ -45,15 +45,17 @@ export default function SignIn() {
             console.log(response);
             if (response.data.success) {
                 sessionStorage.setItem('token', response.data.Result.token);
-                if (response.data.type === 'Admin') {
+                if (response.data.Result.type === 'Admin') {
                     // go to admin page
+                    window.location.pathname= '/Health-Plus/admin'
                 }
-                else if (response.data.type === 'Doctor') {
+                else if (response.data.Result.type === 'Doctor') {
                     // go to doctor page
+                    window.location.pathname= '/Health-Plus/doctorHome'
                 }
                 else {
                     // go to patient page
-                    window.location.pathname= '/Health-Plus/healthPackages'
+                    window.location.pathname= '/Health-Plus/patientHome'
                 }
             }
             else {
@@ -116,12 +118,12 @@ export default function SignIn() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="/Health-Plus/forgotPassword" variant="body2">
                   Forgot password?
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/Health-Plus/register" variant="body2">
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

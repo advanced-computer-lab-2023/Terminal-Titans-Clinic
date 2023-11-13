@@ -1,10 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const HealthPackageSubscriptionPage = () => {
   const [patientHealthPackageData, setPatientHealthPackageData] = useState({});
   const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
+
+  const [patientHealthPackageStatus, setPatientHealthPackageStatus] = useState({});
+  const [familyHealthPackageStatus, setfamilyHealthPackageStatus] = useState([]);
+
+  const [patientHealthPackageCancel, setPatientHealthPackageCancel] = useState({});
+  const [familyHealthPackageCancel, setfamilyHealthPackageCancel] = useState([]);
 
   const fetchHealthPackageData = async () => {
     try {
@@ -15,54 +20,175 @@ const HealthPackageSubscriptionPage = () => {
       });
 
       const result = response.data.result;
+      setPatientHealthPackageData(result.myUser);
+      setFamilyHealthPackageData(result.familyMembers);
 
-      // Extract patient health package data
-      setPatientHealthPackageData({
-        patientId: result.myUser._id,
-        Package_Type: result.myUser.packageType,
-        Subscription_fees: result.myUser.subsriptionFeesInEGP,
-        // Add more fields as needed
-      });
-
-      // Extract family members health package data
-      const familyMembersData = result.familyMembers.map((member) => ({
-        patientId: member.PatientId,
-        name: member.Name,
-        email: member.Email,
-        // Add more fields as needed
-      }));
-      setFamilyHealthPackageData(familyMembersData);
     } catch (error) {
       console.error('Error fetching health package data:', error.message);
+    }
+  };
+
+  const fetchHealthPackageStatus = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/patient/viewSubscriptionStatus", {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
+
+      const result = response.data.result;
+      setPatientHealthPackageStatus(result.myUser.status);
+      setfamilyHealthPackageStatus(result.familyMembers);
+
+    } catch (error) {
+      console.error('Error fetching health package status:', error.message);
+    }
+  };
+
+  const cancelHeathPackage = async () => {
+    try {
+      const response = await axios({
+        method: 'put',
+        url: 'http://localhost:8000/patient/cancelSub',
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      }).then((response) => {
+        alert(response.data.message + " Please refresh the page to see the changes")
+      }).catch((error) => {
+        alert(error.response.data.message)
+      });
+
+      const result = response.data.result;
+      setPatientHealthPackageCancel(result.myUser);
+      setfamilyHealthPackageCancel(result.familyMembers);
+
+    } catch (error) {
+      console.error('Error cancelling health package:', error.message);
     }
   };
 
   return (
     <div>
       <button
-        style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+        style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
         onClick={fetchHealthPackageData}>
         View Subscribed HealthPackages
       </button>
+    {/* subscribed health package front */}
+      <div style={{ marginTop: '20px' }}>
+        <h4>Patient HealthPackage Data:</h4>
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Package Type</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Subscription Fees</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Medicine Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Family Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Doctor Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.packageType || 'No sub'}</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.subsriptionFeesInEGP || 'No sub'} EGP</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.medicinDiscountInPercentage || 'No sub'}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.familyDiscountInPercentage || 'No sub'}%</td>
+              <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageData.doctorDiscountInPercentage || 'No sub'}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+        {/*status patient front  */}
+      <div style={{ marginTop: '20px' }}>
+        <h4>FamilyMembers HealthPackage Data:</h4>
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Name</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Email</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Package Type</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Subscription Fees</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Medicine Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Family Discount</th>
+              <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Doctor Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {familyHealthPackageData.map((familyMember, index) => (
+              <tr key={index}>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.Name}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.Email}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.packageType || 'No sub'}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.subsriptionFeesInEGP || 'No sub'} EGP</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.medicinDiscountInPercentage || 'No sub'}%</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.familyDiscountInPercentage || 'No sub'}%</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMember.doctorDiscountInPercentage || 'No sub'}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+        {/* family members status front */}
+      <div style={{ marginTop: '20px' }}>
+        <button
+          style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
+          onClick={fetchHealthPackageStatus}>
+          View HealthPackages Status
+        </button>
 
-      <div>
-        <h2>Patient Health Package Data:</h2>
-        <p><strong>Patient ID:</strong> {patientHealthPackageData.patientId}</p>
-        <p><strong>Package_Type:</strong> {patientHealthPackageData.Package_Type}</p>
-        <p><strong>Subscription_fees:</strong> {patientHealthPackageData.Subscription_fees}</p>
-        {/* Add more fields as needed */}
+        <div style={{ marginTop: '20px' }}>
+          <h4>Patient HealthPackage Status:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.status}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.renewalDate || 'Nothing'}</td>
+                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.endDate || 'Nothing'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4>FamilyMembers HealthPackage Status:</h4>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Relation</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Status</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>Renewal Date</th>
+                <th style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {familyHealthPackageStatus.map((familyMembers, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.Relation}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.status}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.renewalDate || 'Nothing'}</td>
+                  <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{familyMembers.endDate || 'Nothing'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div>
-        <h2>Family Members Health Package Data:</h2>
-        {familyHealthPackageData.map((familyMember, index) => (
-          <div key={index}>
-            <p><strong>Family Member ID:</strong> {familyMember.patientId}</p>
-            <p><strong>Name:</strong> {familyMember.name}</p>
-            <p><strong>Email:</strong> {familyMember.email}</p>
-            {/* Add more fields as needed */}
-          </div>
-        ))}
+    {/* cancellation front */}
+      <div style={{ marginTop: '20px' }}>
+        <button
+          style={{ background: 'red', color: 'white', padding: '8px', cursor: 'pointer' }}
+          onClick={cancelHeathPackage}>
+          Cancel Subscription
+        </button>
       </div>
     </div>
   );

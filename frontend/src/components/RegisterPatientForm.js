@@ -84,7 +84,7 @@ function RegistrationForm() {
     formData.append('last', last);
     formData.append('gender', gender)
     formData.append('emergencyNumber', emergencyNumber);
-    formData.append('history', history);
+    // formData.append('history', history);
     // const data = {
     //   "username":username,
     //   "password":password,
@@ -219,7 +219,7 @@ function RegistrationForm() {
             value={last}
             onChange={(e) => setEmergencyLastName(e.target.value)}
           />
-          <label htmlFor="history">Medical History:</label>
+          {/* <label htmlFor="history">Medical History:</label> */}
 
           {/* <input type="file" name="History" accept=".jpg , .png, .pdf, .jpeg" onChange={handleFileInputChange} />
           {history && (
@@ -232,7 +232,7 @@ function RegistrationForm() {
               X
             </button>
           )} */}
-          <input type="file" onChange={handleFileChange} />
+          {/* <input type="file" onChange={handleFileChange} /> */}
 
 
 

@@ -14,7 +14,7 @@ const apppointmentSchema = new mongoose.Schema({
     FamilyMemId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'NotRegisteredFamilyMember',
-        required: true
+        required: false
     },
     Date: {
         type: Date,
