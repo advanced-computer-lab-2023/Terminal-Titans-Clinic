@@ -179,7 +179,7 @@ router.post('/acceptContract', protect, async (req, res) => {
 
 
 //requirement number 51
-router.post('/asiignfollowUp', protect, async (req, res) => {
+router.post('/assignfollowUp', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "You are not a doctor", success: false })
@@ -187,11 +187,13 @@ router.post('/asiignfollowUp', protect, async (req, res) => {
     const PID = req.body.PatientId;
     const date = req.body.date;
     const DID= req.user._id;
-    const aptmnt=await docAvailableSlots.findOne({DoctorId:DID,Date:date});
+   const aptmnt=await docAvailableSlots.findOne({DoctorId:DID,Date:date});
+
+    //const slots= await docAvailableSlots.findOne({DoctorId:DID});
    
-    if(aptmnt.length<1){
-        return (res.status(400).send({ error: "You are not available during this slot", success: false }));
-    }
+   if(aptmnt.length<1){
+      return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+ }
   
         const newAppointment = new appointmentModel({
             PatientId: PID,
@@ -200,8 +202,8 @@ router.post('/asiignfollowUp', protect, async (req, res) => {
             Date: date
         });
 
-        newAppointment.save();
-        docAvailableSlots.findOneAndDelete({ DoctorId: dId , Date: date});
+        await newAppointment.save();
+        await docAvailableSlots.findOneAndDelete({ DoctorId: DID , Date: date});
         res.status(200).json({ Result: newAppointment, success: true });
     
     

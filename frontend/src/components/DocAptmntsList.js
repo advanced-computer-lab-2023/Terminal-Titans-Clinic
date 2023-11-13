@@ -46,6 +46,7 @@ const DocAptmntsList = () => {
   const [status, setStatus] = useState('');
   const [availableTime, setAvailableTime]= useState('');
   const [buttonColor, setButtonColor] = useState('primary');
+  const [date, setDate]= useState(null);
   
 
   useEffect(() => {
@@ -76,6 +77,11 @@ const DocAptmntsList = () => {
       setAptmnts(aptmnts);
     }
   }
+
+
+
+
+
 //addavailableSlot with the dateTime picked using availableDateTime
   const addAvailableSlot = async () => {
     const date = document.getElementById("availableDateTime").value;
@@ -118,6 +124,19 @@ const DocAptmntsList = () => {
     // }
   }
 
+
+  const followup = async (PatientId,date) => {
+   
+
+     const response = await axios.post(
+       `http://localhost:8000/doctor/assignfollowUp`,
+       {PatientId,date},
+       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+   );
+     // if (response.status === 200) {
+       // console.log(response.data);
+     // }
+   }
 
   return(
     <div className="UsersList">
@@ -164,7 +183,7 @@ const DocAptmntsList = () => {
               <StyledTableCell align="center">Date</StyledTableCell>
               <StyledTableCell align="center">Status</StyledTableCell>
               <StyledTableCell align="center">Patient</StyledTableCell>
-              <StyledTableCell align="center">Patient ID</StyledTableCell>
+              <StyledTableCell align="center">Assign a followup</StyledTableCell>
               <StyledTableCell align="center">health Records</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -185,7 +204,17 @@ const DocAptmntsList = () => {
                 <TableCell align="center">{aptmnts.Date}</TableCell>
                 <TableCell align="center">{aptmnts.Status}</TableCell>
                 <TableCell align="center">{aptmnts.Name}</TableCell>
-                <TableCell align="center">{aptmnts.PatientId}</TableCell>
+                <TableCell align="center">
+      <InputGroup className="mb-3">
+        
+        
+        <input type="datetime-local" onChange={(e) => setDate(e.target.value)} id="availableDateTime" name="availableTime" /> 
+
+        
+        <Button variant="outline-secondary" onClick={()=>followup(aptmnts.PatientId,date)} id="button-addon2">
+          add
+        </Button>
+      </InputGroup> </TableCell>
                 <TableCell align="center"> 
                 <InputGroup className="mb-3">
         {/* <Form.Control
