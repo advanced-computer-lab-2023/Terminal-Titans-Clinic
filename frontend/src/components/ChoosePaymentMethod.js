@@ -38,8 +38,8 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
           }else{
             setErrorMessage("Success");
             alert('Successfull payment');
-            bookAppointment();
           }
+          bookAppointment();
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');
@@ -73,8 +73,8 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
           }else{
             setErrorMessage("Success");
             alert('Successfull payment');
-            subscribePackage();
           }
+          subscribePackage();
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');
@@ -100,11 +100,10 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
   const subscribePackage = async () => {
     if(famMemId===null){
       const response = await axios.post(
-          `http://localhost:8000/patient/subscribeHealthPackage/:packageId'`,
-          { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") },
-          params: {
-            packageId: packageId
-          }, }
+          `http://localhost:8000/patient/subscribeHealthPackage`,
+          { packageId: packageId},
+          { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") }
+           }
       );
     }else{
       const response = await axios.post(

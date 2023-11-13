@@ -189,6 +189,7 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
         registered: list,
         unregistered: unRegFamMemebers
     }
+
 console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
@@ -724,10 +725,9 @@ router.get('/selectPrescriptions/:id', async (req, res) => {
 })
 
 //req 28 bas lesa msh akeed heya sah wala laa
-router.post('/subscribeHealthPackage/:packageId', protect, async (req, res) => {
+router.post('/subscribeHealthPackage', protect, async (req, res) => {
     const userId = req.user._id;
-    const healthPackageId = req.params.packageId;
-
+    const healthPackageId = req.body.packageId;
     try {
         const user = await patientModel.findById(userId);
         if (!user) {
@@ -1121,11 +1121,12 @@ const getUserOrFamilyMember = async (req, res, userType, registered) => {
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
             }else{
-                const familyMember = await familyMemberModel.findById(familyMemberId);
+                const familyMember = await patientModel.findById(familyMemberId);
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
             }
         }
+
 
         return null;
     } catch (error) {
@@ -1322,7 +1323,8 @@ const processSubscription = async (req, res, userType, paymentType) => {
     let discount = 0;
     if (userType == "familyMember") {
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
-        discount = subscribedHealthPackage.familyDiscountInPercentage;
+        if(subscribedHealthPackage)
+            discount = subscribedHealthPackage.familyDiscountInPercentage;
     }
 
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
