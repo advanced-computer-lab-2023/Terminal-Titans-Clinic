@@ -19,6 +19,7 @@ import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
 import SubPackage from "./Pages/packageSubscribtion";
+import EmploymentContract from "./Pages/EmploymentContract";
 
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
+          <Route path="/EmploymentContract" element={<EmploymentContract/>} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
