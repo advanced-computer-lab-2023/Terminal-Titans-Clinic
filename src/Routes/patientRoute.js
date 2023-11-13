@@ -62,7 +62,6 @@ router.post('/addFamilyMem', protect, async (req, res) => {
             Gender: req.body.gender,
             Relation: req.body.relation.toLowerCase(),
             PatientId: req.user._id,
-            FamilyMemId: req.body.fMemId
         });
         newFamilyMember.save();
         // console.log(req.body.pId)
