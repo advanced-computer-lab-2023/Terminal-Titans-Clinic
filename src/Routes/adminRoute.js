@@ -63,12 +63,6 @@ router.post('/createAdmin', protect, async (req, res) => {
     }
 });
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d',
-    })
-}
-
 //requirement number 8
 router.delete('/deleteUser/:username', protect, async (req, res) => {
     try {
@@ -291,7 +285,9 @@ router.get('/viewHealthPackages', protect, async (req, res) => {
 router.get('/fetchUsers', protect, async (req, res) => {
     try {
         const exist = await Admin.findById(req.user);
-        if (!exist) {
+        console.log(exist);
+        console.log(req.user);
+        if (!exist && req.user._t != "Admin") {
             return res.status(500).json({
                 success: false,
                 message: "You are not an admin"
@@ -311,12 +307,36 @@ router.get('/fetchUsers', protect, async (req, res) => {
     }
 });
 
+router.get('/fetchReqDoctors', protect, async (req, res) => {
+    try {
+        const exist = await Admin.findById(req.user);
+        console.log(exist);
+        console.log(req.user);
+        if (!exist && req.user._t != "Admin") {
+            return res.status(500).json({
+                success: false,
+                message: "You are not an admin"
+            });
+        }
+        const users = await User.find(({ '__t': { $eq: "RequestedDoctor" } }));
+        res.status(200).json({
+            success: true,
+            users: users,
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch users.',
+        });
+    }
+});
+
 router.post('/Acceptance/:username', protect, async (req, res) => {
     try {
         const { username } = req.params;
         console.log(username, req.params.username);
         const user = await DoctorApplication.findOne({ Username: username });
-        console.log(user);
         if (user) {
             await DoctorApplication.deleteOne(user);
             const doctor = new doctorModel({
@@ -328,12 +348,18 @@ router.post('/Acceptance/:username', protect, async (req, res) => {
                 HourlyRate: user.HourlyRate,
                 Affiliation: user.Affiliation,
                 Education: user.Education,
-                Speciality:user.Speciality
+                Speciality:user.Speciality,
+                employmentContract: "Pending",
+                ID:user.ID,
+                Degree:user.Degree,
+                License:user.License
             })
             await doctor.save();
+            let result = await DoctorApplication.find();
             res.status(200).json({
                 success: true,
-                message: "Doctor accepted successfully"
+                message: "Doctor accepted successfully",
+                Result:result
             });
         }
         else {
@@ -354,12 +380,14 @@ router.post('/Acceptance/:username', protect, async (req, res) => {
 router.delete('/Rejection/:username', protect, async (req, res) => {
     try {
         const { username } = req.params;
-        const user = await DoctorApplication.findOne({ Username: username });
+        const user = await DoctorApplication.deleteOne({ Username: username });
+        console.log(user);
         if (user) {
-            await DoctorApplication.deleteOne(user);
+            let myResult = await DoctorApplication.find();
             res.status(200).json({
                 success: true,
-                message: "Doctor rejected successfully"
+                message: "Doctor rejected successfully",
+                Result:myResult
             });
         }
         else {

@@ -47,6 +47,7 @@ export default function SignIn() {
                 sessionStorage.setItem('token', response.data.Result.token);
                 if (response.data.Result.type === 'Admin') {
                     // go to admin page
+                    window.location.pathname= '/Health-Plus/admin'
                 }
                 else if (response.data.Result.type === 'Doctor') {
                     // go to doctor page

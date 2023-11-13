@@ -82,8 +82,8 @@ router.post('/patient', upload.single('history'), async (req, res) => {
 router.post('/doctor', upload.fields([{ name: "ID" }, { name: "Degree" }, { name: "License" }]), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.hourlyRate
-        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req.files.ID[0] || !req.files.Degree[0]
-        || !req.files.License[0]) {
+        || !req.body.affiliation || !req.body.education || !req.body.speciality || !req?.files?.ID[0] || !req?.files?.Degree[0]
+        || !req?.files?.License[0]) {
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
     }
     if (req.body.username.includes(' ')) {
@@ -117,16 +117,16 @@ router.post('/doctor', upload.fields([{ name: "ID" }, { name: "Degree" }, { name
             Education: req.body.education,
             Speciality: req.body.speciality,
             ID: {
-                data: req.files?.ID[0].buffer,
-                contentType: req.files?.ID[0].mimetype,
+                data: req?.files?.ID[0].buffer,
+                contentType: req?.files?.ID[0].mimetype,
             },
             Degree: {
-                data: req.files?.Degree[0].buffer,
-                contentType: req.files?.Degree[0].mimetype,
+                data: req?.files?.Degree[0].buffer,
+                contentType: req?.files?.Degree[0].mimetype,
             },
             License: {
-                data: req.files?.License[0].buffer,
-                contentType: req.files?.License[0].mimetype,
+                data: req?.files?.License[0].buffer,
+                contentType: req?.files?.License[0].mimetype,
             },
         });
 

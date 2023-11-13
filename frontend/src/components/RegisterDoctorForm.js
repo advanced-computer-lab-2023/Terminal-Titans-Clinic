@@ -136,9 +136,11 @@ function RegistrationForm() {
     formData.append('License', license);
     formData.append('speciality', speciality);
     // Make a POST request to your backend register route
-    axios.post('http://localhost:8000/security/doctor/', formData)
+    axios.post('http://localhost:8000/security/doctor/', formData).then((response) => {alert("success:"+response.data.success)})
       .catch(error => {
         console.log(error.response.data);
+        alert(error.response.data.message)
+        
         console.log(error.response.status);
         console.log(error.response.headers);
       });

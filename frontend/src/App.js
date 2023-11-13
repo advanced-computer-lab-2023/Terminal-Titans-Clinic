@@ -17,6 +17,7 @@ import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
+import AdminPage from "./Pages/AdminPage";
 
 
 function App() {
@@ -42,7 +43,7 @@ function App() {
 
         <Routes>
 
-          <Route path="/patient" element={<Patient />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<Patient/>} />
