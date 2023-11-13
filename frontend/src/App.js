@@ -22,8 +22,32 @@ import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 
 
-function App() {
+import Form from 'react-bootstrap/Form';
+import axios from 'axios';
+import { useState } from 'react';
 
+function App() {
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    // Handle file selection
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+
+  const handleSubmit = () => {
+    // Handle file upload
+    const formData = new FormData();
+    formData.append('files', selectedFile);
+    axios.post('http://localhost:8000/patient/addHistory', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: 'Bearer ' + sessionStorage.getItem("token")
+      }
+    }).then(() => {
+      alert('File uploaded successfully');
+    }).catch((err) => alert(err.message));
+  }
   const signoutButtonFunc = () => {
     sessionStorage.removeItem('token');
     window.location.href = '/Health-Plus';
@@ -33,8 +57,17 @@ function App() {
 
   return (
     <div className="App">
+      <Form.Group controlId="formFile" className="mb-3">
+        <Form.Label>Default file input example</Form.Label>
+        <Form.Control type="file" onChange={handleFileChange} />
+      </Form.Group>
+
+      <Button variant="primary" onClick={handleSubmit}>
+        Submit
+      </Button>
+
       {
-        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor'?
+        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
           <></>
           : <div className="signoutButton">
             <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
@@ -48,11 +81,11 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<Patient/>} />
-          <Route path="/doctorHome" element={<Doctor/>} />
-          <Route path="/bookAppointments" element={<BookAppointments/>} />
-          <Route path="/viewAppointments" element={<ViewAppointments/>} />
-          <Route path="/docViewAppointments" element={<DocViewAppointments/>} />
+          <Route path="/patientHome" element={<Patient />} />
+          <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/bookAppointments" element={<BookAppointments />} />
+          <Route path="/viewAppointments" element={<ViewAppointments />} />
+          <Route path="/docViewAppointments" element={<DocViewAppointments />} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
@@ -60,7 +93,7 @@ function App() {
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
-          <Route path="/EmploymentContract" element={<EmploymentContract/>} />
+          <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
