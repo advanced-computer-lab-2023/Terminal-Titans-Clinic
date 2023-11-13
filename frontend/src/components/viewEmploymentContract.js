@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const viewEmploymentContract = () => {
+const ViewEmploymentContract = () => {
     const [contractText, setContractText] = useState('');
     const [decision, setDecision] = useState('');
   
@@ -37,4 +37,4 @@ const viewEmploymentContract = () => {
     );
   };
   
-  export default viewEmploymentContract;
+  export default ViewEmploymentContract;
