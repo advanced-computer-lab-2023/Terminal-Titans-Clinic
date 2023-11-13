@@ -269,7 +269,7 @@ router.get('/viewContract', protect, async (req, res) => {
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
-
+    console.log(req.user);
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
        return res.status(500).json({ message: "You are not a doctor", success: false })

@@ -14,6 +14,7 @@ import SignIn from "./Pages/SignIn";
 import HealthPackages from "./Pages/HealthPackages";
 import ViewmyHealthRecords from "./components/viewHealthRecords";
 import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
+import SubPackage from "./Pages/packageSubscribtion";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
+          <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
