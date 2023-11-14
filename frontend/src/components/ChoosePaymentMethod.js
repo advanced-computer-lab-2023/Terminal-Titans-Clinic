@@ -39,7 +39,6 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
             setErrorMessage("Success");
             alert('Successfull payment');
           }
-          bookAppointment();
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');
@@ -74,7 +73,6 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
             setErrorMessage("Success");
             alert('Successfull payment');
           }
-          subscribePackage();
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');

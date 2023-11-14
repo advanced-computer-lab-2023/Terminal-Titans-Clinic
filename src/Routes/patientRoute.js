@@ -426,9 +426,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
         return res.status(200).json({ Result: newAppointment, success: true });
     }
-    if (aptmnt.length < 1) {
+    if (aptmnt && aptmnt.length < 1) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
     }
+    
     const newAppointment = new appointmentModel({
         PatientId: req.user._id,
         DoctorId: dId,
@@ -1196,7 +1197,24 @@ const giveDoctorMoney = async (req, res, doctor, fees) => {
     }
 };
 
-const processCardPayment = async (req, res, fees, description, doctor, subscribtion) => {
+const processCardPayment = async (req, res, fees, description, doctor, subscribtion, date, user,packageS) => {
+    let docId = null
+    if(doctor){
+        docId = doctor._id;
+    }
+    let dateS = null
+    if(date){
+        dateS = date;
+    }
+    let famId = null
+    if(user){
+        famId = user._id;
+    }
+    let pacId = null
+    if(packageS){
+        pacId = packageS._id;
+    }
+
     try {
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ["card"],
@@ -1211,7 +1229,7 @@ const processCardPayment = async (req, res, fees, description, doctor, subscribt
                 },
                 quantity: 1,
             }],
-            success_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}?success=true`,
+            success_url: `http://localhost:3000/Health-Plus/confirmPayment?paymentType=${subscribtion?'package':'appointment'}${docId?'&sDoc?=$'+{docId}:''}${dateS?'&sDate?=$'+{dateS}:''}${famId?'&fId?=$'+{famId}:''}${pacId?'&sP?=$'+{pacId}:''}`,
             cancel_url: `http://localhost:3000/Health-Plus/${subscribtion?'packageSubscribtion':'bookAppointments'}`,
         });
 
@@ -1292,7 +1310,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
         } else {
-            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor,false);
+            return await processCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor,false,date,user,null);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
