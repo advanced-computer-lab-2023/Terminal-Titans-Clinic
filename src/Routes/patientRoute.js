@@ -237,6 +237,12 @@ router.post('/getAppointment', protect, async (req, res) => {
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
+        if(temp[x].FamilyMemId){
+            const famNam=await familyMemberModel.findOne({_id:temp[x].FamilyMemId});
+            console.log(famNam.Name);
+            result.famMem=famNam.Name;
+        }
+        
         final.push(result);
 
     }
@@ -447,7 +453,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
     const date = req.params.date;
     const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.params.famId;
-    console.log(famId)
+    console.log(req.params.fam)
     if (req.params.fam=='true') {
         const famMember = await familyMember.find({ PatientId: pId, FamilyMemId: famId });
         if (!famMember) {
@@ -462,7 +468,8 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         });
         newAppointment.save();
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
-        return res.status(200).json({ Result: newAppointment, success: true });
+        return res.redirect('http://localhost:3000/Health-Plus/patientHome')
+
     }
     if (!aptmnt) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
@@ -1484,7 +1491,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         discount = healthPackage.doctorDiscountInPercentage;
     }
     var fam=false
-    if(req.body.famId){
+    if(req.body.familyMember){
         fam=true
     }
     const fees = calculateFees(doctor.HourlyRate, discount);
@@ -1492,7 +1499,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
         } else {
-            return await processAppCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor, false,userId,doctorId,req.body.famId,date,fam);
+            return await processAppCardPayment(req, res, fees, "Appointment with " + doctor.Name + " on " + date, doctor, false,userId,doctorId,req.body.familyMember._id,date,fam);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);

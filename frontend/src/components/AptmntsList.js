@@ -108,6 +108,7 @@ const AptmntsList = () => {
               <StyledTableCell align="center">Date</StyledTableCell>
               <StyledTableCell align="center">Status</StyledTableCell>
               <StyledTableCell align="center">Doctor</StyledTableCell>
+              <StyledTableCell align="center">Family Member</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -127,6 +128,7 @@ const AptmntsList = () => {
                 <TableCell align="center">{aptmnts.Date}</TableCell>
                 <TableCell align="center">{aptmnts.Status}</TableCell>
                 <TableCell align="center">{aptmnts.Name}</TableCell>
+                <TableCell align="center">{aptmnts.famMem}</TableCell>
               </TableRow>
             ))}
           </TableBody>
