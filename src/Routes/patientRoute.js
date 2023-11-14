@@ -885,7 +885,7 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             if (member.Patient2Id.equals(userId))
                 famMemberUser = await patientModel.findById(member.PatientId);
 
-            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id });
+            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id, status: { $in: ['Subscribed', 'Cancelled'] } });
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
 
             let famMemberUserHealth = {};
@@ -924,10 +924,10 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
         }
 
         //patient
-        let userHealthPackageStatus = await healthPackageStatus.find({ patientId: userId, status: { $in: ['Subscribed', 'Cancelled'] } });
+        let userHealthPackageStatus = await healthPackageStatus.find({ patientId: userId });
         //fam members
 
-        console.log(userHealthPackageStatus);
+        // console.log('userHealthPackageStatus',userHealthPackageStatus);
 
         let registeredFamilyMembers = await RegFamMem.find({
             $or: [
@@ -941,7 +941,6 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
 
         let result = { 'myUser': userHealthPackageStatus, 'familyMembers': [] };
 
-
         for (let member of registeredFamilyMembers) {
             let famMemberUser = {};
             if (member.PatientId.equals(userId))
@@ -950,50 +949,62 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
             if (member.Patient2Id.equals(userId))
                 famMemberUser = await patientModel.findById(member.PatientId);
 
-            let healthPackage = await healthPackageStatus.findOne({
+            let healthPackage = await healthPackageStatus.find({
                 patientId: famMemberUser._id,
-                status: { $in: ['Subscribed', 'Cancelled'] }
             });
             if (!healthPackage) {
                 healthPackage = null;
             }
 
-            let memberRes = JSON.parse(JSON.stringify(member));
-            delete memberRes['Patient2Id'];
-            delete memberRes['createdAt'];
-            delete memberRes['updatedAt'];
-            delete memberRes['__v'];
 
-            memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
-            memberRes['renewalDate'] = healthPackage?.renewalDate;
-            memberRes['endDate'] = healthPackage?.endDate;
 
-            result['familyMembers'].push(memberRes);
+            console.log(healthPackage);
 
-        }
-        registeredFamilyMembers = await RegFamMem.find({ PatientId: userId });
-        for (let member of registeredFamilyMembers) {
-            let healthPackage = await healthPackageStatus.findOne({
-                patientId: member.PatientId,
-                status: { $in: ['Subscribed', 'Cancelled'] }
-            });
-            if (!healthPackage) {
-                healthPackage = null;
+            for (let i = 0; i < healthPackage.length; i++) {
+                let memberRes = JSON.parse(JSON.stringify(member));
+                delete memberRes['Patient2Id'];
+                delete memberRes['createdAt'];
+                delete memberRes['updatedAt'];
+                delete memberRes['__v'];
+                memberRes['status'] = healthPackage[i].status;
+                memberRes['renewalDate'] = healthPackage[i]?.renewalDate;
+                memberRes['endDate'] = healthPackage[i]?.endDate;
+                result['familyMembers'].push(memberRes);
+                console.log(healthPackage[i].status);
+                console.log(memberRes['status']);
             }
 
-            let memberRes = JSON.parse(JSON.stringify(member));
-            delete memberRes['PatientId'];
-            delete memberRes['createdAt'];
-            delete memberRes['updatedAt'];
-            delete memberRes['__v'];
 
-            memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
-            memberRes['renewalDate'] = healthPackage?.renewalDate;
-            memberRes['endDate'] = healthPackage?.endDate;
 
-            result['familyMembers'].push(memberRes);
+            // console.log(healthPackage.status);
+            // console.log(memberRes['status']);
+
+
 
         }
+        // registeredFamilyMembers = await RegFamMem.find({ PatientId: userId });
+        // for (let member of registeredFamilyMembers) {
+        //     let healthPackage = await healthPackageStatus.findOne({
+        //         patientId: member.PatientId,
+        //         status: { $in: ['Subscribed', 'Cancelled'] }
+        //     });
+        //     if (!healthPackage) {
+        //         healthPackage = null;
+        //     }
+
+        //     let memberRes = JSON.parse(JSON.stringify(member));
+        //     delete memberRes['PatientId'];
+        //     delete memberRes['createdAt'];
+        //     delete memberRes['updatedAt'];
+        //     delete memberRes['__v'];
+
+        //     memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
+        //     memberRes['renewalDate'] = healthPackage?.renewalDate;
+        //     memberRes['endDate'] = healthPackage?.endDate;
+
+        //     result['familyMembers'].push(memberRes);
+
+        // }
 
         return res.status(200).json({ success: true, result });
 
@@ -1046,21 +1057,21 @@ router.put('/cancelSub', protect, async (req, res) => {
             if (familyMember.Patient2Id.equals(userId))
                 famMemberUser = await patientModel.findById(familyMember.PatientId);
 
-                await healthPackageStatus.updateMany(
-                    {
-                        patientId: famMemberUser._id,
-                        $expr: {
-                            $eq: ["$status", "Subscribed"] // Your condition here
-                        }
-                    },
-                    {
-                        $set: {
-                            status: 'Cancelled',
-                            endDate: new Date(0),
-                            renewalDate: new Date(0)
-                        }
+            await healthPackageStatus.updateMany(
+                {
+                    patientId: famMemberUser._id,
+                    $expr: {
+                        $eq: ["$status", "Subscribed"] // Your condition here
                     }
-                );
+                },
+                {
+                    $set: {
+                        status: 'Cancelled',
+                        endDate: new Date(0),
+                        renewalDate: new Date(0)
+                    }
+                }
+            );
         }
 
         return res.status(200).json({ message: 'Health package subscription canceled successfully' });

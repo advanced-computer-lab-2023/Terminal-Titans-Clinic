@@ -64,7 +64,7 @@ router.get('/updateDoctor', protect, async (req, res) => {
 });
 
 // requirement number 25
-router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
+router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findById(req.user)
         if (!doctor) {
@@ -140,11 +140,11 @@ router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
 
 
 // requirement number 33
-router.get('/getPatientsList', protect,async (req, res) => {
+router.get('/getPatientsList', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
         console.log(req.user.Name)
-        if(!doctor){
+        if (!doctor) {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
@@ -205,7 +205,7 @@ router.get('/getPatientsList', protect,async (req, res) => {
 
 router.post('/acceptContract', protect, async (req, res) => {
     try {
-       
+
         const doctor = await doctorModel.findOne({ _id: req.user });
 
         if (!doctor) {
@@ -215,8 +215,8 @@ router.post('/acceptContract', protect, async (req, res) => {
       console.log(doctor)
         doctor.employmentContract = "Accepted";
 
-       await doctorModel.findOneAndUpdate({ _id: req.user }, doctor);
-        //await doctor.save();
+       
+        await doctor.save();
 
         return res.status(200).json({ message: "Contract accepted successfully", success: true });
     } catch (err) {
@@ -262,7 +262,7 @@ router.post('/assignfollowUp', protect, async (req, res) => {
 })
 
 // requirement number 34
-router.get('/getPatientName/:name',protect, async (req, res) => {
+router.get('/getPatientName/:name', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
 
@@ -318,24 +318,23 @@ router.get('/viewContract', protect, async (req, res) => {
 
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
-       return res.status(500).json({ message: "You are not a doctor", success: false })
+        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    
 
     const salary= Math.floor(doctor.HourlyRate / 2);
    /// const markup = Math.floor(salary/10);
     const contact='Employee: '+doctor.Name+'\n'+' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor '+salary+' per appointment and that the clinic have a markup of 10% for the appointment' ;
     return res.status(200).json({message:contact, success: true})
 
-});  
+});
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
-    console.log('k')    
+    console.log('k')
     console.log(req.user);
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
-       return res.status(500).json({ message: "You are not a doctor", success: false })
+        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
     else{
         if(doctor.employmentContract!="Accepted"){
@@ -348,68 +347,68 @@ router.post('/addavailableslots', protect, async (req, res) => {
     let startDate = new Date(dTimeTemp);
     startDate.setHours(startDate.getHours() + 2)
     //const startDate = req.body.Date
-console.log(startDate)
+    console.log(startDate)
     let endDate = new Date(startDate);
     endDate.setMinutes(startDate.getMinutes() + 30);
 
     let aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
     //console.log(aptmnts);
-    if(aptmnts){
+    if (aptmnts) {
 
 
         for (let y in aptmnts) {
-            
-                let start = aptmnts[y].Date;
-                console.log('ll')
-                console.log(!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
-                    console.log(startDate)
-                    console.log(aptmnts[y].Date)
-                    
-                if(!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
-                    flag=false;
-            } 
-        }
-       // console.log(flag)
-        aptmnts = await docAvailableSlots.find({ DoctorId: req.user._id });
-        if (flag==false) {
-            return res.status(500).json({ message: "you have an appointment during this slot", success: false });
-        }
-    flag=true;
-        //console.log(aptmnts);
-        if(aptmnts){
-    
-    
-            for (let y in aptmnts) {
-                   // console.log((startDate).toDateString==(aptmnts[y].Date).toDateString)
-                    console.log(startDate)
-                    console.log(aptmnts[y].Date)
-                    if (!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
-                        flag=false;
-                
-                } 
-            }
-       // console.log(aptmnts);
-            if (flag==false) {
-                return res.status(500).json({ message: "you already  during this slot", success: false });
-            }
-        
-        
-        try {
-            const availableSlots = new docAvailableSlots({
-                DoctorId: req.user._id ,
-                Date: startDate,
-            });
-            availableSlots.save();
-            console.log('ho')
-           return  res.status(200).json({ Result: availableSlots, success: true })
-        }
 
-        catch (error) {
-            res.status(400).send({ error: error, success: false });
-        
+            let start = aptmnts[y].Date;
+            console.log('ll')
+            console.log(!((startDate) > (aptmnts[y].Date) || (startDate) < (aptmnts[y].Date)))
+            console.log(startDate)
+            console.log(aptmnts[y].Date)
+
+            if (!((startDate) > (aptmnts[y].Date) || (startDate) < (aptmnts[y].Date)))
+                flag = false;
         }
-            });
-        
+    }
+    // console.log(flag)
+    aptmnts = await docAvailableSlots.find({ DoctorId: req.user._id });
+    if (flag == false) {
+        return res.status(500).json({ message: "you have an appointment during this slot", success: false });
+    }
+    flag = true;
+    //console.log(aptmnts);
+    if (aptmnts) {
+
+
+        for (let y in aptmnts) {
+            // console.log((startDate).toDateString==(aptmnts[y].Date).toDateString)
+            console.log(startDate)
+            console.log(aptmnts[y].Date)
+            if (!((startDate) > (aptmnts[y].Date) || (startDate) < (aptmnts[y].Date)))
+                flag = false;
+
+        }
+    }
+    // console.log(aptmnts);
+    if (flag == false) {
+        return res.status(500).json({ message: "you already  during this slot", success: false });
+    }
+
+
+    try {
+        const availableSlots = new docAvailableSlots({
+            DoctorId: req.user._id,
+            Date: startDate,
+        });
+        availableSlots.save();
+        console.log('ho')
+        return res.status(200).json({ Result: availableSlots, success: true })
+    }
+
+    catch (error) {
+        res.status(400).send({ error: error, success: false });
+
+    }
+});
+
 
 router.get('/getWalletAmount', protect,async (req, res) => {
         
@@ -433,7 +432,7 @@ router.get('/getWalletAmount', protect,async (req, res) => {
 })
 
 // requirement number 35 front lesa
-router.get('/getUpcomingAppointment', protect,async (req, res) => {
+router.get('/getUpcomingAppointment', protect, async (req, res) => {
     try {
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
@@ -486,7 +485,7 @@ router.get('/getUpcomingAppointment', protect,async (req, res) => {
 });
 
 // requirement number 36
-router.get('/selectPatientName/:id', protect,async (req, res) => {
+router.get('/selectPatientName/:id', protect, async (req, res) => {
     try {
         // const getAppointment = await appointmentModel.find({ DoctorId: id });
         const exists = await doctorModel.findById(req.user);
@@ -536,8 +535,8 @@ router.get('/selectPatientName/:id', protect,async (req, res) => {
     }
 })
 
-router.post('/getAppointment', protect,async (req, res) => {
-console.log('here')
+router.post('/getAppointment', protect, async (req, res) => {
+    console.log('here')
     const exists = await doctorModel.findById(req.user);
     if (!exists) {
         return res.status(500).json({
@@ -584,8 +583,8 @@ console.log('here')
         const patient = await patientsModel.find({ _id: temp[x].PatientId })
         if (patient.length > 0)
             result.Name = patient[0].Name;
-        result.PatientId=temp[x].PatientId;
-        result.DoctorId=temp[x].DoctorId;
+        result.PatientId = temp[x].PatientId;
+        result.DoctorId = temp[x].DoctorId;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
         final.push(result);
@@ -651,6 +650,7 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
+    
     console.log("Abl el patient ID")
     const patientID = req.params.PatientId;
     console.log(patientID);
@@ -662,20 +662,21 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
             message:"patient doesn't exist"
         })
         }
-    else{
-        const newrecord = new healthModel( {
-            HealthDocument:{
-                data:req.file.buffer,
-                contentType:req.file.mimetype
-            } ,
-            PatientId: patientID
-        } );
-        newrecord.save();
-    }}
-    catch(error){
+        else {
+            const newrecord = new healthModel({
+                HealthDocument: {
+                    data: req.file.buffer,
+                    contentType: req.file.mimetype
+                },
+                PatientId: patientID
+            });
+            newrecord.save();
+        }
+    }
+    catch (error) {
         console.log(error);
         res.status(500).json({
-            success:false,
+            success: false,
             messsage: "Internal error mate2refnash"
         })
     }
