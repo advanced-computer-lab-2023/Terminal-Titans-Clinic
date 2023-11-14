@@ -232,7 +232,7 @@ router.post('/getAppointment', protect, async (req, res) => {
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-        if (patient.length > 0)
+        if (doctor && doctor.length > 0)
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
