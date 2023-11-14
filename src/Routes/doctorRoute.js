@@ -239,21 +239,23 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     }
     const PID = req.body.PatientId;
     const date = req.body.date;
-    const DID= req.user._id;
-   const aptmnt=await appointmentModel.findOne({DoctorId:DID,Date:date});
-
+    const DID = req.user._id;
+    let myDate = new Date(date);
+    console.log(myDate);
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: DID, Date: myDate });
+    console.log(aptmnt);
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
-   
-   if(aptmnt && aptmnt.length>1){
-      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
- }
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
-        const newAppointment = new appointmentModel({
-            PatientId: PID,
-            DoctorId: DID,
-            Status: "upcoming",
-            Date: date
-        });
+
+    if (!aptmnt) {
+        return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+    }
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: myDate });
+    const newAppointment = new appointmentModel({
+        PatientId: PID,
+        DoctorId: DID,
+        Status: "upcoming",
+        Date: myDate
+    });
 
         await newAppointment.save();
         res.status(200).json({ Result: newAppointment, success: true });
@@ -671,6 +673,10 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
                 PatientId: patientID
             });
             newrecord.save();
+            res.status(200).json({
+                success: true,
+                message: "record added successfully"
+            })
         }
     }
     catch (error) {
