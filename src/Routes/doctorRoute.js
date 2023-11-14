@@ -187,12 +187,13 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     const PID = req.body.PatientId;
     const date = req.body.date;
     const DID = req.user._id;
-    console.log(date);
-    const aptmnt = await docAvailableSlots.findOne({ DoctorId: DID, Date: date });
-
+    let myDate = new Date(date);
+    console.log(myDate);
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: DID, Date: myDate });
+    console.log(aptmnt);
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
 
-    if (aptmnt.length < 1) {
+    if (!aptmnt) {
         return (res.status(400).send({ error: "You are not available during this slot", success: false }));
     }
 
@@ -584,6 +585,10 @@ router.post('/addrecord/:PatientId', upload.single('file'), protect, async (req,
                 PatientId: patientID
             });
             newrecord.save();
+            res.status(200).json({
+                success: true,
+                message: "record added successfully"
+            })
         }
     }
     catch (error) {
