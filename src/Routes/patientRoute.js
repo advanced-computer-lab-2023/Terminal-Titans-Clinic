@@ -1451,10 +1451,12 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
         const healthRecord = await healthModel.find({ PatientId: patient._id });
         let list = []
         console.log(healthRecord)
-        for (var x in healthRecord) {
-            const data = healthRecord[x].HealthDocument.binData
-            list.push(data)
-        }
+       
+            for (let x in healthRecord) {
+                list.push(healthRecord[x].HealthDocument.data)
+    
+            }         
+        
         const medicalHistory = patient.HealthHistory
         let list1 = []
         let list2 = []

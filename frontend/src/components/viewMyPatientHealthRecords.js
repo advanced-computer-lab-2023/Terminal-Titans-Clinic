@@ -54,6 +54,7 @@ async function viewPatientsDoc(){
                  // console.log(aptmnts);
                  
         console.log(data.Result)
+        console.log(data.Result.healthDoc)
                  setUserHealthRecord(data.Result.healthDoc)
                  setCurDoc('')
                  setUserHealthHistoryPDF(data.Result.medicalHistoryPDF)
@@ -66,6 +67,8 @@ const viewCurDoc = (event) =>{
     console.log('k')
     const selectedOption = event.target.options[event.target.selectedIndex];
     console.log(userHealthRecord[selectedOption.value])
+    console.log(userHealthRecord[selectedOption.value])
+
     setCurDoc(userHealthRecord[selectedOption.value].data)
     console.log(curDoc)
 }

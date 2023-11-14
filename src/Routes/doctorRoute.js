@@ -75,6 +75,7 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
              return   res.status(400).json({ message: "Contract not accepted", success: false })
             }}
 
+
         const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
 
         if (appointment.length == 0) {
@@ -85,7 +86,7 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
 
         let healthRecords = await healthModel.find({ PatientId: appointment.PatientId })
 
-
+        console.log(healthRecords)
         // if (healthRecords.length == 0) {
         //     res.status(400).json({ message: "No health records found", success: false })
         // }
@@ -108,7 +109,7 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         }
         let list = []
         for (let x in healthRecords) {
-            list.push(healthRecords[x].HealthDocument.binData)
+            list.push(healthRecords[x].HealthDocument.data)
 
         }
         const medicalHistory = patient.HealthHistory
@@ -248,7 +249,7 @@ console.log(aptmnt)
    if(aptmnt && aptmnt.length>0){
       return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
  }
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newDate });
         const newAppointment = new appointmentModel({
             PatientId: PID,
             DoctorId: DID,

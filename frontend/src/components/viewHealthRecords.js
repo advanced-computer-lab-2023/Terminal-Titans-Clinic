@@ -22,6 +22,7 @@ useEffect(() => {
                // console.log(aptmnts);
                console.log(data.Result)
                console.log(data.Result.healthRecords);
+
                setUserHealthRecord(data.Result.healthRecords)
                console.log(data.Result.medicalHistoryPDF)
                setUserHealthHistoryPDF(data.Result.medicalHistoryPDF)
