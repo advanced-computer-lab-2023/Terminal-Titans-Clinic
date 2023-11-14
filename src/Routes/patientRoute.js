@@ -1015,8 +1015,22 @@ router.put('/cancelSub', protect, async (req, res) => {
             return res.status(500).json({ message: 'Patient not found' });
         }
 
-        let result = await healthPackageStatus.updateMany({patientId:userId}, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
-        console.log(result);
+        await healthPackageStatus.updateMany(
+            {
+                patientId: userId,
+                $expr: {
+                    $eq: ["$status", "Subscribed"] // Your condition here
+                }
+            },
+            {
+                $set: {
+                    status: 'Cancelled',
+                    endDate: new Date(0),
+                    renewalDate: new Date(0)
+                }
+            }
+        );
+
         var registeredFamilyMembers = await RegFamMem.find({
             $or: [
                 { Patient2Id: userId },
@@ -1032,7 +1046,21 @@ router.put('/cancelSub', protect, async (req, res) => {
             if (familyMember.Patient2Id.equals(userId))
                 famMemberUser = await patientModel.findById(familyMember.PatientId);
 
-            await healthPackageStatus.updateMany({ patientId: famMemberUser._id }, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
+                await healthPackageStatus.updateMany(
+                    {
+                        patientId: famMemberUser._id,
+                        $expr: {
+                            $eq: ["$status", "Subscribed"] // Your condition here
+                        }
+                    },
+                    {
+                        $set: {
+                            status: 'Cancelled',
+                            endDate: new Date(0),
+                            renewalDate: new Date(0)
+                        }
+                    }
+                );
         }
 
         return res.status(200).json({ message: 'Health package subscription canceled successfully' });
