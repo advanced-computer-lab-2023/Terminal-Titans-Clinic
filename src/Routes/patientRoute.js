@@ -831,6 +831,65 @@ router.post('/subscribeHealthPackage', protect, async (req, res) => {
         return res.status(500).json({ error: 'Error' });
     }
 });
+router.get('/subscribeHealthPackageCard/:pid/:packageId', async (req, res) => {
+    const userId = req.params.pid;
+    const healthPackageId = req.params.packageId;
+    try {
+        const user = await patientModel.findById(userId);
+        if (!user) {
+            return res.status(500).json({ message: 'Patient not found' });
+        }
+        const healthPackage = await healthPackageModel.findById(healthPackageId);
+
+        if (!healthPackage) {
+            return res.status(500).json({ message: 'Health package not found' });
+        }
+
+        let renewalDate = new Date();
+        renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        console.log(renewalDate);
+
+
+        //update baa el status bta3t el patient
+        let myHealthStatus = await healthPackageStatus.findOne(
+            { patientId: userId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        );
+
+        if (!myHealthStatus) {
+            let myHealthStatus = new healthPackageStatus({
+                patientId: userId,
+                status: 'Subscribed',
+                renewalDate: renewalDate,
+                endDate: renewalDate,
+                healthPackageId: healthPackage
+            })
+            await myHealthStatus.save();
+        }
+
+        // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        // // do the subscription for the fam members
+        // for (const familyMember of registeredFamilyMembers) {
+        //     let healthStatusFamMember = await healthPackageStatus.findOne(
+        //         { patientId: familyMember.PatientId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        //     );
+        //     if(!healthStatusFamMember){
+        //         let healthStatusFamMember = new healthPackageStatus({
+        //             patientId: familyMember.PatientId,
+        //             status: 'Subscribed',
+        //             renewalDate: renewalDate,
+        //             endDate: renewalDate,
+        //             healthPackageId: healthPackage
+        //         })
+        //         await healthStatusFamMember.save();
+        //     }
+        //}
+        return res.redirect('http://localhost:3000/Health-Plus/patientHome')
+
+    } catch (error) {
+        console.error('Error subscribing to health package:', error.message);
+        return res.status(500).json({ error: 'Error' });
+    }
+});
 router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
     const userId = req.user._id;
     const healthPackageId = req.body.packageId;
@@ -853,11 +912,11 @@ router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
 
 
         //update baa el status bta3t el patient
-        let myHealthStatus = await healthPackageStatus.findOne(
-            { patientId: userId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
-        );
+        // let myHealthStatus = await healthPackageStatus.findOne(
+        //     { patientId: userId, status: 'Subscribed', renewalDate: renewalDate, endDate: renewalDate, healthPackageId: healthPackage }
+        // );
 
-        if (!myHealthStatus) {
+       // if (!myHealthStatus) {
             let myHealthStatus = new healthPackageStatus({
                 patientId: familyMemberId,
                 status: 'Subscribed',
@@ -866,7 +925,7 @@ router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
                 healthPackageId: healthPackage
             })
             await myHealthStatus.save();
-        }
+     //   }
 
         // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
         // // do the subscription for the fam members
@@ -1482,10 +1541,41 @@ const processSubscription = async (req, res, userType, paymentType) => {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
-            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true);
+            return await processSubCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true,user._id,healthPackageId);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
+        return res.status(400).send({ error: e.message });
+    }
+};
+const processSubCardPayment = async (req, res, fees, description, doctor, subscribtion,pid,packageId) => {
+    try {
+        console.log('l')
+        const session = await stripeInstance.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            line_items: [{
+                price_data: {
+                    currency: "egp",
+                    product_data: {
+                        name: description,
+                    },
+                    unit_amount: fees * 100,
+                },
+                quantity: 1,
+            }],
+            success_url: `http://localhost:8000/patient/subscribeHealthPackageCard/${pid}/${packageId}`,
+
+            
+            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
+        });
+
+        
+
+        console.log('Card payment processed successfully');
+        return res.status(200).send({ url: session.url });
+    } catch (e) {
+        console.error('Error in payment', e.message, e);
         return res.status(400).send({ error: e.message });
     }
 };
