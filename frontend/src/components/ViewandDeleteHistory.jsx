@@ -97,39 +97,40 @@ export default function ViewandDeleteHistory() {
     }, []);
 
     return (
-        <Table striped bordered hover>
-            <thead>
-                <tr>
-                    <th>index</th>
-                    <th>image</th>
-                    <th>file name</th>
-                    <th>delete</th>
-                </tr>
-            </thead>
-            <tbody>
-                {History.map((histo, index) => (
-                    <tr>
-                        <React.Fragment key={index}>
-                            <td>{index + 1}</td>
-                            <td>
-                            {History.map((record, index) => (
-                        <div key={index}>
-                            <h3>Record {index + 1}</h3>
-                         {/* {console.log(record)}    */}
-                         <img
-                          src={`data:image/jpeg;base64,${arrayBufferToBase64(histo.data.data)}`}
+        <div></div>
+        // <Table striped bordered hover>
+        //     <thead>
+        //         <tr>
+        //             <th>index</th>
+        //             <th>image</th>
+        //             <th>file name</th>
+        //             <th>delete</th>
+        //         </tr>
+        //     </thead>
+        //     <tbody>
+        //         {History.map((histo, index) => (
+        //             <tr>
+        //                 <React.Fragment key={index}>
+        //                     <td>{index + 1}</td>
+        //                     <td>
+        //                     {History.map((record, index) => (
+        //                 <div key={index}>
+        //                     <h3>Record {index + 1}</h3>
+        //                  {/* {console.log(record)}    */}
+        //                  <img
+        //                   src={`data:image/jpeg;base64,${arrayBufferToBase64(histo.data.data)}`}
                           
-                      />
-                        </div> 
-                           ))}       
-                                </td>
-                            <td>{histo.name}</td>
-                            {/* <td><button type="button" className="btn btn-success" onClick={(event) => { acceptDoctor(doctor.Username) }}>Accept</button></td> */}
-                            <td><button type="button" className="btn btn-danger">Reject</button></td>
-                        </React.Fragment>
-                    </tr>
-                ))}
-            </tbody>
-        </Table >
+        //               />
+        //                 </div> 
+        //                    ))}       
+        //                         </td>
+        //                     <td>{histo.name}</td>
+        //                     {/* <td><button type="button" className="btn btn-success" onClick={(event) => { acceptDoctor(doctor.Username) }}>Accept</button></td> */}
+        //                     <td><button type="button" className="btn btn-danger">Reject</button></td>
+        //                 </React.Fragment>
+        //             </tr>
+        //         ))}
+        //     </tbody>
+        // </Table >
     );
 }

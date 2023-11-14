@@ -279,7 +279,7 @@ router.post('/addavailableslots', protect, async (req, res) => {
        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
    // console.log(doctor);
-    const flag= true;
+    let flag= true;
     let dTimeTemp = req.body.date; 
     console.log(dTimeTemp); 
     let startDate = new Date(dTimeTemp);
@@ -288,8 +288,8 @@ router.post('/addavailableslots', protect, async (req, res) => {
 console.log(startDate)
     let endDate = new Date(startDate);
     endDate.setMinutes(startDate.getMinutes() + 30);
-console.log('p')
-    const aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
+
+    let aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
     //console.log(aptmnts);
     if(aptmnts){
 
@@ -297,14 +297,37 @@ console.log('p')
         for (let y in aptmnts) {
             
                 let start = aptmnts[y].Date;
-                if ( start==startDate )
+                console.log('ll')
+                console.log(!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
+                    console.log(startDate)
+                    console.log(aptmnts[y].Date)
+                    
+                if(!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
                     flag=false;
-            
             } 
         }
+       // console.log(flag)
+        aptmnts = await docAvailableSlots.find({ DoctorId: req.user._id });
+        if (flag==false) {
+            return res.status(500).json({ message: "you have an appointment during this slot", success: false });
+        }
+    flag=true;
+        //console.log(aptmnts);
+        if(aptmnts){
+    
+    
+            for (let y in aptmnts) {
+                   // console.log((startDate).toDateString==(aptmnts[y].Date).toDateString)
+                    console.log(startDate)
+                    console.log(aptmnts[y].Date)
+                    if (!((startDate)>(aptmnts[y].Date) || (startDate)<(aptmnts[y].Date)))
+                        flag=false;
+                
+                } 
+            }
        // console.log(aptmnts);
             if (flag==false) {
-                return res.status(500).json({ message: "you have an appointment during this slot", success: false });
+                return res.status(500).json({ message: "you already  during this slot", success: false });
             }
         
         
@@ -436,7 +459,7 @@ router.get('/selectPatientName/:id', protect,async (req, res) => {
 })
 
 router.post('/getAppointment', protect,async (req, res) => {
-
+console.log('here')
     const exists = await doctorModel.findById(req.user);
     if (!exists) {
         return res.status(500).json({

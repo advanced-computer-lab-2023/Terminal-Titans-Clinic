@@ -66,7 +66,6 @@ router.post('/addFamilyMem', protect, async (req, res) => {
             Gender: req.body.gender,
             Relation: req.body.relation.toLowerCase(),
             PatientId: req.user._id,
-            FamilyMemId: req.body.fMemId
         });
         newFamilyMember.save();
         // console.log(req.body.pId)
@@ -813,7 +812,7 @@ router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
 
         if (!myHealthStatus) {
             let myHealthStatus = new healthPackageStatus({
-                patientId: userId,
+                patientId: familyMemberId,
                 status: 'Subscribed',
                 renewalDate: renewalDate,
                 endDate: renewalDate,
@@ -855,11 +854,12 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         // get the patient package
         const user = await patientModel.findById(userId);
 
-        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId });
+        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId,status: 'Subscribed' });
+        console.log(userHealthPackageStatus)
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
         let userHealth = {}
 
-        if (userHealthPackage.status == 'Subscribed')
+        if (userHealthPackageStatus.status == 'Subscribed')
             userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
 
         userHealth.PatientId = user?._id;
@@ -870,7 +870,7 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         let result = { 'myUser': userHealth, 'familyMembers': [] };
 
         //Get the health package details for registered family members
-        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        var registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
 
         for (let member of registeredFamilyMembers) {
             let famMemberUser = await patientModel.findById(member.PatientId);
@@ -884,6 +884,27 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
 
             let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
+
+            memberRes.PatientId = famMemberUser?._id;
+            memberRes.Name = famMemberUser?.Name;
+            memberRes.Email = famMemberUser?.Email;
+            memberRes.Username = famMemberUser?.Username;
+            result['familyMembers'].push(memberRes);
+        }
+         registeredFamilyMembers = await RegFamMem.find({ PatientId: userId });
+        console.log(registeredFamilyMembers)
+        for (let member of registeredFamilyMembers) {
+            let famMemberUser = await patientModel.findById(member.Patient2Id);
+
+            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser });
+            let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
+            console.log(famMemberUserHealthPackage)
+
+            let famMemberUserHealth = {};
+            if(famMemberUserHealthPackage.status == 'Subscribed')
+                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage)??{};
+
+            let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
             memberRes.PatientId = famMemberUser?._id;
             memberRes.Name = famMemberUser?.Name;
@@ -943,6 +964,29 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
 
             let memberRes = JSON.parse(JSON.stringify(member));
             delete memberRes['Patient2Id'];
+            delete memberRes['createdAt'];
+            delete memberRes['updatedAt'];
+            delete memberRes['__v'];
+
+            memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
+            memberRes['renewalDate'] = healthPackage?.renewalDate;
+            memberRes['endDate'] = healthPackage?.endDate;
+
+            result['familyMembers'].push(memberRes);
+
+        }
+        registeredFamilyMembers = await RegFamMem.find({ PatientId: userId });
+        for (let member of registeredFamilyMembers) {
+            let healthPackage = await healthPackageStatus.findOne({
+                patientId: member.PatientId,
+                status: { $in: ['Subscribed', 'Cancelled'] }
+            });
+            if (!healthPackage) {
+                healthPackage = null;
+            }
+
+            let memberRes = JSON.parse(JSON.stringify(member));
+            delete memberRes['PatientId'];
             delete memberRes['createdAt'];
             delete memberRes['updatedAt'];
             delete memberRes['__v'];
@@ -1152,7 +1196,7 @@ const getDoctor = async (req, res, doctorId) => {
 const getSubscribedHealthPackage = async (req, res, userId) => {
     try {
         let packageStatus = await healthPackageStatus.find({ patientId: userId, status: 'Subscribed' });
-
+        
         if (packageStatus && packageStatus.length > 0) {
             const healthPackage = await healthPackageModel.findById(packageStatus[0].healthPackageId);
             console.log('Subscribed health package retrieved successfully');
@@ -1312,17 +1356,26 @@ router.post("/subscribeForPackage", protect, async (req, res) => {
 const processSubscription = async (req, res, userType, paymentType) => {
     const userId = req.user._id;
     const healthPackageId = req.body.healthPackage._id;
-
     const user = await getUserOrFamilyMember(req, res, userType, true);
     if (!user) return;
-
     const healthPackage = await getHealthPackage(req, res, healthPackageId);
 
     let discount = 0;
     if (userType == "familyMember") {
+        let packageStatus = await healthPackageStatus.find({ patientId: user, status: 'Subscribed' });
+        if (packageStatus && packageStatus.length > 0) {
+            return res.status(900).send({ error: "This patient is already subscribed to a health package" });
+        }
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
         if (subscribedHealthPackage)
             discount = subscribedHealthPackage.familyDiscountInPercentage;
+    }else{
+        let packageStatus = await healthPackageStatus.find({ patientId: userId, status: 'Subscribed' });
+    
+        if (packageStatus && packageStatus.length > 0) {
+            
+            return res.status(400).send({ error: "You are already subscribed to a health package" });
+        }
     }
 
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);

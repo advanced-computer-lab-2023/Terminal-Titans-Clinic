@@ -76,6 +76,7 @@ export default function AcceptRejectDoctor() {
                     <th>Affiliation</th>
                     <th>Education</th>
                     <th>Speciality</th>
+                    <th>Documents</th>
                     <th>Accept</th>
                     <th>Reject</th>
                 </tr>
@@ -92,6 +93,7 @@ export default function AcceptRejectDoctor() {
                             <td>{doctor.Affiliation}</td>
                             <td>{doctor.Education}</td>
                             <td>{doctor.Speciality}</td>
+                            <td><button type="button" className="btn btn-success"  onClick={() => window.location.href=`/Health-Plus/viewRegDocDoc?Id=${doctor._id}`}>view Doc</button></td>
                             <td><button type="button" className="btn btn-success" onClick={(event) => { acceptDoctor(doctor.Username) }}>Accept</button></td>
                             <td><button type="button" className="btn btn-danger" onClick={(event) => { rejectDoctor(doctor.Username) }}>Reject</button></td>
                         </React.Fragment>
