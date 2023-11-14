@@ -254,7 +254,7 @@ router.post('/assignfollowUp', protect, async (req, res) => {
         PatientId: PID,
         DoctorId: DID,
         Status: "upcoming",
-        Date: date
+        Date: myDate
     });
 
         await newAppointment.save();
