@@ -7,6 +7,8 @@ import familyMemberModel from '../Models/familyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
 import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
 import { escape } from 'querystring';
+import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
+import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 
 import multer from 'multer';
 const storage = multer.memoryStorage();
@@ -25,8 +27,12 @@ router.get('/getCurrentDoctor', protect, async (req, res) => {
     if (!doctor) {
         res.status(400).json({ message: "Doctor not found", success: false })
     }
-    else
+    else{
+        if(doctor.employmentContract!="Accepted"){
+          return  res.status(400).json({ message: "Contract not accepted", success: false })
+        }
         res.status(200).json({ Result: doctor, success: true })
+    }
 })
 
 // requirement number 14 later
@@ -36,6 +42,10 @@ router.get('/updateDoctor', protect, async (req, res) => {
         if (!doctor) {
             return res.status(400).json({ message: "Doctor not found", success: false })
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: req.user._id },
             {
                 Email: req.query.Email || doctor.Email,
@@ -60,6 +70,10 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         if (!doctor) {
             res.status(500).json({ message: "You are not a doctor", success: false })
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
 
         const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
 
@@ -97,13 +111,24 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
             list.push(healthRecords[x].HealthDocument.binData)
 
         }
-
+        const medicalHistory = patient.HealthHistory
+        let list1=[]
+        let list2=[]
+        for(var x in medicalHistory){
+            const type=medicalHistory[x].contentType
+            if(type=='application/pdf')
+                list1.push(medicalHistory[x])
+            else
+                list2.push(medicalHistory[x])
+        }
+        
         //console.log(patient)
         const result = {
             "healthRecords": healthRecords,
             "patient": patient,
             "healthDoc": list,
-            "medicalHistory": patient.MedicalHistory
+            "medicalHistoryPDF": list1,
+            "medicalHistoryImage": list2
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -118,11 +143,18 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
 router.get('/getPatientsList', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
+        console.log(req.user.Name)
         if (!doctor) {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
+       
         if (appointments.length == 0) {
             res.status(400).json({ message: "No patients found", success: false })
             return;
@@ -132,18 +164,33 @@ router.get('/getPatientsList', protect, async (req, res) => {
 
         for (let i = 0; i < appointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
-            let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-            if (!result.find((pat) => pat._id.equals(patient._id))) {
-                patient = { ...patient._doc, "familyMember": [] }
+            console.log(appointments[i]._id)
+            console.log(patient._id)
+            let familyMembers = await unRegFamMem.find({ PatientId: patient._id })
+            if(!result.find((pat) => pat._id.equals(patient._id))){
+            patient = { ...patient._doc, "familyMember": [] }
 
-                for (let i = 0; i < familyMembers.length; i++) {
-                    patient.familyMember.push(familyMembers[i].Name)
-                }
-
-                result = [...result, patient];
+            for (let i = 0; i < familyMembers.length; i++) {
+                patient.familyMember.push(familyMembers[i].Name)
             }
+            familyMembers = await RegFamMem.find({ PatientId: patient._id })
+            for (let i = 0; i < familyMembers.length; i++) {
+                let patientFam = await patientsModel.findOne({ _id: familyMembers[i].Patient2Id })
+
+                patient.familyMember.push(patientFam.Name)
+            }
+            familyMembers = await RegFamMem.find({ Patient2Id: patient._id })
+            for (let i = 0; i < familyMembers.length; i++) {
+                let patientFam = await patientsModel.findOne({ _id: familyMembers[i].PatientId })
+
+                patient.familyMember.push(patientFam.Name)
+            }
+
+            result = [...result, patient];
         }
-        console.log(result)
+    }
+
+    console.log(result)
 
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })
@@ -151,6 +198,7 @@ router.get('/getPatientsList', protect, async (req, res) => {
         else
             res.status(200).json({ Result: result, success: true })
     } catch (err) {
+        console.error(err.message)
         res.status(400).json({ message: err.message, success: false })
     }
 });
@@ -163,11 +211,11 @@ router.post('/acceptContract', protect, async (req, res) => {
         if (!doctor) {
             return res.status(400).json({ message: "You are not a doctor", success: false });
         }
+        
+      console.log(doctor)
+        doctor.employmentContract = "Accepted";
 
-
-        doctor.employmentContract = "accepted";
-
-
+       
         await doctor.save();
 
         return res.status(200).json({ message: "Contract accepted successfully", success: true });
@@ -184,6 +232,11 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "You are not a doctor", success: false })
     }
+    else{
+        if(doctor.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
     const PID = req.body.PatientId;
     const date = req.body.date;
     const DID = req.user._id;
@@ -196,7 +249,7 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     if (!aptmnt) {
         return (res.status(400).send({ error: "You are not available during this slot", success: false }));
     }
-
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
     const newAppointment = new appointmentModel({
         PatientId: PID,
         DoctorId: DID,
@@ -204,11 +257,10 @@ router.post('/assignfollowUp', protect, async (req, res) => {
         Date: date
     });
 
-    await newAppointment.save();
-    await docAvailableSlots.findOneAndDelete({ DoctorId: DID, Date: date });
-    res.status(200).json({ Result: newAppointment, success: true });
-
-
+        await newAppointment.save();
+        res.status(200).json({ Result: newAppointment, success: true });
+    
+    
 })
 
 // requirement number 34
@@ -220,6 +272,12 @@ router.get('/getPatientName/:name', protect, async (req, res) => {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+                return   res.status(400).json({ message: "Contract not accepted", success: false })
+                }
+
+            }
 
         let appointments = await appointmentModel.find({ DoctorId: doctor._id })
 
@@ -265,10 +323,10 @@ router.get('/viewContract', protect, async (req, res) => {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
 
-    const salary = Math.floor(doctor.HourlyRate / 2);
-    /// const markup = Math.floor(salary/10);
-    const contact = 'Employee: ' + doctor.Name + '\n' + ' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor ' + salary + ' per appointment and that the clinic have a markup of 10% for the appointment';
-    return res.status(200).json({ message: contact, success: true })
+    const salary= Math.floor(doctor.HourlyRate / 2);
+   /// const markup = Math.floor(salary/10);
+    const contact='Employee: '+doctor.Name+'\n'+' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor '+salary+' per appointment and that the clinic have a markup of 10% for the appointment' ;
+    return res.status(200).json({message:contact, success: true})
 
 });
 
@@ -280,10 +338,14 @@ router.post('/addavailableslots', protect, async (req, res) => {
     if (!doctor) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    // console.log(doctor);
-    let flag = true;
-    let dTimeTemp = req.body.date;
-    console.log(dTimeTemp);
+    else{
+        if(doctor.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }}
+   // console.log(doctor);
+    let flag= true;
+    let dTimeTemp = req.body.date; 
+    console.log(dTimeTemp); 
     let startDate = new Date(dTimeTemp);
     startDate.setHours(startDate.getHours() + 2)
     //const startDate = req.body.Date
@@ -350,18 +412,23 @@ router.post('/addavailableslots', protect, async (req, res) => {
 });
 
 
-router.get('/getWalletAmount', protect, async (req, res) => {
-
-    const exists = await doctorModel.findById(req.user);
-    if (!exists) {
-        return res.status(500).json({
-            success: false,
-            message: "You are not a doctor"
-        });
-    }
-
-    var result = {};
-    result.Amount = exists.Wallet;
+router.get('/getWalletAmount', protect,async (req, res) => {
+        
+            const exists = await doctorModel.findById(req.user);
+            if (!exists) {
+                return res.status(500).json({
+                    success: false,
+                    message: "You are not a doctor"
+                });
+            }
+            else{
+                if(exists.employmentContract!="Accepted"){
+                    return res.status(400).json({ message: "Contract not accepted", success: false })
+                }
+            }
+          
+    var result={};
+    result.Amount=exists.Wallet;
     return res.status(200).json(result);
 
 })
@@ -375,6 +442,11 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
                 success: false,
                 message: "You are not a doctor"
             });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
         }
 
         let today = new Date();
@@ -425,6 +497,11 @@ router.get('/selectPatientName/:id', protect, async (req, res) => {
                 message: "You are not a doctor"
             });
         }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
 
         let patient = await patientsModel.findOne({ _id: req.params.id });
 
@@ -469,6 +546,12 @@ router.post('/getAppointment', protect, async (req, res) => {
             message: "You are not a doctor"
         });
     }
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
+    
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
@@ -556,25 +639,30 @@ router.get('/test', (req, res) => {
         })
 });
 
-router.post('/addrecord/:PatientId', upload.single('file'), protect, async (req, res) => {
-    try {
-        const exists = await doctorModel.findById(req.user);
-        if (!exists) {
-            return res.status(500).json({
-                success: false,
-                message: "You are not a doctor"
-            });
+router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)=>{
+  try { const exists = await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    } 
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
         }
-        console.log("Abl el patient ID")
-        const patientID = req.params.PatientId;
-        console.log(patientID);
-        console.log(req.file);
-        const existingpatient = await patientsModel.findById(patientID);
-        if (!existingpatient) {
-            res.status(400).json({
-                success: false,
-                message: "patient doesn't exist"
-            })
+    }
+    
+    console.log("Abl el patient ID")
+    const patientID = req.params.PatientId;
+    console.log(patientID);
+    console.log(req.file);
+    const existingpatient = await patientsModel.findById(patientID);
+    if(!existingpatient){
+        res.status(400).json({
+            success: false,
+            message:"patient doesn't exist"
+        })
         }
         else {
             const newrecord = new healthModel({
