@@ -885,8 +885,11 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             if (member.Patient2Id.equals(userId))
                 famMemberUser = await patientModel.findById(member.PatientId);
 
-            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id, status: { $in: ['Subscribed', 'Cancelled'] } });
+            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id, status: 'Subscribed' });
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
+
+            console.log(famMemberUserHealthPackage);
+            console.log(famMemberUserHealthPackageStatus);
 
             let famMemberUserHealth = {};
             if (famMemberUserHealthPackageStatus?.status == 'Subscribed')
@@ -1453,11 +1456,11 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
             list.push(data)
         }
         const medicalHistory = patient.HealthHistory
-        let list1=[]
-        let list2=[]
-        for(var x in medicalHistory){
-            const type=medicalHistory[x].contentType
-            if(type=='application/pdf')
+        let list1 = []
+        let list2 = []
+        for (var x in medicalHistory) {
+            const type = medicalHistory[x].contentType
+            if (type == 'application/pdf')
                 list1.push(medicalHistory[x])
             else
                 list2.push(medicalHistory[x])
@@ -1493,7 +1496,7 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
 
 router.delete('/deleteMedicalHistory/:medicalHistoryId', protect, async (req, res) => {
     const patient = await patientModel.findOne(req.user);
-console.log(req.params)
+    console.log(req.params)
     if (!patient) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
