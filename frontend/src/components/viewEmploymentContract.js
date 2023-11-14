@@ -11,15 +11,23 @@ const ViewEmploymentContract = () => {
     const fetchContract = async () => {
         const response = await axios.get(
           `http://localhost:8000/doctor/viewContract`,
-          null,
           { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
         );
         if (response.status === 200) {
           const contractText = response.data.message;
           console.log(contractText);
-          setContractText(contractText);
+          const paragraphs = contractText.split('\n').map((paragraph, index) => (
+            <React.Fragment key={index}>
+              {paragraph}
+              <br />
+            </React.Fragment>
+          ));
+          setContractText(paragraphs);
         }
       }
+      useEffect(() => {
+        fetchContract();
+    }, []);
 
           const accept = async () => {
         const response = await axios.post(
@@ -30,7 +38,8 @@ const ViewEmploymentContract = () => {
         if (response.status === 200) {
           const contractText = response.data.message;
           console.log(contractText);
-          setContractText(contractText);
+          window.location='/Health-Plus/doctorHome'
+         // setContractText(contractText);
         }
       }
 
@@ -38,7 +47,7 @@ const ViewEmploymentContract = () => {
   
     return (
       <div>
-        <p>{contractText}</p>
+        <h2>{contractText}</h2>
   
         {/* Buttons for Accept and Reject */}
         <button onClick={() => accept()}>Accept</button>

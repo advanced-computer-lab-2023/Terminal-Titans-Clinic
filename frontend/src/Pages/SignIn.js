@@ -51,7 +51,8 @@ export default function SignIn() {
                 }
                 else if (response.data.Result.type === 'Doctor') {
                     // go to doctor page
-                    window.location.pathname= '/Health-Plus/doctorHome'
+                    console.log(response)
+                  //  window.location.pathname= '/Health-Plus/doctorHome'
                 }
                 else {
                     // go to patient page

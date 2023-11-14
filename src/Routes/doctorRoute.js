@@ -27,8 +27,12 @@ router.get('/getCurrentDoctor', protect, async (req, res) => {
     if (!doctor) {
         res.status(400).json({ message: "Doctor not found", success: false })
     }
-    else
+    else{
+        if(doctor.employmentContract!="Accepted"){
+          return  res.status(400).json({ message: "Contract not accepted", success: false })
+        }
         res.status(200).json({ Result: doctor, success: true })
+    }
 })
 
 // requirement number 14 later
@@ -38,6 +42,10 @@ router.get('/updateDoctor', protect, async (req, res) => {
         if (!doctor) {
             return res.status(400).json({ message: "Doctor not found", success: false })
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: req.user._id },
             {
                 Email: req.query.Email || doctor.Email,
@@ -62,6 +70,10 @@ router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
         if (!doctor) {
             res.status(500).json({ message: "You are not a doctor", success: false })
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
 
         const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
 
@@ -136,6 +148,11 @@ router.get('/getPatientsList', protect,async (req, res) => {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
        
         if (appointments.length == 0) {
@@ -194,12 +211,12 @@ router.post('/acceptContract', protect, async (req, res) => {
         if (!doctor) {
             return res.status(400).json({ message: "You are not a doctor", success: false });
         }
+        
+      console.log(doctor)
+        doctor.employmentContract = "Accepted";
 
-      
-        doctor.employmentContract = "accepted";
-
-       
-        await doctor.save();
+       await doctorModel.findOneAndUpdate({ _id: req.user }, doctor);
+        //await doctor.save();
 
         return res.status(200).json({ message: "Contract accepted successfully", success: true });
     } catch (err) {
@@ -214,6 +231,11 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "You are not a doctor", success: false })
+    }
+    else{
+        if(doctor.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
     }
     const PID = req.body.PatientId;
     const date = req.body.date;
@@ -248,6 +270,12 @@ router.get('/getPatientName/:name',protect, async (req, res) => {
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+                return   res.status(400).json({ message: "Contract not accepted", success: false })
+                }
+
+            }
 
         let appointments = await appointmentModel.find({ DoctorId: doctor._id })
 
@@ -292,6 +320,7 @@ router.get('/viewContract', protect, async (req, res) => {
     if (!doctor) {
        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
+    
 
     const salary= Math.floor(doctor.HourlyRate / 2);
    /// const markup = Math.floor(salary/10);
@@ -308,6 +337,10 @@ router.post('/addavailableslots', protect, async (req, res) => {
     if (!doctor) {
        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
+    else{
+        if(doctor.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }}
    // console.log(doctor);
     let flag= true;
     let dTimeTemp = req.body.date; 
@@ -387,6 +420,11 @@ router.get('/getWalletAmount', protect,async (req, res) => {
                     message: "You are not a doctor"
                 });
             }
+            else{
+                if(exists.employmentContract!="Accepted"){
+                    return res.status(400).json({ message: "Contract not accepted", success: false })
+                }
+            }
           
     var result={};
     result.Amount=exists.Wallet;
@@ -403,6 +441,11 @@ router.get('/getUpcomingAppointment', protect,async (req, res) => {
                 success: false,
                 message: "You are not a doctor"
             });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
         }
 
         let today = new Date();
@@ -453,6 +496,11 @@ router.get('/selectPatientName/:id', protect,async (req, res) => {
                 message: "You are not a doctor"
             });
         }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
 
         let patient = await patientsModel.findOne({ _id: req.params.id });
 
@@ -497,6 +545,12 @@ console.log('here')
             message: "You are not a doctor"
         });
     }
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
+    
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
 
@@ -592,6 +646,11 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
             message: "You are not a doctor"
         });
     } 
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
     console.log("Abl el patient ID")
     const patientID = req.params.PatientId;
     console.log(patientID);
