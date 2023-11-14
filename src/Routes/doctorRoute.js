@@ -249,7 +249,7 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     if (!aptmnt) {
         return (res.status(400).send({ error: "You are not available during this slot", success: false }));
     }
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: myDate });
     const newAppointment = new appointmentModel({
         PatientId: PID,
         DoctorId: DID,
