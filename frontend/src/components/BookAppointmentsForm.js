@@ -18,7 +18,9 @@ function BookAppointmentsForm() {
     const [showPaymentButtons, setShowPaymentButtons] = useState(false);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
-    
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+console.log(params.get('success'))
 
 
     useEffect(() => {
@@ -172,6 +174,7 @@ function BookAppointmentsForm() {
         selectedDate={selectedDate}
         famMemId={famMemId}
         packageId={null}
+        success={success}
       />
     )}
         </div>

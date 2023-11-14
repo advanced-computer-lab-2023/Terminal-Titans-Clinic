@@ -31,15 +31,19 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
             },
           }
         );
+        console.log('llll')
         if (response.status === 200) {
           if(paymentMethod==="card"){
+
             const url = response.data.url;
             window.location = url;
           }else{
             setErrorMessage("Success");
             alert('Successfull payment');
+            bookAppointment();
+
           }
-          bookAppointment();
+          console.log('kkkk')
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');
@@ -73,8 +77,9 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
           }else{
             setErrorMessage("Success");
             alert('Successfull payment');
+            subscribePackage();
+
           }
-          subscribePackage();
         } else {
           setErrorMessage(response.data.message);
           alert('Unsuccessfull payment');
