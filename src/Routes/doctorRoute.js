@@ -216,8 +216,7 @@ router.post('/acceptContract', protect, async (req, res) => {
         doctor.employmentContract = "Accepted";
 
        
-        await doctor.save();
-
+        await doctorModel.findOneAndUpdate({ _id: req.user }, doctor);
         return res.status(200).json({ message: "Contract accepted successfully", success: true });
     } catch (err) {
         return res.status(500).json({ message: err.message, success: false });
@@ -233,36 +232,34 @@ router.post('/assignfollowUp', protect, async (req, res) => {
         return res.status(400).json({ message: "You are not a doctor", success: false })
     }
     else{
-        if(doctor.employmentContract!="Accepted"){
+        if(exists.employmentContract!="Accepted"){
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
     const PID = req.body.PatientId;
     const date = req.body.date;
-    const DID = req.user._id;
-    let myDate = new Date(date);
-    console.log(myDate);
-    const aptmnt = await docAvailableSlots.findOne({ DoctorId: DID, Date: myDate });
-    console.log(aptmnt);
+    console.log(date)
+    let newDate = new Date(date);
+    newDate.setHours(newDate.getHours() + 2)
+    const DID= req.user._id;
+   const aptmnt=await appointmentModel.find({DoctorId:DID,Date:newDate});
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
-
-    if (!aptmnt) {
-        return (res.status(400).send({ error: "You are not available during this slot", success: false }));
-    }
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: myDate });
-    const newAppointment = new appointmentModel({
-        PatientId: PID,
-        DoctorId: DID,
-        Status: "upcoming",
-        Date: myDate
-    });
-
+console.log(aptmnt)
+   if(aptmnt && aptmnt.length>0){
+      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
+ }
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
+        const newAppointment = new appointmentModel({
+            PatientId: PID,
+            DoctorId: DID,
+            Status: "upcoming",
+            Date: newDate
+        });
         await newAppointment.save();
         res.status(200).json({ Result: newAppointment, success: true });
     
     
 })
-
 // requirement number 34
 router.get('/getPatientName/:name', protect, async (req, res) => {
     try {

@@ -208,7 +208,7 @@ const DocAptmntsList = () => {
       <InputGroup className="mb-3">
         
         
-        <input type="date" onChange={(e) => setDate(e.target.value)} id="availableDateTime" name="availableTime" /> 
+        <input type="datetime-local" onChange={(e) => setDate(e.target.value)} id="availableDateTime" name="availableTime" /> 
 
         
         <Button variant="outline-secondary" onClick={()=>followup(aptmnts.PatientId,date)} id="button-addon2">
