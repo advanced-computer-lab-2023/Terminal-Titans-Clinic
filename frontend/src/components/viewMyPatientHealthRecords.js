@@ -8,9 +8,10 @@ function ViewmyPatientsHealthRecords() {
     const [myPatients, setMyPatients] = useState([]);
     const [curPatientId, setcurPatientId] = useState('');
     const [curDoc, setCurDoc] = useState('');
+    const [userHealthHistoryPDF, setUserHealthHistoryPDF] = useState([]);
+const [userHealthHistoryIMG, setUserHealthHistoryIMG] = useState([]);
 
     const [userHealthRecord, setUserHealthRecord] = useState([]);
-const [userHealthHistory, setUserHealthHistory] = useState('');
 useEffect(() => {
     const fetchData = async () => {
         
@@ -44,7 +45,6 @@ async function viewPatientsDoc(){
     try {
         if(curPatientId === ''){
             if(myPatients.length > 0){
-                console.log(myPatients[0]._id)
                 setcurPatientId(myPatients[0]._id)
                }
         }
@@ -53,11 +53,11 @@ async function viewPatientsDoc(){
             const data = response.data;
                  // console.log(aptmnts);
                  
-
+        console.log(data.Result)
                  setUserHealthRecord(data.Result.healthDoc)
-                 console.log(data.Result.patient.HealthHistory.data)
                  setCurDoc('')
-                 setUserHealthHistory(data.Result.patient.HealthHistory)
+                 setUserHealthHistoryPDF(data.Result.medicalHistoryPDF)
+                setUserHealthHistoryIMG(data.Result.medicalHistoryImage)
     } catch (error) {
             console.error('Error fetching data:', error);
     }
@@ -137,9 +137,33 @@ const handlePatientChange = (event) =>{
                             ):(<div>this patient doesnt have any health Douments</div>)}
                             </div>
                             <div>
-                            {userHealthHistory.data ? (
-                            <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(userHealthHistory.data)}`}  width="800" height="600"></iframe>
-                            ):(<div>this patient doesnt have any health history</div>)}
+
+
+                            <h3>   Patient's Medical History </h3>
+                                 {userHealthHistoryPDF.map((record, index) => (
+                                    <div key={index}>
+                                        <h3>Record {index + 1}</h3>
+            
+                                     {console.log(record)}   
+                                     <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(record.data.data)}`}  width="800" height="600"></iframe>
+                                        {/* Add any other fields you want to display */}
+            
+                                    </div>
+                                ))}
+                                {userHealthHistoryIMG.map((record, index) => (
+                                    <div key={index}>
+                                        <h3>Record {index + 1}</h3>
+            
+                                     {console.log(record)}   
+                                     <img
+                                      src={`data:image/jpeg;base64,${arrayBufferToBase64(record.data.data)}`}
+                                      
+                                  />
+            
+                                        {/* Add any other fields you want to display */}
+                                    </div>
+                                ))}
+                            
                             </div>
                     <br></br>
                     

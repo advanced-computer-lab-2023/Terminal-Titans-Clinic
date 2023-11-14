@@ -1405,9 +1405,20 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
             const data = healthRecord[x].HealthDocument.binData
             list.push(data)
         }
+        const medicalHistory = patient.HealthHistory
+        let list1=[]
+        let list2=[]
+        for(var x in medicalHistory){
+            const type=medicalHistory[x].contentType
+            if(type=='application/pdf')
+                list1.push(medicalHistory[x])
+            else
+                list2.push(medicalHistory[x])
+        }
         let Result = {
             "healthRecords": list,
-            "medicalHistory": patient.HealthHistory
+            "medicalHistoryPDF": list1,
+            "medicalHistoryImage": list2
         }
         return res.status(200).json({ Result: Result, success: true });
     }
@@ -1435,7 +1446,7 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
 
 router.delete('/deleteMedicalHistory/:medicalHistoryId', protect, async (req, res) => {
     const patient = await patientModel.findOne(req.user);
-
+console.log(req.params)
     if (!patient) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }

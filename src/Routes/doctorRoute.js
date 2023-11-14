@@ -7,6 +7,8 @@ import familyMemberModel from '../Models/familyMemberModel.js';
 import protect from '../middleware/authMiddleware.js';
 import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
 import { escape } from 'querystring';
+import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
+import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 
 import multer from 'multer';
 const storage = multer.memoryStorage();
@@ -97,13 +99,24 @@ router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
             list.push(healthRecords[x].HealthDocument.binData)
 
         }
-
+        const medicalHistory = patient.HealthHistory
+        let list1=[]
+        let list2=[]
+        for(var x in medicalHistory){
+            const type=medicalHistory[x].contentType
+            if(type=='application/pdf')
+                list1.push(medicalHistory[x])
+            else
+                list2.push(medicalHistory[x])
+        }
+        
         //console.log(patient)
         const result = {
             "healthRecords": healthRecords,
             "patient": patient,
             "healthDoc": list,
-            "medicalHistory": patient.MedicalHistory
+            "medicalHistoryPDF": list1,
+            "medicalHistoryImage": list2
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -118,11 +131,13 @@ router.get('/getPatientInfoAndHealth/:id',protect, async (req, res) => {
 router.get('/getPatientsList', protect,async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
+        console.log(req.user.Name)
         if(!doctor){
             res.status(400).json({ message: "Doctor not found", success: false })
             return;
         }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
+       
         if (appointments.length == 0) {
             res.status(400).json({ message: "No patients found", success: false })
             return;
@@ -132,17 +147,32 @@ router.get('/getPatientsList', protect,async (req, res) => {
 
         for (let i = 0; i < appointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
-            let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
+            console.log(appointments[i]._id)
+            console.log(patient._id)
+            let familyMembers = await unRegFamMem.find({ PatientId: patient._id })
             if(!result.find((pat) => pat._id.equals(patient._id))){
             patient = { ...patient._doc, "familyMember": [] }
 
             for (let i = 0; i < familyMembers.length; i++) {
                 patient.familyMember.push(familyMembers[i].Name)
             }
+            familyMembers = await RegFamMem.find({ PatientId: patient._id })
+            for (let i = 0; i < familyMembers.length; i++) {
+                let patientFam = await patientsModel.findOne({ _id: familyMembers[i].Patient2Id })
+
+                patient.familyMember.push(patientFam.Name)
+            }
+            familyMembers = await RegFamMem.find({ Patient2Id: patient._id })
+            for (let i = 0; i < familyMembers.length; i++) {
+                let patientFam = await patientsModel.findOne({ _id: familyMembers[i].PatientId })
+
+                patient.familyMember.push(patientFam.Name)
+            }
 
             result = [...result, patient];
         }
     }
+
     console.log(result)
 
         if (result.length == 0) {
@@ -151,6 +181,7 @@ router.get('/getPatientsList', protect,async (req, res) => {
         else
             res.status(200).json({ Result: result, success: true })
     } catch (err) {
+        console.error(err.message)
         res.status(400).json({ message: err.message, success: false })
     }
 });
@@ -187,14 +218,14 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     const PID = req.body.PatientId;
     const date = req.body.date;
     const DID= req.user._id;
-   const aptmnt=await docAvailableSlots.findOne({DoctorId:DID,Date:date});
+   const aptmnt=await appointmentModel.findOne({DoctorId:DID,Date:date});
 
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
    
-   if(aptmnt.length<1){
-      return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+   if(aptmnt && aptmnt.length>1){
+      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
  }
-  
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: date });
         const newAppointment = new appointmentModel({
             PatientId: PID,
             DoctorId: DID,
@@ -203,7 +234,6 @@ router.post('/assignfollowUp', protect, async (req, res) => {
         });
 
         await newAppointment.save();
-        await docAvailableSlots.findOneAndDelete({ DoctorId: DID , Date: date});
         res.status(200).json({ Result: newAppointment, success: true });
     
     
