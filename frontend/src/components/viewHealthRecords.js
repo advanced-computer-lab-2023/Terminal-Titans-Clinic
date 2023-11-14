@@ -51,8 +51,8 @@ useEffect(() => {
                     {userHealthRecord.map((record, index) => (
                         <div key={index}>
                             <h3>Record {index + 1}</h3>
-                            {console.log(record.data)}
-                            <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(record.data)}`}  width="800" height="600"></iframe>
+                            {console.log(record?.data)}
+                            <iframe src={`data:application/pdf;base64,${arrayBufferToBase64(record?.data)}`}  width="800" height="600"></iframe>
                             
                             {/* Add any other fields you want to display */}
                         </div>
