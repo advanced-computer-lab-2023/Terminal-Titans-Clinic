@@ -1451,7 +1451,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
-            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true);
+            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true,null,user,healthPackageId);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
