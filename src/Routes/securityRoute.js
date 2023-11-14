@@ -166,6 +166,20 @@ router.post('/login', async (req, res) => {
         console.log(password);
         if (user && (await bcrypt.compare(password, user.Password))) {
             // generate token
+            if(user.__t=='Doctor'){
+                return res.status(200).json({
+                    Result:
+                    {
+                        _id: user._id,
+                        name: user.Name,
+                        email: user.Email,
+                        type: user.__t,
+                        employmentContract:user.employmentContract,
+                        token: generateToken(user._id)
+                    },
+                    success: true
+                })
+            }
             res.status(200).json({
                 Result:
                 {

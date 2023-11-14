@@ -78,7 +78,13 @@ const PatientHome = () => {
         onClick={ handleAppointmentsClick}>
         View available slots and Book
       </button>
-
+      <button
+      style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+      onClick={() => {
+        window.location.pathname = '/Health-Plus/viewAppointments';
+      }}>
+     View my appointments
+        </button>
       <button
         style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={ handleHealthRecordsClick}>
@@ -90,6 +96,13 @@ const PatientHome = () => {
         onClick={ handleForgotPassClick}>
         forgot password
       </button>
+      <button
+      style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+      onClick={() => {
+        window.location.pathname = '/Health-Plus/packageSubscribtion';
+      }}>
+      Subscribe to a health package
+        </button>
 
 
 

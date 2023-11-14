@@ -5,7 +5,7 @@ const HealthPackageSubscriptionPage = () => {
   const [patientHealthPackageData, setPatientHealthPackageData] = useState({});
   const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
 
-  const [patientHealthPackageStatus, setPatientHealthPackageStatus] = useState({});
+  const [patientHealthPackageStatus, setPatientHealthPackageStatus] = useState([]);
   const [familyHealthPackageStatus, setfamilyHealthPackageStatus] = useState([]);
 
   const [patientHealthPackageCancel, setPatientHealthPackageCancel] = useState({});
@@ -37,7 +37,9 @@ const HealthPackageSubscriptionPage = () => {
       });
 
       const result = response.data.result;
-      setPatientHealthPackageStatus(result.myUser.status);
+      console.log(result);
+      setPatientHealthPackageStatus(result.myUser);
+      console.log(result.myUser);
       setfamilyHealthPackageStatus(result.familyMembers);
 
     } catch (error) {
@@ -54,6 +56,7 @@ const HealthPackageSubscriptionPage = () => {
           Authorization: 'Bearer ' + sessionStorage.getItem('token')
         }
       }).then((response) => {
+        console.log(response);
         alert(response.data.message + " Please refresh the page to see the changes")
       }).catch((error) => {
         alert(error.response.data.message)
@@ -75,7 +78,7 @@ const HealthPackageSubscriptionPage = () => {
         onClick={fetchHealthPackageData}>
         View Subscribed HealthPackages
       </button>
-    {/* subscribed health package front */}
+      {/* subscribed health package front */}
       <div style={{ marginTop: '20px' }}>
         <h4>Patient HealthPackage Data:</h4>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -99,7 +102,7 @@ const HealthPackageSubscriptionPage = () => {
           </tbody>
         </table>
       </div>
-        {/*status patient front  */}
+      {/*status patient front  */}
       <div style={{ marginTop: '20px' }}>
         <h4>FamilyMembers HealthPackage Data:</h4>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -129,7 +132,7 @@ const HealthPackageSubscriptionPage = () => {
           </tbody>
         </table>
       </div>
-        {/* family members status front */}
+      {/* family members status front */}
       <div style={{ marginTop: '20px' }}>
         <button
           style={{ background: 'green', color: 'white', padding: '8px', cursor: 'pointer' }}
@@ -139,6 +142,7 @@ const HealthPackageSubscriptionPage = () => {
 
         <div style={{ marginTop: '20px' }}>
           <h4>Patient HealthPackage Status:</h4>
+          {/* {patientHealthPackageStatus[0].status} */}
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
@@ -148,11 +152,15 @@ const HealthPackageSubscriptionPage = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.status}</td>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.renewalDate || 'Nothing'}</td>
-                <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{patientHealthPackageStatus.endDate || 'Nothing'}</td>
-              </tr>
+              {
+                patientHealthPackageStatus.map((packageUser, index) => (
+                  <tr key={index}>
+                    <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{packageUser.status}</td>
+                    <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{packageUser.renewalDate || 'Nothing'}</td>
+                    <td style={{ border: '1px solid #dddddd', textAlign: 'left', padding: '5px' }}>{packageUser.endDate || 'Nothing'}</td>
+                  </tr>
+                ))
+              }
             </tbody>
           </table>
         </div>
@@ -182,7 +190,7 @@ const HealthPackageSubscriptionPage = () => {
         </div>
       </div>
 
-    {/* cancellation front */}
+      {/* cancellation front */}
       <div style={{ marginTop: '20px' }}>
         <button
           style={{ background: 'red', color: 'white', padding: '8px', cursor: 'pointer' }}

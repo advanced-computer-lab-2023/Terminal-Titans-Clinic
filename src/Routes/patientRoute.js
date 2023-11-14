@@ -66,7 +66,6 @@ router.post('/addFamilyMem', protect, async (req, res) => {
             Gender: req.body.gender,
             Relation: req.body.relation.toLowerCase(),
             PatientId: req.user._id,
-            FamilyMemId: req.body.fMemId
         });
         newFamilyMember.save();
         // console.log(req.body.pId)
@@ -190,7 +189,7 @@ router.get('/viewRegFamMem', protect, async (req, res) => {
         unregistered: unRegFamMemebers
     }
 
-console.log(famMembers);
+    console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
 })
@@ -233,7 +232,7 @@ router.post('/getAppointment', protect, async (req, res) => {
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-        if (patient.length > 0)
+        if (doctor && doctor.length > 0)
             result.Name = doctor[0].Name;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
@@ -814,7 +813,7 @@ router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
 
         if (!myHealthStatus) {
             let myHealthStatus = new healthPackageStatus({
-                patientId: userId,
+                patientId: familyMemberId,
                 status: 'Subscribed',
                 renewalDate: renewalDate,
                 endDate: renewalDate,
@@ -856,11 +855,12 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         // get the patient package
         const user = await patientModel.findById(userId);
 
-        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId });
+        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId, status: 'Subscribed' });
+        // console.log(userHealthPackageStatus)
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
         let userHealth = {}
 
-        if (userHealthPackage.status == 'Subscribed')
+        if (userHealthPackageStatus?.status == 'Subscribed')
             userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
 
         userHealth.PatientId = user?._id;
@@ -871,17 +871,30 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         let result = { 'myUser': userHealth, 'familyMembers': [] };
 
         //Get the health package details for registered family members
-        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        var registeredFamilyMembers = await RegFamMem.find({
+            $or: [
+                { Patient2Id: userId },
+                { PatientId: userId }
+            ]
+        });
 
         for (let member of registeredFamilyMembers) {
-            let famMemberUser = await patientModel.findById(member.PatientId);
+            let famMemberUser = {};
+            if (member.PatientId.equals(userId))
+                famMemberUser = await patientModel.findById(member.Patient2Id);
 
-            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser });
+            if (member.Patient2Id.equals(userId))
+                famMemberUser = await patientModel.findById(member.PatientId);
+
+            let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id, status: 'Subscribed' });
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
 
+            console.log(famMemberUserHealthPackage);
+            console.log(famMemberUserHealthPackageStatus);
+
             let famMemberUserHealth = {};
-            if(famMemberUserHealthPackage.status == 'Subscribed')
-                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage)??{};
+            if (famMemberUserHealthPackageStatus?.status == 'Subscribed')
+                famMemberUserHealth = await healthPackageModel.findById(famMemberUserHealthPackage) ?? {};
 
             let memberRes = JSON.parse(JSON.stringify(famMemberUserHealth)) ?? {};
 
@@ -892,11 +905,6 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
             memberRes.Username = famMemberUser?.Username;
             result['familyMembers'].push(memberRes);
         }
-        //hena ba3mel array ba store fi kol package le kol fam member
-        // const familyMembersHealthPackages = registeredFamilyMembers.map(member => member.PackageId);
-
-        // //ba3mel a single array containing patient w fam members packages
-        // const allHealthPackages = [userHealthPackage, ...familyMembersHealthPackages];
 
         return res.json({ result });
 
@@ -920,41 +928,87 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
         }
 
         //patient
-        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId, status: { $in: ['Subscribed', 'Cancelled'] } });
+        let userHealthPackageStatus = await healthPackageStatus.find({ patientId: userId });
         //fam members
-        let registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
 
-        console.log(userHealthPackageStatus);
+        // console.log('userHealthPackageStatus',userHealthPackageStatus);
 
-        let myUser = JSON.parse(JSON.stringify(req.user));
+        let registeredFamilyMembers = await RegFamMem.find({
+            $or: [
+                { Patient2Id: userId },
+                { PatientId: userId }
+            ]
+        });
 
-        myUser.status = userHealthPackageStatus ?? 'Unsubscribed';
+        if (!userHealthPackageStatus)
+            userHealthPackageStatus.status = 'Unsubscribed';
 
-        let result = { 'myUser': myUser, 'familyMembers': [] };
-
+        let result = { 'myUser': userHealthPackageStatus, 'familyMembers': [] };
 
         for (let member of registeredFamilyMembers) {
-            let healthPackage = await healthPackageStatus.findOne({
-                patientId: member.PatientId,
-                status: { $in: ['Subscribed', 'Cancelled'] }
+            let famMemberUser = {};
+            if (member.PatientId.equals(userId))
+                famMemberUser = await patientModel.findById(member.Patient2Id);
+
+            if (member.Patient2Id.equals(userId))
+                famMemberUser = await patientModel.findById(member.PatientId);
+
+            let healthPackage = await healthPackageStatus.find({
+                patientId: famMemberUser._id,
             });
             if (!healthPackage) {
                 healthPackage = null;
             }
 
-            let memberRes = JSON.parse(JSON.stringify(member));
-            delete memberRes['Patient2Id'];
-            delete memberRes['createdAt'];
-            delete memberRes['updatedAt'];
-            delete memberRes['__v'];
 
-            memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
-            memberRes['renewalDate'] = healthPackage?.renewalDate;
-            memberRes['endDate'] = healthPackage?.endDate;
 
-            result['familyMembers'].push(memberRes);
+            console.log(healthPackage);
+
+            for (let i = 0; i < healthPackage.length; i++) {
+                let memberRes = JSON.parse(JSON.stringify(member));
+                delete memberRes['Patient2Id'];
+                delete memberRes['createdAt'];
+                delete memberRes['updatedAt'];
+                delete memberRes['__v'];
+                memberRes['status'] = healthPackage[i].status;
+                memberRes['renewalDate'] = healthPackage[i]?.renewalDate;
+                memberRes['endDate'] = healthPackage[i]?.endDate;
+                result['familyMembers'].push(memberRes);
+                console.log(healthPackage[i].status);
+                console.log(memberRes['status']);
+            }
+
+
+
+            // console.log(healthPackage.status);
+            // console.log(memberRes['status']);
+
+
 
         }
+        // registeredFamilyMembers = await RegFamMem.find({ PatientId: userId });
+        // for (let member of registeredFamilyMembers) {
+        //     let healthPackage = await healthPackageStatus.findOne({
+        //         patientId: member.PatientId,
+        //         status: { $in: ['Subscribed', 'Cancelled'] }
+        //     });
+        //     if (!healthPackage) {
+        //         healthPackage = null;
+        //     }
+
+        //     let memberRes = JSON.parse(JSON.stringify(member));
+        //     delete memberRes['PatientId'];
+        //     delete memberRes['createdAt'];
+        //     delete memberRes['updatedAt'];
+        //     delete memberRes['__v'];
+
+        //     memberRes['status'] = healthPackage?.status ? healthPackage?.status : 'Unsubscribed';
+        //     memberRes['renewalDate'] = healthPackage?.renewalDate;
+        //     memberRes['endDate'] = healthPackage?.endDate;
+
+        //     result['familyMembers'].push(memberRes);
+
+        // }
 
         return res.status(200).json({ success: true, result });
 
@@ -976,12 +1030,52 @@ router.put('/cancelSub', protect, async (req, res) => {
             return res.status(500).json({ message: 'Patient not found' });
         }
 
-        await healthPackageStatus.findOneAndUpdate({ patientId: userId }, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
+        await healthPackageStatus.updateMany(
+            {
+                patientId: userId,
+                $expr: {
+                    $eq: ["$status", "Subscribed"] // Your condition here
+                }
+            },
+            {
+                $set: {
+                    status: 'Cancelled',
+                    endDate: new Date(0),
+                    renewalDate: new Date(0)
+                }
+            }
+        );
 
-        const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
+        var registeredFamilyMembers = await RegFamMem.find({
+            $or: [
+                { Patient2Id: userId },
+                { PatientId: userId }
+            ]
+        });
 
         for (const familyMember of registeredFamilyMembers) {
-            await healthPackageStatus.findOneAndUpdate({ patientId: familyMember.PatientId }, { status: 'Cancelled', endDate: new Date(0), renewalDate: new Date(0) });
+            let famMemberUser = {};
+            if (familyMember.PatientId.equals(userId))
+                famMemberUser = await patientModel.findById(familyMember.Patient2Id);
+
+            if (familyMember.Patient2Id.equals(userId))
+                famMemberUser = await patientModel.findById(familyMember.PatientId);
+
+            await healthPackageStatus.updateMany(
+                {
+                    patientId: famMemberUser._id,
+                    $expr: {
+                        $eq: ["$status", "Subscribed"] // Your condition here
+                    }
+                },
+                {
+                    $set: {
+                        status: 'Cancelled',
+                        endDate: new Date(0),
+                        renewalDate: new Date(0)
+                    }
+                }
+            );
         }
 
         return res.status(200).json({ message: 'Health package subscription canceled successfully' });
@@ -1030,7 +1124,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
             for (const file of files) {
                 const newHistoryEntry = {
                     data: file.buffer,
-                    type: file.mimetype,
+                    contentType: file.mimetype,
                     // Add any other properties you need for the file entry
                 };
 
@@ -1044,14 +1138,12 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
             { new: true }
         );
 
-        console.log(updatedPatient.HealthHistory);
         res.status(200).json({
             success: true,
             message: "Health history updated successfully",
             data: updatedPatient,
         });
     } catch (error) {
-        console.error('Error: ', error);
         res.status(500).json({
             success: false,
             message: "General Error",
@@ -1108,7 +1200,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
 
 const getUserOrFamilyMember = async (req, res, userType, registered) => {
     const userId = req.user._id;
-    
+
     const familyMemberId = userType === "familyMember" ? req.body.familyMember._id : null;
 
     try {
@@ -1117,11 +1209,11 @@ const getUserOrFamilyMember = async (req, res, userType, registered) => {
             console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
             return user;
         } else if (userType === "familyMember") {
-            if(!registered){
+            if (!registered) {
                 const familyMember = await NotRegisteredFamilyMemberModel.findById(familyMemberId);
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
-            }else{
+            } else {
                 const familyMember = await patientModel.findById(familyMemberId);
                 console.log(`${userType === "patient" ? 'User' : 'Family Member'} retrieved successfully`);
                 return familyMember;
@@ -1275,7 +1367,7 @@ const processWalletPayment = async (req, res, userId, fees, doctor) => {
     }
 };
 
-router.post("/payForAppointment", protect,async (req, res) => {
+router.post("/payForAppointment", protect, async (req, res) => {
     console.log(req);
     const { userType, paymentType } = req.query;
     try {
@@ -1318,7 +1410,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
     }
 };
 
-router.post("/subscribeForPackage", protect,async (req, res) => {
+router.post("/subscribeForPackage", protect, async (req, res) => {
     const { userType, paymentType } = req.query;
     try {
         const result = await processSubscription(req, res, userType, paymentType);
@@ -1332,17 +1424,26 @@ router.post("/subscribeForPackage", protect,async (req, res) => {
 const processSubscription = async (req, res, userType, paymentType) => {
     const userId = req.user._id;
     const healthPackageId = req.body.healthPackage._id;
-
     const user = await getUserOrFamilyMember(req, res, userType, true);
     if (!user) return;
-
     const healthPackage = await getHealthPackage(req, res, healthPackageId);
 
     let discount = 0;
     if (userType == "familyMember") {
+        let packageStatus = await healthPackageStatus.find({ patientId: user, status: 'Subscribed' });
+        if (packageStatus && packageStatus.length > 0) {
+            return res.status(900).send({ error: "This patient is already subscribed to a health package" });
+        }
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
-        if(subscribedHealthPackage)
+        if (subscribedHealthPackage)
             discount = subscribedHealthPackage.familyDiscountInPercentage;
+    } else {
+        let packageStatus = await healthPackageStatus.find({ patientId: userId, status: 'Subscribed' });
+
+        if (packageStatus && packageStatus.length > 0) {
+
+            return res.status(400).send({ error: "You are already subscribed to a health package" });
+        }
     }
 
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
@@ -1350,7 +1451,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
         if (paymentType == "wallet") {
             return await processWalletPayment(req, res, userId, fees, null);
         } else {
-            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null,true);
+            return await processCardPayment(req, res, fees, healthPackage.paymentType + " Subscription", null, true);
         }
     } catch (e) {
         console.error('Error processing payment', e.message);
@@ -1368,18 +1469,68 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
         const healthRecord = await healthModel.find({ PatientId: patient._id });
         let list = []
         console.log(healthRecord)
-        for (var x in healthRecord) {
-            const data = healthRecord[x].HealthDocument.binData
-            list.push(data)
+       
+            for (let x in healthRecord) {
+                list.push(healthRecord[x].HealthDocument.data)
+    
+            }         
+        
+        const medicalHistory = patient.HealthHistory
+        let list1 = []
+        let list2 = []
+        for (var x in medicalHistory) {
+            const type = medicalHistory[x].contentType
+            if (type == 'application/pdf')
+                list1.push(medicalHistory[x])
+            else
+                list2.push(medicalHistory[x])
         }
         let Result = {
             "healthRecords": list,
-            "medicalHistory": patient.HealthHistory
+            "medicalHistoryPDF": list1,
+            "medicalHistoryImage": list2
         }
         return res.status(200).json({ Result: Result, success: true });
     }
     catch (error) {
         console.error('Error getting health records', error.message);
+    }
+});
+
+// router.get('/viewMedicalHistory', protect, async (req, res) => {
+//     const patient = await patientModel.findOne(req.user);
+
+//     if (!patient) {
+//         return res.status(400).json({ message: "Patient not found", success: false })
+//     }
+//     try {
+//         let Result = {
+//             "medicalHistory": patient.HealthHistory
+//         }
+//         return res.status(200).json({ Result: Result, success: true });
+//     }
+//     catch (error) {
+//         console.error('Error getting health history', error.message);
+//     }
+// });
+
+router.delete('/deleteMedicalHistory/:medicalHistoryId', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+    console.log(req.params)
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        for (let i = 0; i < patient.HealthHistory.length; i++) {
+            if (patient.HealthHistory[i]._id == req.params.medicalHistoryId) {
+                patient.HealthHistory.splice(i, 1)
+            }
+        }
+        await patient.save();
+        return res.status(200).json({ Result: patient, message: "Delete successfully", success: true });
+    }
+    catch (error) {
+        console.error('Error getting health history', error.message);
     }
 });
 

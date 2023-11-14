@@ -54,10 +54,10 @@ const DoctorHome = () => {
         onClick={() => window.location.pathname = '/Health-Plus/forgotPassword'}>
         Forgot Password
       </button>
-      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+      {/* <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={() => window.location.pathname = '/Health-Plus/EmploymentContract'}>
         View Employment Contract
-      </button>
+      </button> */}
     </div>
   );
 };

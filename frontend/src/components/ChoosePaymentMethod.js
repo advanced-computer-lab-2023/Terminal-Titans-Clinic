@@ -123,7 +123,7 @@ const PaymentPage = ({ selectedDoctor, selectedDate, famMemId, packageId }) => {
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <button onClick={() => handlePayment('card')}>Pay with Credit Card</button>
       <button onClick={() => handlePayment('wallet')}>Pay with Wallet</button>
-      <button onClick={() => handlePayment('COD')}>Cash on Delivery</button>
+      
     </div>
   );
 };

@@ -50,8 +50,11 @@ export default function SignIn() {
                     window.location.pathname= '/Health-Plus/admin'
                 }
                 else if (response.data.Result.type === 'Doctor') {
+                  if(response.data.Result.employmentContract=='Accepted')
                     // go to doctor page
-                    window.location.pathname= '/Health-Plus/doctorHome'
+                   window.location.pathname= '/Health-Plus/doctorHome'
+                   else
+                   window.location.pathname='/Health-Plus/EmploymentContract'
                 }
                 else {
                     // go to patient page
