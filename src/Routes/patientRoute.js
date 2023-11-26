@@ -25,6 +25,7 @@ import NotRegisteredFamilyMemberModel from '../Models/NotRegisteredFamilyMemberM
 
 import multer from 'multer';
 import { pid } from 'process';
+import { TransformStreamDefaultController } from 'node:stream/web';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -166,7 +167,7 @@ router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
 
 })
 // requirement number 22
-router.get('/viewRegFamMem', protect, async (req, res) => {
+router.get('/viewFamMem', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
@@ -1135,7 +1136,14 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
 });
 
 //hena bas msh mota2aked bet cancel sah wala laa (req 32)
-router.put('/cancelSub', protect, async (req, res) => {
+router.put('/cancelMySub', protect, async (req, res) => {
+    let exists = await patientModel.findById(req.user);
+    if (!exists || req.user.__t != "Patient") {
+      return res.status(500).json({
+        success: false,
+        message: "Not authorized"
+      });
+    }
     const userId = req.user._id;//bagib el id after authentication
 
     try {
@@ -1161,45 +1169,66 @@ router.put('/cancelSub', protect, async (req, res) => {
                 }
             }
         );
-
-        var registeredFamilyMembers = await RegFamMem.find({
-            $or: [
-                { Patient2Id: userId },
-                { PatientId: userId }
-            ]
-        });
-
-        for (const familyMember of registeredFamilyMembers) {
-            let famMemberUser = {};
-            if (familyMember.PatientId.equals(userId))
-                famMemberUser = await patientModel.findById(familyMember.Patient2Id);
-
-            if (familyMember.Patient2Id.equals(userId))
-                famMemberUser = await patientModel.findById(familyMember.PatientId);
-
-            await healthPackageStatus.updateMany(
-                {
-                    patientId: famMemberUser._id,
-                    $expr: {
-                        $eq: ["$status", "Subscribed"] // Your condition here
-                    }
-                },
-                {
-                    $set: {
-                        status: 'Cancelled',
-                        endDate: new Date(0),
-                        renewalDate: new Date(0)
-                    }
-                }
-            );
-        }
-
         return res.status(200).json({ message: 'Health package subscription canceled successfully' });
     } catch (error) {
         console.error('Error canceling health package subscription:', error.message);
         return res.status(500).json({ error: 'Error' });
     }
 });
+router.put('/cancelFamSub',protect, async (req, res) => {
+    let exists = await patientModel.findById(req.user);
+    if (!exists || req.user.__t != "Patient") {
+      return res.status(500).json({
+        success: false,
+        message: "Not authorized"
+      });
+    }
+    try{
+    const famId=req.body.famId;
+    var FamMem = await RegFamMem.findOne({ 
+            $or: [
+                { PatientId: req.user._id, Patient2Id: famId }, 
+                { PatientId: famId, Patient2Id: req.user._id }  
+            ] 
+        });
+        if(!FamMem){
+            return res.status(500).json({
+                success: false,
+                message: "Cant find Family Member"
+            });
+        }
+        let famMemberUser = await patientModel.findById(famId);
+        if(!famMemberUser){
+            return res.status(500).json({
+                success: false,
+                message: "Cant find Family Member"
+              });
+        }
+        await healthPackageStatus.updateMany(
+            {
+                patientId: famId,
+                $expr: {
+                    $eq: ["$status", "Subscribed"] // Your condition here
+                }
+            },
+            {
+                $set: {
+                    status: 'Cancelled',
+                    endDate: new Date(0),
+                    renewalDate: new Date(0)
+                }
+            }
+        );
+    
+        return res.status(200).json({ message: 'Family Member Health package subscription canceled successfully' });
+    }
+    catch(error){
+       
+        return res.status(500).json({ error: 'Error canceling health package subscription' });
+    
+    }
+});
+
 
 //req 27
 router.get('/viewHealthCarePackages', protect, async (req, res) => {
@@ -1963,15 +1992,29 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
     } let pid = req.user._id//temp until login
     const cartItems = await CartItem.find({ userId: pid });
     let list = []
+    let total=0;
     for (var x in cartItems) {
       const med = await MedicineModel.findById(cartItems[x].medicineId);
+      total+=med.Price*cartItems[x].quantity;
       list.push(med);
     }
+    let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+        const packId = myHealthStatus.packageId;
+        var discountP = 0;
+        if (packId) {
+            const allPackages = await healthPackageModel.find({ _id: packId });
+            if (allPackages.length > 0)
+                discountP = allPackages[0].medicineDiscountInPercentage;
+            else
+                return (res.status(400).send({ error: "cant find package", success: false }));
+
+        }
+        total=total-(total*(discountP/100));
     Result = {
       cartItems: cartItems,
-      medInfo: list
+      medInfo: list,
+      total:total
     }
-    console.log(cartItems);
     res.json(Result);
   });
   
@@ -2151,11 +2194,26 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
       // Debugging: Output the 'total' value after setting it
       console.log('Total after setting:', total);
       if(total>0){
+        let myHealthStatus =await healthPackageStatus.findOne({patientId:patientId.id,status: 'Subscribed'}) ;
+        const packId = myHealthStatus.packageId;
+        var discountP = 0;
+        if (packId) {
+            const allPackages = await healthPackageModel.find({ _id: packId });
+            if (allPackages.length > 0)
+                discountP = allPackages[0].medicinDiscountInPercentage;
+            else
+                return (res.status(400).send({ error: "cant find package", success: false }));
+
+        }
+        const discount=(total * (discountP / 100));
+        total = total - discount;
+        
       // Create the order in the database
       const newOrder = new Order({
         userId: patientId,
         items: itemsForOrder,
         total: total,
+        discount:discount,
         address: req.params.address,
         paymentMethod:req.params.paymentMethod,
         status:'processing'
@@ -2354,7 +2412,18 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
   });
   
   async function getOrderDetails(pid) {
-      
+    try{
+    let myHealthStatus =await healthPackageStatus.findOne({patientId:pid,status: 'Subscribed'}) ;
+        const packId = myHealthStatus.packageId;
+        var discountP = 0;
+        if (packId) {
+            const allPackages = await healthPackageModel.find({ _id: packId });
+            if (allPackages.length > 0)
+                discountP = allPackages[0].medicinDiscountInPercentage;
+            else
+                return (res.status(400).send({ error: "cant find package", success: false }));
+
+        }
       const cartItems = await CartItem.find({ userId: pid });
       let list = []
       for (var x in cartItems) {
@@ -2362,12 +2431,16 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
         medInfo={
           id:med._id,
           name:med.Name,
-          price:med.Price*100*cartItems[x].quantity,
+          price:med.Price*100*(1-discountP/100),
           quantity:cartItems[x].quantity
         }
         list.push(medInfo);
       }
         return list
+    }
+    catch(error){
+      console.log(error);
+    }
     
   }
   
@@ -2414,7 +2487,7 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
     var total=0;
     console.log(orderDetails);
   for(var x in orderDetails){
-    total+=orderDetails[x].price;
+    total+=orderDetails[x].price*orderDetails[x].quantity;
     console.log(total);
   }
   total=total/100;
