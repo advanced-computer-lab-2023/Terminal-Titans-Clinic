@@ -2,6 +2,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import RegisterDoctorForm from "../components/RegisterDoctorForm";
 import RegisterPatientForm from "../components/RegisterPatientForm";
+import RegisterPharmacistForm from "../components/RegisterPharmacistForm";
 
 function Register() {
     return (
@@ -16,6 +17,9 @@ function Register() {
           </Tab>
           <Tab eventKey="profile" title="Register Patient">
           {<RegisterPatientForm />}
+          </Tab>
+          <Tab eventKey="tab3" title="Register Pharmacist">
+          {<RegisterPharmacistForm />}
           </Tab>
         </Tabs>
       );

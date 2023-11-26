@@ -4,64 +4,64 @@ import Table from 'react-bootstrap/Table';
 
 // ----------------------------------------------------------------------
 
-export default function AcceptRejectDoctor() {
+const AcceptRejectPharmacist = () => {
 
-    const [doctors, setDoctors] = useState([]);
+    const [pharmacists, setPharmacists] = useState([]);
 
-    const acceptDoctor = async (username) => {
+    const acceptPharmacist = async (username) => {
         await axios(
             {
                 method: 'post',
-                url: `http://localhost:8000/admin/DoctorAcceptance/${username}`,
+                url: `http://localhost:8000/admin/PharmAcceptance/${username}`,
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
             }
         ).then((response) => {
             console.log(response);
-            setDoctors(response.data.Result);
+            setPharmacists(response.data.Result);
         }).catch((error) => {
             console.log(error);
         });
     }
 
-    const rejectDoctor = async (username) => {
+    const rejectPharmacist = async (username) => {
         console.log(username);
         await axios(
             {
                 method: 'delete',
-                url: `http://localhost:8000/admin/DoctorRejection/${username}`,
+                url: `http://localhost:8000/admin/PharmRejection/${username}`,
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
             }
         ).then((response) => {
             console.log(response);
-            setDoctors(response.data.Result);
+            setPharmacists(response.data.Result);
         }).catch((error) => {
             console.log(error);
         });
     }
 
-    const getDoctors = async () => {
+    const getPharmacists = async () => {
         await axios(
             {
                 method: 'get',
-                url: 'http://localhost:8000/admin/fetchReqDoctors',
+                url: 'http://localhost:8000/admin/viewReqPharm',
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
             }
         ).then((response) => {
             console.log(response);
-            setDoctors(response.data.users);
+            setPharmacists(response.data.Result);
         }).catch((error) => {
             console.log(error);
         });
     }
 
     useEffect(() => {
-        getDoctors();
+        getPharmacists();
     }, []);
 
     return (
@@ -75,27 +75,27 @@ export default function AcceptRejectDoctor() {
                     <th>Hourly Rate</th>
                     <th>Affiliation</th>
                     <th>Education</th>
-                    <th>Speciality</th>
-                    <th>Documents</th>
+                    <th>Affiliation</th>
+                    <th>View Doc</th>
                     <th>Accept</th>
                     <th>Reject</th>
                 </tr>
             </thead>
             <tbody>
-                {doctors.map((doctor, index) => (
+                {pharmacists.map((pharmacist, index) => (
                     <tr>
                         <React.Fragment key={index}>
                             <td>{index + 1}</td>
-                            <td>{doctor.Name}</td>
-                            <td>{doctor.Email}</td>
-                            <td>{doctor.DateOfBirth}</td>
-                            <td>{doctor.HourlyRate}</td>
-                            <td>{doctor.Affiliation}</td>
-                            <td>{doctor.Education}</td>
-                            <td>{doctor.Speciality}</td>
-                            <td><button type="button" className="btn btn-success"  onClick={() => window.location.href=`/Health-Plus/viewRegDocDoc?Id=${doctor._id}`}>view Doc</button></td>
-                            <td><button type="button" className="btn btn-success" onClick={(event) => { acceptDoctor(doctor.Username) }}>Accept</button></td>
-                            <td><button type="button" className="btn btn-danger" onClick={(event) => { rejectDoctor(doctor.Username) }}>Reject</button></td>
+                            <td>{pharmacist.Name}</td>
+                            <td>{pharmacist.Email}</td>
+                            <td>{pharmacist.DateOfBirth}</td>
+                            <td>{pharmacist.HourlyRate}</td>
+                            <td>{pharmacist.Affiliation}</td>
+                            <td>{pharmacist.EducationalBackground}</td>
+                            <td>{pharmacist.Affiliation}</td>
+                            <td><button type="button" className="btn btn-success"  onClick={() => window.location.href=`viewReqPharmcDoc?Id=${pharmacist._id}`}>view Doc</button></td>
+                            <td><button type="button" className="btn btn-success" onClick={(event) => { acceptPharmacist(pharmacist.Username) }}>Accept</button></td>
+                            <td><button type="button" className="btn btn-danger" onClick={(event) => { rejectPharmacist(pharmacist.Username) }}>Reject</button></td>
                         </React.Fragment>
                     </tr>
                 ))}
@@ -103,3 +103,5 @@ export default function AcceptRejectDoctor() {
         </Table >
     );
 }
+
+export default AcceptRejectPharmacist

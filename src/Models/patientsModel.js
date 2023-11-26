@@ -21,6 +21,7 @@ const patientSchema = new _Schema({
   },
   Gender: {
     type: String,
+    enum: ['male', 'female', 'Other'],
     required: true
   },
   Wallet: {
@@ -38,6 +39,14 @@ const patientSchema = new _Schema({
   EmergencyMobile: {
     type: String,
     required: true,
+  },
+  EmergencyContactRelationToThePatient: {
+    type : String,
+    required: true
+  },
+  address: {
+    type : Array,
+    required: false
   },
   HealthHistory: [
     {

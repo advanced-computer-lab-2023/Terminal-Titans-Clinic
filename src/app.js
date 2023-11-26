@@ -5,6 +5,7 @@ import securityModule from './Routes/securityRoute.js'
 import DoctorModule from './Routes/doctorRoute.js'
 import PatientModule from './Routes/patientRoute.js'
 import AdminModule from './Routes/adminRoute.js'
+import PharmacistModule from './Routes/pharmacistRoute.js'
 import ejs from 'ejs'
 import cors from 'cors';
 
@@ -27,6 +28,7 @@ app.use(
 app.use('/doctor',DoctorModule)
 app.use('/patient',PatientModule)
 app.use('/admin',AdminModule)
+app.use('/Pharma',PharmacistModule)
 
 app.set('view engine' , 'ejs');
 
