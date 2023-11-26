@@ -676,5 +676,184 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
     }
 })
 
+//requirement 53
+//add/delete medicine to/from the prescription from the pharmacy platform
+
+router.post('addOrDeleteMedFromPresc',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const medicineId=req.body.medicineId;
+        const action=req.body.action;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        if(action=="add"){
+            prescription.items.push({medicineId:medicineId,dosage:1});
+        }
+        else if(action=="delete"){
+            prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
+        }
+        await prescription.save();
+        res.status(200).json({
+            success: true,
+            message: "Prescription updated successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+
+})
+
+//requirement 54
+//add/update dosage for each medicine added to the prescription
+router.post('updateDosage',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const medicineId=req.body.medicineId;
+        const dosage=req.body.dosage;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        prescription.items=prescription.items.map((item)=>{
+            if(item.medicineId==medicineId){
+                item.dosage=dosage;
+            }
+            return item;
+        });
+        await prescription.save();
+        res.status(200).json({
+            success: true,
+            message: "Prescription updated successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+
+})
+
+//requirement 63
+//add a patient's prescription
+router.post('addPrescription',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const patientId=req.body.patientId;
+        const prescription=new prescriptionModel({
+            PatientId:patientId,
+            DoctorId:req.user._id,
+            items:[],
+            status:"pending",
+            Date:Date.now()
+        });
+        await prescription.save();
+        res.status(200).json({
+            success: true,
+            message: "Prescription added successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+
+})
+
+//requirement 64
+//update a patient's prescriptions before it's submitted to the pharmacy
+router.post('updatePrescription',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        prescription.status="pending";
+        await prescription.save();
+        res.status(200).json({
+            success: true,
+            message: "Prescription updated successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+
+})
+
+
 
 export default router;

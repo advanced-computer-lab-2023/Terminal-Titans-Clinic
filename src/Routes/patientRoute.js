@@ -1266,7 +1266,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
         });
     }
 });
-
+    
 router.post('/addHistory', upload.array('files', 10), protect, async (req, res) => {
     try {
         const files = req.files;
@@ -2475,4 +2475,25 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
         return false;
     }
   });
+
+//requirement 58
+//view the details of my selected prescription
+router.get('/viewPrescription/:prescriptionId', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const prescription = await prescriptionModel.findById(req.params.prescriptionId);
+        if (!prescription) {
+            return res.status(400).json({ message: "Prescription not found", success: false })
+        }
+        return res.status(200).json({ Result: prescription, success: true });
+    }
+    catch (error) {
+        console.error('Error getting prescription', error.message);
+    }
+});
+
+
 export default router;
