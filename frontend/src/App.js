@@ -27,6 +27,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { useState } from 'react';
 import Room from './components/Room';
+import Chat from './components/Chat';
 
 function App() {
 
@@ -67,10 +68,10 @@ function App() {
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
-          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
+          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat" element={chat}/>
+          <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>

@@ -265,6 +265,23 @@ router.post('/login', async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 })
+
+router.get('/profile', protect, async (req, res) => {
+    try {
+        console.log('hena');
+        const user = await userModel.findById(req.user._id)
+        if (user) {
+            res.status(200).json({ Result: user, success: true })
+        }
+        else {
+            res.status(400).json({ message: 'User not found', success: false })
+        }
+    }
+    catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+})
+
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
