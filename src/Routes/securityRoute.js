@@ -2,6 +2,7 @@ import { Router } from 'express';
 import patientModel from '../Models/patientsModel.js';
 import userModel from '../Models/userModel.js';
 import reqdoctorModel from '../Models/requestedDoctorModel.js';
+import reqPharmacist from '../Models/requestedPharmacist.js';
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import nodemailer from 'nodemailer';
@@ -22,7 +23,7 @@ router.post('/patient', upload.single('history'), async (req, res) => {
 
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
-        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender) {
+        || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.body.emergencyRel) {
         console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
@@ -59,6 +60,7 @@ router.post('/patient', upload.single('history'), async (req, res) => {
             Mobile: req.body.mobile,
             EmergencyName: req.body.first + " " + req.body.last,
             EmergencyMobile: req.body.emergencyNumber,
+            EmergencyContactRelationToThePatient: req.body.emergencyRel,
             Gender: req.body.gender,
             HealthRecords: {
                 data: null,
@@ -141,6 +143,66 @@ router.post('/doctor', upload.fields([{ name: "ID" }, { name: "Degree" }, { name
     }
 });
 
+router.post('/pharmacist', upload.fields([{ name: "ID" }, { name: "Degree" }, { name: "License" }]), async (req, res) => {
+    if (!req.body.username || !req.body.dateOfBirth || !req.body.password
+        || !req.body.name || !req.body.email || !req.body.hourlyRate
+        || !req.body.affiliation || !req.body.education || !req.files?.ID[0] || !req.files?.Degree[0]
+        || !req.files?.License[0]) {
+        return res.status(400).json({ message: 'You have to complete all the fields', success: false })
+    }
+    if (req.body.username.includes(' ')) {
+        return res.status(400).json({ message: 'username has to be one word', success: false })
+    }
+    const savedUser = await userModel.find({ Username: req.body.username });
+    if (savedUser.length > 0)
+        return res.status(400).json({ message: 'username has to be unique', success: false })
+
+    const unqiueUser = await userModel.find({ Email: req.body.email });
+    if (unqiueUser.length > 0)
+        return res.status(400).json({ message: 'email has to be unique', success: false })
+    //return(res.status(400).send({message: "username exists "}));
+    // if (!validator.validate(req.body.email))
+    //     return (res.render('../../views/doctorRegistration', { message: "Please enter a valid email" }));
+    // if(!validator.validate(req.body.email))
+    //      return(res.status(400).json({message:"Please enter a valid email"}))
+    try {
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
+        const newPharmacist = new reqPharmacist({
+            Username: req.body.username,
+            Password: hashedPassword,
+            Name: req.body.name,
+            Email: req.body.email,
+            DateOfBirth: req.body.dateOfBirth,
+            HourlyRate: req.body.hourlyRate,
+            Affiliation: req.body.affiliation,
+            EducationalBackground: req.body.education,
+            ID: {
+                data: req.files?.ID[0].buffer,
+                contentType: req.files?.ID[0].mimetype,
+            },
+            Degree: {
+                data: req.files?.Degree[0].buffer,
+                contentType: req.files?.Degree[0].mimetype,
+            },
+            License: {
+                data: req.files?.License[0].buffer,
+                contentType: req.files?.License[0].mimetype,
+            },
+        });
+
+
+        newPharmacist.save();
+
+
+        return res.status(200).json({ message: "You have registered", success: true, newPharmacist })
+    }
+    catch (error) {
+        return res.status(400).json({ message: error.message, success: false })
+    }
+});
+
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body
@@ -158,6 +220,9 @@ router.post('/login', async (req, res) => {
         }
 
         if (user?.__t === 'RequestedDoctor') {
+            return res.status(400).json({ message: 'Please wait for admin approval', success: false })
+        }
+        if(user?.__t === 'ReqPharmacist'){
             return res.status(400).json({ message: 'Please wait for admin approval', success: false })
         }
 
@@ -296,7 +361,9 @@ router.post('/verifyOTP', async (req, res) => {
 router.post('/forgotPassword',async (req, res) => {
     const  email  = req.body.email
     let user = await userModel.findOne({ Email: email })
-    console.log('here')
+    if (!user) {
+        return res.status(400).json({ message: 'Email not found', success: false })
+    }
     try{
     const newPass=req.body.password;
     

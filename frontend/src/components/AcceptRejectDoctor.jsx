@@ -12,7 +12,7 @@ export default function AcceptRejectDoctor() {
         await axios(
             {
                 method: 'post',
-                url: `http://localhost:8000/admin/Acceptance/${username}`,
+                url: `http://localhost:8000/admin/DoctorAcceptance/${username}`,
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
@@ -30,7 +30,7 @@ export default function AcceptRejectDoctor() {
         await axios(
             {
                 method: 'delete',
-                url: `http://localhost:8000/admin/Rejection/${username}`,
+                url: `http://localhost:8000/admin/DoctorRejection/${username}`,
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
