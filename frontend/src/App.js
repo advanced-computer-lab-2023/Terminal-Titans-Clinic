@@ -26,6 +26,7 @@ import AdminPharmPage from "./Pages/AdminPharmPage";
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { useState } from 'react';
+import Room from './components/Room';
 
 function App() {
 
@@ -68,6 +69,8 @@ function App() {
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
+          <Route path="/meeting" element={<Room />} />
+          <Route path="/chat" element={chat}/>
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>
