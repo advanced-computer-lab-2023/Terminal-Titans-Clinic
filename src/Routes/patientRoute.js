@@ -338,8 +338,8 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
             return (res.status(400).send({ error: "cant find patient", success: false }));
 
         }
-        const packId = currPat[0].PackageId;
-        console.log(currPat)
+        let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+        const packId = myHealthStatus.packageId;
         var discountP = 0;
         if (packId) {
             const allPackages = await healthPackageModel.find({ _id: packId });
@@ -696,9 +696,10 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
         return (res.status(400).send({ error: "cant find patient", success: false }));
 
     }
-    const packId = currPat[0].PackageId;
-    console.log(currPat)
-    var discountP = 0;
+    let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+        const packId = myHealthStatus.packageId;
+        var discountP = 0;
+    
     if (packId) {
         const allPackages = await healthPackageModel.find({ _id: packId });
         if (allPackages.length > 0)

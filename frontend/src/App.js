@@ -21,7 +21,7 @@ import AdminPage from "./Pages/AdminPage";
 import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
-
+import AdminPharmPage from "./Pages/AdminPharmPage";
 
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -67,6 +67,7 @@ function App() {
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
+          <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>

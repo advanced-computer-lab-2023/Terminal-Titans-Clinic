@@ -99,13 +99,26 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         }
 
 
-        let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
+        var RegFamMemembers = await RegFamMem.find({ PatientId: patient._id })
 
-        patient = { ...patient._doc, "familyMember": [] }
+        patient = { ...patient._doc }
+        let famlist=[];
+        for (let i = 0; i < RegFamMemembers.length; i++) {
+            var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].Patient2Id })
+           famlist.push(fam.Name)
+           // patient.familyMember.push(familyMembers[i].Name)
+        }
+        RegFamMemembers = await RegFamMem.find({ Patient2Id: patient._id })
 
-        for (let i = 0; i < familyMembers.length; i++) {
-            console.log(familyMembers[i].Name)
-            patient.familyMember.push(familyMembers[i].Name)
+
+        for (let i = 0; i < RegFamMemembers.length; i++) {
+            var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].PatientId })
+           famlist.push(fam.Name)
+           // patient.familyMember.push(familyMembers[i].Name)
+        }
+        var unRegFamMemembers = await unRegFamMem.find({ PatientId: patient._id })
+        for (let i = 0; i < unRegFamMemembers.length; i++) {
+            famlist.push(unRegFamMemembers[i].Name)
         }
         let list = []
         for (let x in healthRecords) {
@@ -129,7 +142,8 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
             "patient": patient,
             "healthDoc": list,
             "medicalHistoryPDF": list1,
-            "medicalHistoryImage": list2
+            "medicalHistoryImage": list2,
+            "familyMembers":famlist
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -291,10 +305,20 @@ router.get('/getPatientName/:name', protect, async (req, res) => {
             let patient = await patientsModel.findOne({ _id: appointments[key].PatientId })
 
             if (patient.Name.toLowerCase() == req.params.name.toLowerCase()) {
-                let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-
                 patient = { ...patient._doc, "familyMember": [] }
 
+                let familyMembers = await RegFamMem.find({ PatientId: patient._id })    
+                for (let i = 0; i < familyMembers.length; i++) {
+                    let patientFam = await patientsModel.findOne({ _id: familyMembers[i].Patient2Id })
+                    patient.familyMember.push(patientFam.Name)
+                }
+                familyMembers = await RegFamMem.find({ Patient2Id: patient._id })
+                for (let i = 0; i < familyMembers.length; i++) {
+                    let patientFam = await patientsModel.findOne({ _id: familyMembers[i].PatientId })
+    
+                    patient.familyMember.push(patientFam.Name)
+                }
+                familyMembers = await unRegFamMem.find({ PatientId: patient._id })
                 for (let i = 0; i < familyMembers.length; i++) {
                     patient.familyMember.push(familyMembers[i].Name)
                 }
@@ -467,13 +491,11 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
 
         for (let i = 0; i < getAppointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: getAppointments[i].PatientId })
-            let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-
-            patient = { ...patient._doc, "familyMember": [], "appointmentDate": getAppointments[i].Date }
-
-            for (let j = 0; j < familyMembers.length; j++) {
-                patient.familyMember.push(familyMembers[j].Name)
+            if(getAppointments[i].FamilyMemId){
+            let familyMember = await unRegFamMem.findOne({ _id: getAppointments[i].FamilyMemId })
+            patient = { ...patient._doc, "familyMember":familyMember.Name, "appointmentDate": getAppointments[i].Date }
             }
+           
 
             result = [...result, patient]
         }
@@ -517,12 +539,25 @@ router.get('/selectPatientName/:id', protect, async (req, res) => {
 
         let result = []
 
-        let familyMembers = await familyMemberModel.find({ PatientId: patient._id })
-
+       
+        let familyMembers = await unRegFamMem.find({ PatientId: patient._id })
+       
         patient = { ...patient._doc, "familyMember": [] }
 
         for (let i = 0; i < familyMembers.length; i++) {
             patient.familyMember.push(familyMembers[i].Name)
+        }
+        familyMembers = await RegFamMem.find({ PatientId: patient._id })
+        for (let i = 0; i < familyMembers.length; i++) {
+            let patientFam = await patientsModel.findOne({ _id: familyMembers[i].Patient2Id })
+
+            patient.familyMember.push(patientFam.Name)
+        }
+        familyMembers = await RegFamMem.find({ Patient2Id: patient._id })
+        for (let i = 0; i < familyMembers.length; i++) {
+            let patientFam = await patientsModel.findOne({ _id: familyMembers[i].PatientId })
+
+            patient.familyMember.push(patientFam.Name)
         }
 
         result = [patient];
@@ -592,51 +627,6 @@ router.post('/getAppointment', protect, async (req, res) => {
     }
     res.status(200).json(final);
 });
-//add file to db
-// router.post('/test',async(req,res)=>{
-
-// // POST: called by uploading form
-
-// var model = new healthModel({PatientId:'651c89b4a38c19dc5624ca5f'});
-//     console.log('here')
-//     await fs.readFile(req.body.myFile, function (err, data) {
-//     console.log(data)
-//     model.HealthDocument.binData = data;
-//     // get extension
-//     model.HealthDocument.contentType = 'file/pdf'
-//         model.save();
-//     console.log("end end")
-//     res.status(200).json({status:"success"});
-//   });
-// });
-
-//export file from db
-// router.post('/test',async(req,res)=>{    
-//     var model = new healthModel({PatientId:'651c89b4a38c19dc5624ca5f'});
-//         console.log('here')
-//         await fs.readFile(req.body.myFile, function (err, data) {
-//         console.log(data)
-//         model.HealthDocument.binData = data;
-//         // get extension
-//         model.HealthDocument.contentType = 'application/pdf'
-//             model.save();
-//         console.log("end end")
-//         res.status(200).json({status:"success"});
-//       });
-//     });
-router.get('/test', (req, res) => {
-    healthModel.find({})
-        .then((data, err) => {
-            if (err) {
-                console.log(err);
-            }
-            console.log(data)
-            res.render('../../views/imagepage', { items: data })
-            //return(res.render('../../views/home'));
-
-        })
-});
-
 router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)=>{
   try { const exists = await doctorModel.findById(req.user);
     if (!exists) {

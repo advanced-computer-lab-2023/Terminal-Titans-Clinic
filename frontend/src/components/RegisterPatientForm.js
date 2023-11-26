@@ -19,6 +19,8 @@ function RegistrationForm() {
   const [first, setEmergencyFirtName] = useState('');
   const [last, setEmergencyLastName] = useState('');
   const [gender, setGender] = useState('');
+  const [emergencyRel, setEmergencyRelation] = useState('');
+
   const [history, setHistory] = useState('');
 
   const [errorMessagePass, setErrorMessagePass] = useState('')
@@ -84,6 +86,8 @@ function RegistrationForm() {
     formData.append('last', last);
     formData.append('gender', gender)
     formData.append('emergencyNumber', emergencyNumber);
+    formData.append('emergencyRel', emergencyRel);
+    
     // formData.append('history', history);
     // const data = {
     //   "username":username,
@@ -218,6 +222,13 @@ function RegistrationForm() {
             type="text"
             value={last}
             onChange={(e) => setEmergencyLastName(e.target.value)}
+          />
+           <label htmlFor="emergencyRel">Emergency Relation:</label>
+
+          <input
+            type="text"
+            value={emergencyRel}
+            onChange={(e) => setEmergencyRelation(e.target.value)}
           />
           {/* <label htmlFor="history">Medical History:</label> */}
 
