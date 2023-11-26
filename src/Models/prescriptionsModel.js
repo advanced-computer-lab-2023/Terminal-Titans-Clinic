@@ -9,10 +9,12 @@ const prescriptionSchema = new mongoose.Schema({
         type: String, 
         required:true
     },
-    prescriptionDoc:{
-        binData:Buffer,
-        contentType: String,
-    },
+    items: [
+        {
+          medicineId: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine' },
+          dosage: Number,
+        },
+        ],
     status:{
         type:String,
         required:true
