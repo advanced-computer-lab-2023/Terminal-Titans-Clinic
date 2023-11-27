@@ -13,6 +13,8 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { WebSocketServer } from 'ws'
 import userModel from './Models/userModel.js'
+import Message from './Models/messageModel.js'
+import protect from './middleware/authMiddleware.js'
 
 
 const dotenv = dotenvModule.config();
@@ -126,32 +128,32 @@ wss.on('connection', async (connection, req) => {
 			connection.username = myUser.Username;
 			console.log('connected', connection.userId, connection.username);
 		}
-		else if (file) {
-			console.log('size', file.data.length);
-			const parts = file.name.split('.');
-			const ext = parts[parts.length - 1];
-			filename = Date.now() + '.' + ext;
-			const path = __dirname + '/uploads/' + filename;
-			const bufferData = new Buffer(file.data.split(',')[1], 'base64');
-			fs.writeFile(path, bufferData, () => {
-				console.log('file saved:' + path);
-			});
-		}
+		// else if (file) {
+		// 	console.log('size', file.data.length);
+		// 	const parts = file.name.split('.');
+		// 	const ext = parts[parts.length - 1];
+		// 	filename = Date.now() + '.' + ext;
+		// 	const path = __dirname + '/uploads/' + filename;
+		// 	const bufferData = new Buffer(file.data.split(',')[1], 'base64');
+		// 	fs.writeFile(path, bufferData, () => {
+		// 		console.log('file saved:' + path);
+		// 	});
+		// }
 		if (recipient && (text || file)) {
+			console.log('message', messageData);
 			const messageDoc = await Message.create({
 				sender: connection.userId,
 				recipient,
 				text,
 				file: file ? filename : null,
 			});
-			console.log('created message');
 			[...wss.clients]
-				.filter(c => c.userId === recipient)
+				.filter(c => c.userId == recipient.toString())
 				.forEach(c => c.send(JSON.stringify({
 					text,
 					sender: connection.userId,
 					recipient,
-					file: file ? filename : null,
+					// file: file ? filename : null,
 					_id: messageDoc._id,
 				})));
 		}
@@ -159,4 +161,26 @@ wss.on('connection', async (connection, req) => {
 
 	// notify everyone about online people (when someone connects)
 	notifyAboutOnlinePeople();
+});
+
+app.get('/messages/:userId', protect, async (req, res) => {
+	const myUser = await userModel.findById(req.user._id).select('-password');
+	if (!myUser) return res.status(404).json({ message: 'User not found' });
+
+	const { userId } = req.params;
+	const messages = await Message.find({
+		$or: [
+			{ sender: req.user._id, recipient: userId },
+			{ sender: userId, recipient: req.user._id },
+		],
+	}).sort({ createdAt: -1 });
+	res.status(200).json(messages);
+});
+
+app.get('/people', protect, async (req, res) => {
+	const myUser = await userModel.findById(req.user._id);
+	if (!myUser) return res.status(404).json({ message: 'User not found' });
+
+	const people = await userModel.find({}, { '_id': 1, 'Username': 1 });
+	res.status(200).json(people);
 });
