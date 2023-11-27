@@ -455,15 +455,15 @@ router.post('/bookAppointment', protect, async (req, res) => {
 //reschedule an appointment req.47
 
 
-    router.put('/rescheduleAppointment/:id', protect, async (req, res) => {
+    router.post('/rescheduleAppointment', protect, async (req, res) => {
         const exists = await patientModel.findOne(req.user);
         if (!exists) {
             return res.status(400).json({ message: "Patient not found", success: false })
         }
     
-        const appId = req.params.id;
+        const appId = req.body._id;
         const newdate= req.body.Date ;
-        const appointment= await appointments.findById(appId);
+        const appointment= await appointmentModel.findById(appId);
         //add ba3d manzt el available slots
         //const dId = appointment.DoctorId ;
        // const availslot = await docAvailableSlots.findOne({ DoctorId: dId, Date: newdate });
@@ -471,10 +471,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
        //     return (res.status(400).send({ error: "This slot is not available", success: false }));
       //  }
 console.log(appId);
-        result = await appointment.Update( { Date : newdate},
-            {Status :"rescheduled"});
+        const result = await appointmentModel.findByIdAndUpdate( appId , { Date : newdate },{
+            Status :"rescheduled"});
      
-
+ result.save();
        // await docAvailableSlots.deleteOne({ DoctorId: dId, Date: newdate });
         return res.status(200).json({ Result: result, success: true });
     }
