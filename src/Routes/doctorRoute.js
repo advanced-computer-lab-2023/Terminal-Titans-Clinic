@@ -170,10 +170,10 @@ router.get('/getPatientsList', protect, async (req, res) => {
         }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
        
-        if (appointments.length == 0) {
-            res.status(400).json({ message: "No patients found", success: false })
-            return;
-        }
+        // if (appointments.length == 0) {
+        //     res.status(400).json({ message: "No patients found", success: false })
+        //     return;
+        // }
 
         let result = []
 
@@ -206,6 +206,63 @@ router.get('/getPatientsList', protect, async (req, res) => {
     }
 
     console.log(result)
+
+        if (result.length == 0) {
+            res.status(400).json({ message: "No patient found", success: false })
+        }
+        else
+            res.status(200).json({ Result: result, success: true })
+    } catch (err) {
+        console.error(err.message)
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
+router.get('/getPatientsList2', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findOne({ _id: req.user._id })
+        console.log(req.user.Name)
+        if (!doctor) {
+            res.status(400).json({ message: "Doctor not found", success: false })
+            return;
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const appointments = await appointmentModel.find({ DoctorId: req.user._id });
+       
+        // if (appointments.length == 0) {
+        //     res.status(400).json({ message: "No patients found", success: false })
+        //     return;
+        // }
+
+        let result = []
+
+        for (let i = 0; i < appointments.length; i++) {
+            let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
+            console.log(appointments[i]._id)
+            console.log(patient._id)
+            const date=appointments[i].Date;
+            var upcoming=false;
+            if(date>new Date()){
+                upcoming=true;
+            }
+            let pat={
+                "Name":patient.Name,
+                "Gender":patient.Gender,
+                "Mobile":patient.Mobile,
+                "Email":patient.Email,
+                "DateOfBirth":patient.DateOfBirth,
+                "upcoming":upcoming,
+                "id":patient._id
+            }
+
+            result.push(pat);
+        
+    
+        }
+
 
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })
@@ -377,6 +434,7 @@ router.post('/addavailableslots', protect, async (req, res) => {
 
     let aptmnts = await appointmentModel.find({ DoctorId: req.user._id });
     //console.log(aptmnts);
+    console.log('kppp')
     if (aptmnts) {
 
 
@@ -392,13 +450,13 @@ router.post('/addavailableslots', protect, async (req, res) => {
                 flag = false;
         }
     }
-    // console.log(flag)
+    console.log(flag)
     aptmnts = await docAvailableSlots.find({ DoctorId: req.user._id });
     if (flag == false) {
         return res.status(500).json({ message: "you have an appointment during this slot", success: false });
     }
     flag = true;
-    //console.log(aptmnts);
+    console.log(aptmnts);
     if (aptmnts) {
 
 
