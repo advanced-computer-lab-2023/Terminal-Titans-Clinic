@@ -15,3 +15,9 @@ password:hello kitty
 token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NGJlMmI0M2NmMzY3OTRlNmI2MDkyNiIsImlhdCI6MTY5OTU2NjE1NiwiZXhwIjoxNzAyMTU4MTU2fQ.fSzc0txIfi4GP3gKBO0JSXOZbxQqdGr2iEVP0_4fwM8
 
 ------------
+username:patient
+password:Pass1234
+token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjJjMmQxZGEyMGY2OGFjNTk0M2I5OCIsImlhdCI6MTcwMTA1MDc4MywiZXhwIjoxNzAzNjQyNzgzfQ.OUd08QX1eKTrL_2zgUvzgQAtOx-4tQ9pNcyUAq2n5gI
+
+
+------------
