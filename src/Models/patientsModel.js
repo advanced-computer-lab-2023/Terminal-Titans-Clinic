@@ -21,7 +21,7 @@ const patientSchema = new _Schema({
   },
   Gender: {
     type: String,
-    enum: ['male', 'female', 'Other'],
+    enum: ['male', 'female'],
     required: true
   },
   Wallet: {

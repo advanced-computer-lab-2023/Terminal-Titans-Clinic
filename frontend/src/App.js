@@ -32,6 +32,7 @@ import PaymentPagePharm from './components/paymentMethodPharm';
 import ViewReqPharmDoc from './components/viewReqPharmDoc';
 import PharmacistScreen from './Pages/pharmacistScreen';
 import CartScreen from './Pages/cartScreen';
+import ViewMyPatientInfo from './Pages/viewMyPatientInfo';
 
 
 
@@ -95,7 +96,7 @@ function App() {
           <Route path="/viewReqPharmcDoc" element={<ViewReqPharmDoc />} />
           <Route path="/cart" element={<CartScreen />} />
           <Route path="/pharmacistScreen" element={<PharmacistScreen />} />
-
+          <Route path='/viewMyPatientInfo' element={<ViewMyPatientInfo />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
