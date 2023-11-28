@@ -15,6 +15,7 @@ import { WebSocketServer } from 'ws'
 import userModel from './Models/userModel.js'
 import Message from './Models/messageModel.js'
 import protect from './middleware/authMiddleware.js'
+import appointmentModel from './Models/appointmentModel.js'
 
 
 const dotenv = dotenvModule.config();
@@ -66,32 +67,44 @@ const io = new Server(server, {
 	}
 });
 io.attach(server);
+let userSocketMap = new Map();
+// io.on("connection", async (socket) => {
+// 	if (socket.handshake.auth.Authorization) {
+// 		const token = socket.handshake.auth.Authorization.split(" ")[1];
+// 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// 		// socket.id = decoded.id;
+// 		userSocketMap.set(decoded.id, socket.id);
+// 		socket.emit("me", socket.id)
+// 	}
+// 	// socket.emit("me", socket.id)
 
-io.on("connection", (socket) => {
-	socket.emit("me", socket.id)
+// 	socket.on("disconnect", () => {
+// 		socket.broadcast.emit("callEnded")
+// 	})
 
-	socket.on("disconnect", () => {
-		socket.broadcast.emit("callEnded")
-	})
+// 	socket.on("callUser", (data) => {
+// 		// loop through all the sockets and find the one with the id
+// 		userSocketMap.forEach((value, key) => {
+// 			if (key == data.userToCall) {
+// 				io.to(value).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+// 			}
+// 		})
+// 	})
 
-	socket.on("callUser", (data) => {
-		io.to(data.userToCall).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
-	})
+// 	socket.on("answerCall", (data) => {
+// 		io.to(data.to).emit("callAccepted", data.signal)
+// 	})
 
-	socket.on("answerCall", (data) => {
-		io.to(data.to).emit("callAccepted", data.signal)
-	})
-
-	socket.on("endCall", ({ to }) => {
-		io.to(to).emit("callEnded");
-	});
-})
+// 	socket.on("endCall", ({ to }) => {
+// 		io.to(to).emit("callEnded");
+// 	});
+// })
 
 //chat
-console.log(server);
 const wss = new WebSocketServer({ server });
 wss.on('connection', async (connection, req) => {
 	function notifyAboutOnlinePeople() {
+		console.log('notify');
 		[...wss.clients].forEach(client => {
 			client.send(JSON.stringify({
 				online: [...wss.clients].map(c => ({ userId: c.userId, username: c.username })),
@@ -126,6 +139,7 @@ wss.on('connection', async (connection, req) => {
 			const myUser = await userModel.findById(decoded.id).select('-password');
 			connection.userId = myUser._id;
 			connection.username = myUser.Username;
+			notifyAboutOnlinePeople();
 			console.log('connected', connection.userId, connection.username);
 		}
 		// else if (file) {
@@ -178,9 +192,30 @@ app.get('/messages/:userId', protect, async (req, res) => {
 });
 
 app.get('/people', protect, async (req, res) => {
-	const myUser = await userModel.findById(req.user._id);
+	// console.log(req.user.Username,'people');
+	const myUser = await userModel.findById(req.user._id).select('-ID -License -Degree -HealthHistory');
 	if (!myUser) return res.status(404).json({ message: 'User not found' });
+	if (myUser.__t == 'patient') {
+		let appointments = await appointmentModel.find({ PatientId: req.user._id });
+		let people = [];
+		for (let i = 0; i < appointments.length; i++) {
+			let doctor = await userModel.findById(appointments[i].DoctorId).select('-ID -License -Degree');
+			people.push(doctor);
+		}
+		let mySet = new Set(people);
+		people = [...mySet];
+		res.status(200).json({ myUser: myUser, Result: people });
+	}
+	else if (myUser.__t == 'Doctor') {
+		let appointments = await appointmentModel.find({ DoctorId: req.user._id });
+		let people = [];
+		for (let i = 0; i < appointments.length; i++) {
+			let patient = await userModel.findById(appointments[i].PatientId).select('-HealthHistory');
+			people.push(patient);
+		}
+		let mySet = new Set(people);
+		people = [...mySet];
 
-	const people = await userModel.find({}, { '_id': 1, 'Username': 1 });
-	res.status(200).json(people);
+		res.status(200).json({ myUser: myUser, Result: people });
+	}
 });
