@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
+import { useLocation } from 'react-router-dom';
 import { CopyToClipboard } from "react-copy-to-clipboard"
 import Peer from "simple-peer"
 import io from "socket.io-client"
@@ -11,7 +12,11 @@ import { faVideo, faPhoneSlash, faMicrophone, faVideoSlash, faMicrophoneSlash } 
 
 // const socket = io('http://localhost:5000')
 //connet to the socket
-const socket = io('http://localhost:8000');
+const socket = io('http://localhost:8000', {
+    auth: {
+        Authorization: "Bearer " + sessionStorage.getItem('token')
+    }
+});
 socket.on('connect', () => {
     console.log('Connected to server');
 });
@@ -32,8 +37,24 @@ function Room() {
     const userVideo = useRef()
     const connectionRef = useRef()
 
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+
+    // Get specific parameters
+    const videoParam = Boolean(searchParams.get('video')) == true;
+
+    const recipientParam = searchParams.get('recipient');
+
+    const isAnswerCall = searchParams.get('answerCall') == 'true';
+
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+        if (isAnswerCall) {
+            answerCall();
+        }
+        else {
+            callUser(recipientParam)
+        }
+        navigator.mediaDevices.getUserMedia({ video: videoParam, audio: true }).then((stream) => {
             setStream(stream)
             if (myVideo.current)
                 myVideo.current.srcObject = stream
@@ -43,12 +64,12 @@ function Room() {
             setMe(id)
         })
 
-        socket.on("callUser", (data) => {
-            setReceivingCall(true)
-            setCaller(data.from)
-            setName(data.name)
-            setCallerSignal(data.signal)
-        })
+        // socket.on("callUser", (data) => {
+        //     setReceivingCall(true)
+        //     setCaller(data.from)
+        //     setName(data.name)
+        //     setCallerSignal(data.signal)
+        // })
     }, [])
 
     const callUser = (id) => {
@@ -56,33 +77,34 @@ function Room() {
             initiator: true,
             trickle: false,
             stream: stream
-        })
+        });
+
         peer.on("signal", (data) => {
+            // Include the user ID in the call information
             socket.emit("callUser", {
                 userToCall: id,
                 signalData: data,
                 from: me,
-                name: name
-            })
-        })
+                name: name,
+            });
+        });
+
         peer.on("stream", (stream) => {
-
-            userVideo.current.srcObject = stream
-
-        })
+            userVideo.current.srcObject = stream;
+        });
 
         peer.on('close', () => {
-            setCallEnded(true)
-            connectionRef.current.destroy()
-        })
+            setCallEnded(true);
+            connectionRef.current.destroy();
+        });
 
         socket.on("callAccepted", (signal) => {
-            setCallAccepted(true)
-            peer.signal(signal)
-        })
+            setCallAccepted(true);
+            peer.signal(signal);
+        });
 
-        connectionRef.current = peer
-    }
+        connectionRef.current = peer;
+    };
 
     const answerCall = () => {
         setCallAccepted(true)
@@ -108,7 +130,7 @@ function Room() {
 
     const leaveCall = () => {
         setCallEnded(true)
-        if(connectionRef.current)
+        if (connectionRef.current)
             connectionRef.current.destroy()
     }
 
@@ -137,7 +159,6 @@ function Room() {
     return (
         <>
             <div id="videos">
-                {/* <video className="video-player" id="user-1" autoplay playsinline></video> */}
                 <div className="video-player">
                     {stream && <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />}
                 </div>
@@ -147,85 +168,82 @@ function Room() {
                         <video playsInline ref={userVideo} autoPlay style={{ width: "300px" }} /> :
                         null}
                 </div>
-                {/* <video className="video-player" id="user-2" autoplay playsinline></video> */}
             </div>
 
             <div id="controls">
 
-                <div class="control-container" id="camera-btn" onClick={closeVideo}>
+                <div className="control-container" id="camera-btn" onClick={closeVideo}>
                     {videoButton ? <FontAwesomeIcon icon={faVideo} /> : <FontAwesomeIcon icon={faVideoSlash} />}
                 </div>
 
-                <div class="control-container" id="mic-btn" onClick={closeMic}>
+                <div className="control-container" id="mic-btn" onClick={closeMic}>
                     {micButton ? <FontAwesomeIcon icon={faMicrophone} /> : <FontAwesomeIcon icon={faMicrophoneSlash} />}
                 </div>
 
-                {/* <a href="lobby.html"> */}
-                    <div class="control-container" id="leave-btn">
-                        <FontAwesomeIcon icon={faPhoneSlash} onClick={leaveCall} />
-                    </div>
-                {/* </a> */}
+                <div className="control-container" id="leave-btn">
+                    <FontAwesomeIcon icon={faPhoneSlash} onClick={leaveCall} />
+                </div>
 
             </div>
 
             {/* <h1 style={{ textAlign: "center", color: '#fff' }}>Zoomish</h1>
-			<div className="container">
-				<div className="video-container">
-					<div className="video">
-						{stream && <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />}
-					</div>
-					<div className="video">
-						{callAccepted && !callEnded ?
-							<video playsInline ref={userVideo} autoPlay style={{ width: "300px" }} /> :
-							null}
-					</div>
-				</div>
-				<div className="myId">
-					<textarea
-						id="filled-basic"
-						label="Name"
-						variant="filled"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						style={{ marginBottom: "20px" }}
-					/>
-					<CopyToClipboard text={me} style={{ marginBottom: "2rem" }}>
-						<button variant="contained" color="primary">
-							Copy ID
-						</button>
-					</CopyToClipboard>
+            <div className="container">
+                <div className="video-container">
+                    <div className="video">
+                        {stream && <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />}
+                    </div>
+                    <div className="video">
+                        {callAccepted && !callEnded ?
+                            <video playsInline ref={userVideo} autoPlay style={{ width: "300px" }} /> :
+                            null}
+                    </div>
+                </div>
+                <div className="myId">
+                    <textarea
+                        id="filled-basic"
+                        label="Name"
+                        variant="filled"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        style={{ marginBottom: "20px" }}
+                    />
+                    <CopyToClipboard text={me} style={{ marginBottom: "2rem" }}>
+                        <button variant="contained" color="primary">
+                            Copy ID
+                        </button>
+                    </CopyToClipboard>
 
-					<textarea
-						id="filled-basic"
-						label="ID to call"
-						variant="filled"
-						value={idToCall}
-						onChange={(e) => setIdToCall(e.target.value)}
-					/>
-					<div className="call-button">
-						{callAccepted && !callEnded ? (
-							<button variant="contained" color="secondary" onClick={leaveCall}>
-								End Call
-							</button>
-						) : (
-							<button color="primary" aria-label="call" onClick={() => callUser(idToCall)}>
-								phone
-							</button>
-						)}
-						{idToCall}
-					</div>
-				</div>
-				<div>
-					{receivingCall && !callAccepted ? (
-						<div className="caller">
-							<h1 >{name} is calling...</h1>
-							<button variant="contained" color="primary" onClick={answerCall}>
-								Answer
-							</button>
-						</div>
-					) : null}
-				</div>
-			</div> */}
+                    <textarea
+                        id="filled-basic"
+                        label="ID to call"
+                        variant="filled"
+                        value={idToCall}
+                        onChange={(e) => setIdToCall(e.target.value)}
+                    />
+                    <div className="call-button">
+                        {callAccepted && !callEnded ? (
+                            <button variant="contained" color="secondary" onClick={leaveCall}>
+                                End Call
+                            </button>
+                        ) : (
+                            <button color="primary" aria-label="call" onClick={() => callUser(recipientParam)}>
+                                phone
+                            </button>
+                        )}
+                        {idToCall}
+                    </div>
+                </div> */}
+            {/* <div>
+                    {receivingCall && !callAccepted ? (
+                        <div className="caller">
+                            <h1 >{name} is calling...</h1>
+                            <button variant="contained" color="primary" onClick={answerCall}>
+                                Answer
+                            </button>
+                        </div>
+                    ) : null}
+                </div> */}
+            {/* </div> */}
         </>
     )
 }

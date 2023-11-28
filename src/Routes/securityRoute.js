@@ -268,8 +268,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/profile', protect, async (req, res) => {
     try {
-        console.log('hena');
-        const user = await userModel.findById(req.user._id)
+        const user = await userModel.findById(req.user._id).select('-HealthHistory -ID -Degree -License');
         if (user) {
             res.status(200).json({ Result: user, success: true })
         }
