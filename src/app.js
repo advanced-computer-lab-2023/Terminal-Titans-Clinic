@@ -68,37 +68,37 @@ const io = new Server(server, {
 });
 io.attach(server);
 let userSocketMap = new Map();
-io.on("connection", async (socket) => {
-	if (socket.handshake.auth.Authorization) {
-		const token = socket.handshake.auth.Authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		// socket.id = decoded.id;
-		userSocketMap.set(decoded.id, socket.id);
-		socket.emit("me", socket.id)
-	}
-	// socket.emit("me", socket.id)
+// io.on("connection", async (socket) => {
+// 	if (socket.handshake.auth.Authorization) {
+// 		const token = socket.handshake.auth.Authorization.split(" ")[1];
+// 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// 		// socket.id = decoded.id;
+// 		userSocketMap.set(decoded.id, socket.id);
+// 		socket.emit("me", socket.id)
+// 	}
+// 	// socket.emit("me", socket.id)
 
-	socket.on("disconnect", () => {
-		socket.broadcast.emit("callEnded")
-	})
+// 	socket.on("disconnect", () => {
+// 		socket.broadcast.emit("callEnded")
+// 	})
 
-	socket.on("callUser", (data) => {
-		// loop through all the sockets and find the one with the id
-		userSocketMap.forEach((value, key) => {
-			if (key == data.userToCall) {
-				io.to(value).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
-			}
-		})
-	})
+// 	socket.on("callUser", (data) => {
+// 		// loop through all the sockets and find the one with the id
+// 		userSocketMap.forEach((value, key) => {
+// 			if (key == data.userToCall) {
+// 				io.to(value).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+// 			}
+// 		})
+// 	})
 
-	socket.on("answerCall", (data) => {
-		io.to(data.to).emit("callAccepted", data.signal)
-	})
+// 	socket.on("answerCall", (data) => {
+// 		io.to(data.to).emit("callAccepted", data.signal)
+// 	})
 
-	socket.on("endCall", ({ to }) => {
-		io.to(to).emit("callEnded");
-	});
-})
+// 	socket.on("endCall", ({ to }) => {
+// 		io.to(to).emit("callEnded");
+// 	});
+// })
 
 //chat
 const wss = new WebSocketServer({ server });
