@@ -15,6 +15,7 @@ import ViewmyHealthRecords from "./components/viewHealthRecords";
 import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
+import PatientHome from "./components/PatientHomePage";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
@@ -55,7 +56,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<Patient />} />
+          {/* <Route path="/patientHome" element={<PatientHome />} /> */}
           <Route path="/doctorHome" element={<Doctor />} />
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
