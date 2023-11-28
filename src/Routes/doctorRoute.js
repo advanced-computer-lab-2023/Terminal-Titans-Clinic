@@ -86,7 +86,92 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
 
         let healthRecords = await healthModel.find({ PatientId: appointment.PatientId })
 
-        console.log(healthRecords)
+       
+        // if (healthRecords.length == 0) {
+        //     res.status(400).json({ message: "No health records found", success: false })
+        // }
+
+        let patient = await patientsModel.findOne({ _id: req.params.id });
+
+        if (!patient) {
+            res.status(400).json({ message: "No patient found", success: false })
+            return;
+        }
+
+
+        // var RegFamMemembers = await RegFamMem.find({ PatientId: patient._id })
+
+        // patient = { ...patient._doc }
+        // let famlist=[];
+        // for (let i = 0; i < RegFamMemembers.length; i++) {
+        //     var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].Patient2Id })
+        //    famlist.push(fam.Name)
+        //    // patient.familyMember.push(familyMembers[i].Name)
+        // }
+        // RegFamMemembers = await RegFamMem.find({ Patient2Id: patient._id })
+
+
+        // for (let i = 0; i < RegFamMemembers.length; i++) {
+        //     var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].PatientId })
+        //    famlist.push(fam.Name)
+        //    // patient.familyMember.push(familyMembers[i].Name)
+        // }
+        // var unRegFamMemembers = await unRegFamMem.find({ PatientId: patient._id })
+        // for (let i = 0; i < unRegFamMemembers.length; i++) {
+        //     famlist.push(unRegFamMemembers[i].Name)
+        // }
+        // let list = []
+        // for (let x in healthRecords) {
+        //     list.push(healthRecords[x].HealthDocument.data)
+
+        // }
+        // const medicalHistory = patient.HealthHistory
+        // let list1=[]
+        // let list2=[]
+        // for(var x in medicalHistory){
+        //     const type=medicalHistory[x].contentType
+        //     if(type=='application/pdf')
+        //         list1.push(medicalHistory[x])
+        //     else
+        //         list2.push(medicalHistory[x])
+        // }
+        
+        //console.log(patient)
+        patient.HealthHistory=null;
+        const result = {
+            
+            "patient": patient,
+            
+        }
+
+        res.status(200).json({ Result: result, success: true })
+    } catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
+router.get('/getPatientInfoAndHealth2/:id', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+
+
+        const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
+
+        if (appointment.length == 0) {
+            res.status(400).json({ message: "Not registered with you", success: false })
+            return;
+        }
+
+
+        // let healthRecords = await healthModel.find({ PatientId: appointment.PatientId })
+
+        // console.log(healthRecords)
         // if (healthRecords.length == 0) {
         //     res.status(400).json({ message: "No health records found", success: false })
         // }
@@ -120,11 +205,11 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         for (let i = 0; i < unRegFamMemembers.length; i++) {
             famlist.push(unRegFamMemembers[i].Name)
         }
-        let list = []
-        for (let x in healthRecords) {
-            list.push(healthRecords[x].HealthDocument.data)
+        // let list = []
+        // for (let x in healthRecords) {
+        //     list.push(healthRecords[x].HealthDocument.data)
 
-        }
+        // }
         const medicalHistory = patient.HealthHistory
         let list1=[]
         let list2=[]
@@ -138,12 +223,93 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         
         //console.log(patient)
         const result = {
-            "healthRecords": healthRecords,
-            "patient": patient,
-            "healthDoc": list,
             "medicalHistoryPDF": list1,
             "medicalHistoryImage": list2,
-            "familyMembers":famlist
+            
+        }
+
+        res.status(200).json({ Result: result, success: true })
+    } catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
+router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+
+
+        const appointment = await appointmentModel.findOne({ DoctorId: req.user._id, PatientId: req.params.id });
+
+        if (appointment.length == 0) {
+            res.status(400).json({ message: "Not registered with you", success: false })
+            return;
+        }
+
+
+        let healthRecords = await healthModel.find({ PatientId: appointment.PatientId })
+
+        
+        // if (healthRecords.length == 0) {
+        //     res.status(400).json({ message: "No health records found", success: false })
+        // }
+
+        let patient = await patientsModel.findOne({ _id: req.params.id });
+
+        if (!patient) {
+            res.status(400).json({ message: "No patient found", success: false })
+            return;
+        }
+
+
+        // var RegFamMemembers = await RegFamMem.find({ PatientId: patient._id })
+
+        // patient = { ...patient._doc }
+        // let famlist=[];
+        // for (let i = 0; i < RegFamMemembers.length; i++) {
+        //     var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].Patient2Id })
+        //    famlist.push(fam.Name)
+        //    // patient.familyMember.push(familyMembers[i].Name)
+        // }
+        // RegFamMemembers = await RegFamMem.find({ Patient2Id: patient._id })
+
+
+        // for (let i = 0; i < RegFamMemembers.length; i++) {
+        //     var fam=await patientsModel.findOne({ _id: RegFamMemembers[i].PatientId })
+        //    famlist.push(fam.Name)
+        //    // patient.familyMember.push(familyMembers[i].Name)
+        // }
+        // var unRegFamMemembers = await unRegFamMem.find({ PatientId: patient._id })
+        // for (let i = 0; i < unRegFamMemembers.length; i++) {
+        //     famlist.push(unRegFamMemembers[i].Name)
+        // }
+        let list = []
+        for (let x in healthRecords) {
+            list.push(healthRecords[x].HealthDocument.data)
+
+        }
+        // const medicalHistory = patient.HealthHistory
+        // let list1=[]
+        // let list2=[]
+        // for(var x in medicalHistory){
+        //     const type=medicalHistory[x].contentType
+        //     if(type=='application/pdf')
+        //         list1.push(medicalHistory[x])
+        //     else
+        //         list2.push(medicalHistory[x])
+        // }
+        
+        //console.log(patient)
+        const result = {
+           
+            "healthDoc": list,
+            
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -738,6 +904,7 @@ router.post('/getAppointment', protect, async (req, res) => {
     res.status(200).json(final);
 });
 router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)=>{
+    console.log('l')
   try { const exists = await doctorModel.findById(req.user);
     if (!exists) {
         return res.status(500).json({
@@ -753,8 +920,8 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
     
     console.log("Abl el patient ID")
     const patientID = req.params.PatientId;
-    console.log(patientID);
-    console.log(req.file);
+    // console.log(patientID);
+    // console.log(req.file);
     const existingpatient = await patientsModel.findById(patientID);
     if(!existingpatient){
         res.status(400).json({

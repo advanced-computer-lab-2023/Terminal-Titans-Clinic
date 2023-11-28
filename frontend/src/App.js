@@ -12,7 +12,6 @@ import ViewAppointments from "./Pages/ViewAppoitments";
 import SignIn from "./Pages/SignIn";
 import HealthPackages from "./Pages/HealthPackages";
 import ViewmyHealthRecords from "./components/viewHealthRecords";
-import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
 import Doctor from "./Pages/Doctor";
@@ -78,7 +77,6 @@ function App() {
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
-          <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
