@@ -9,7 +9,7 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
-import StarIcon from '@mui/icons-material/StarBorder';
+// StarIcon from '@mui/icons-material/StarBorder';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
@@ -21,7 +21,8 @@ const tiers = [
   {
     title: 'Prescriptions',
     description: [
-      'Here you can explore everything related to your Prescriptions'
+      'Explore and manage your prescriptions conveniently through this part.',
+      'Order new prescriptions, view prescription history, and more.'
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -29,7 +30,8 @@ const tiers = [
   {
     title: 'HealthPackages',
     description: [
-      'Here you can explore everything related to your HealthPackages'
+      'Discover various health packages tailored to your needs from here.',
+      'Get comprehensive health checkups and insights for a healthier life.'
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -37,7 +39,8 @@ const tiers = [
   {
     title: 'Appointments',
     description: [
-      'Here you can explore everything related to your Appointments'
+      'Schedule and manage your appointments seamlessly.',
+      'Stay on top of your health with easy access to appointment details and reminders.'
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -60,7 +63,7 @@ export default function Pricing() {
       >
         <Toolbar sx={{ flexWrap: 'wrap' }}>
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Company name
+            Health Plus+
           </Typography>
           <nav>
             <Link
@@ -69,7 +72,7 @@ export default function Pricing() {
               href="#"
               sx={{ my: 1, mx: 1.5 }}
             >
-              Features
+              Visit pharmacy
             </Link>
             <Link
               variant="button"
@@ -77,19 +80,21 @@ export default function Pricing() {
               href="#"
               sx={{ my: 1, mx: 1.5 }}
             >
-              Enterprise
+              FamilyMembers Information
             </Link>
             <Link
               variant="button"
               color="text.primary"
+              // hena link el chatting
               href="#"
               sx={{ my: 1, mx: 1.5 }}
             >
               Support
             </Link>
           </nav>
-          <Button href="#" variant="outlined" sx={{ my: 1, mx: 1.5 }}>
-            Login
+          {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
+          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}> 
+            Home
           </Button>
         </Toolbar>
       </AppBar>
@@ -97,17 +102,16 @@ export default function Pricing() {
       <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography
           component="h1"
-          variant="h2"
+          variant="h4"
           align="center"
           color="text.primary"
           gutterBottom
         >
-          Pricing
+              Your Patient Dashboard
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" component="p">
-          Quickly build an effective pricing table for your potential customers with
-          this layout. It&apos;s built with default MUI components with little
-          customization.
+        Manage your health effectively with our patient dashboard.
+        Access your prescriptions, health packages, and appointments in one place. 
         </Typography>
       </Container>
       {/* End hero unit */}
@@ -119,7 +123,7 @@ export default function Pricing() {
               item
               key={tier.title}
               xs={12}
-              sm={tier.title === 'Enterprise' ? 12 : 6}
+             // sm={tier.title === 'Enterprise' ? 12 : 6}
               md={4}
             >
               <Card>
@@ -127,7 +131,7 @@ export default function Pricing() {
                   title={tier.title}
                   subheader={tier.subheader}
                   titleTypographyProps={{ align: 'center' }}
-                  action={tier.title === 'Pro' ? <StarIcon /> : null}
+                  //action={tier.title === 'Pro' ? <StarIcon /> : null}
                   subheaderTypographyProps={{
                     align: 'center',
                   }}
@@ -147,12 +151,6 @@ export default function Pricing() {
                       mb: 2,
                     }}
                   >
-                    {/* <Typography component="h2" variant="h3" color="text.primary">
-                      ${tier.price}
-                    </Typography>
-                    <Typography variant="h6" color="text.secondary">
-                      /mo
-                    </Typography> */}
                   </Box>
                   <ul>
                     {tier.description.map((line) => (
@@ -171,7 +169,7 @@ export default function Pricing() {
                   <Button
                     fullWidth
                     variant={tier.buttonVariant}
-                  >
+                  >                  
                     {tier.buttonText}
                   </Button>
                 </CardActions>
