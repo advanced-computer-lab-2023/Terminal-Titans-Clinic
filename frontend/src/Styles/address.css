@@ -1,0 +1,50 @@
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to the top */
+    height: 15vh; /* Center horizontally within the viewport */
+  }
+  
+  .card {
+    width: 400px; /* Adjust the width as needed */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Add a shadow effect */
+    text-align: center;
+  }
+  .dot {
+    height: 10px;
+    width: 10px;
+    text-align: left;
+    background-color: #bbb;
+    border-radius: 50%;
+    display:inline-block;
+    position: relative;
+  }
+  .dot2 {
+    height: 10px;
+    width: 10px;
+    text-align: left;
+    background-color: #d81616;
+    border-radius: 50%;
+    display:inline-block;
+    position: relative;
+  }
+  .card-content {
+    margin-bottom: 20px;
+  }
+  
+  .btn {
+    background-color: #000000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    background-color: #535658;
+  }
+  

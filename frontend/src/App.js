@@ -22,6 +22,18 @@ import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 import AdminPharmPage from "./Pages/AdminPharmPage";
+import PharmHomescreen from "./Pages/PharmHomePage";
+import OrderDetails from './Pages/OrderDetails.js';
+import OrderScreen from './Pages/OrderScreen.js';
+import Meds2 from './Pages/Meds';
+import CheckoutMed from './Pages/CheckoutMed';
+import Cancel from './Pages/Cancel';
+import PaymentPagePharm from './components/paymentMethodPharm';
+import ViewReqPharmDoc from './components/viewReqPharmDoc';
+import PharmacistScreen from './Pages/pharmacistScreen';
+import CartScreen from './Pages/cartScreen';
+
+
 
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -72,6 +84,18 @@ function App() {
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path='viewMyPatients' element={<ViewMyPatientsList />} />
+          <Route path="/pharmHome" element={<PharmHomescreen />} />
+          <Route path="/orderDetails/:orderId" element={<OrderDetails />} />
+          <Route path="/orderDetails" element={<OrderScreen />} />
+          <Route path="/medicine" element={<Meds2 />} />
+          <Route path="/medicine/:medicineId" element={<Meds2 />} />
+          <Route path="/checkoutMed" element={<CheckoutMed />} />
+          <Route path="/cancel" element={<Cancel />} />
+          <Route path="/paymentPharm" element={<PaymentPagePharm />} />
+          <Route path="/viewReqPharmcDoc" element={<ViewReqPharmDoc />} />
+          <Route path="/cart" element={<CartScreen />} />
+          <Route path="/pharmacistScreen" element={<PharmacistScreen />} />
+
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
