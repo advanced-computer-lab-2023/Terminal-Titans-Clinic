@@ -3,8 +3,19 @@ import Logo from "./Logo";
 import { uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
+import { io } from 'socket.io-client';
+import { useNavigate, createSearchParams } from "react-router-dom";
+import Peer from "simple-peer"
+import chat from '../Styles/Chat.css';
+
 
 export default function Chat() {
+    const [receivingCall, setReceivingCall] = useState(false)
+    const [caller, setCaller] = useState("")
+    const [callerSignal, setCallerSignal] = useState()
+    const [name, setName] = useState("")
+
+
     const [ws, setWs] = useState(null);
     const [onlinePeople, setOnlinePeople] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
@@ -14,8 +25,21 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [offlinePeople, setOfflinePeople] = useState({});
     const divUnderMessages = useRef();
+    const navigate = useNavigate();
+
     useEffect(() => {
         connectToWs()
+        const socket = io('http://localhost:8000', {
+            auth: {
+                Authorization: "Bearer " + sessionStorage.getItem('token')
+            }
+        });
+        socket.on("callUser", (data) => {
+            setReceivingCall(true)
+            setCaller(data.from)
+            setName(data.name)
+            setCallerSignal(data.signal)
+        })
     }, []);
 
     function connectToWs() {
@@ -41,19 +65,31 @@ export default function Chat() {
     }, [messages]);
 
     async function showOnlinePeople(peopleArray) {
-        await axios.get('http://localhost:8000/security/profile', {
+        await axios.get('http://localhost:8000/people', {
             headers: {
                 'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             }
         }).then(response => {
-            setId(response.data.Result._id);
-            setUsername(response.data.Result.Username);
-            let people = {};
-            peopleArray.forEach(({ userId, username }) => {
-                if (userId !== response.data.Result._id && userId)
-                    people[userId] = username;
+            setId(response.data.myUser._id);
+            setUsername(response.data.myUser.Username);
+            let onlinePeople = {};
+
+            for (let i = 0; i < response.data.Result.length; i++) {
+                for (let j = 0; j < peopleArray.length; j++) {
+                    if (response.data.Result[i]._id == peopleArray[j].userId) {
+                        onlinePeople[response.data.Result[i]._id] = response.data.Result[i].Username;
+                    }
+                }
+            }
+            const offlinePeopleArr = response.data.Result
+                .filter(p => p._id != id)
+                .filter(p => !Object.keys(onlinePeople).includes(p._id));
+            const offlinePeople = {};
+            offlinePeopleArr.forEach(p => {
+                offlinePeople[p._id] = p;
             });
-            setOnlinePeople(people);
+            setOfflinePeople(offlinePeople);
+            setOnlinePeople(onlinePeople);
         });
     }
 
@@ -98,37 +134,56 @@ export default function Chat() {
     function handleMessage(ev) {
         const messageData = JSON.parse(ev.data);
         if ('online' in messageData) {
-            console.log(messageData.online);
             showOnlinePeople(messageData.online);
         } else if ('text' in messageData) {
             console.log(messageData.sender.toString() == selectedUserId);
             // if (messageData.sender.toString() == selectedUserId) {
-                setMessages(prev => ([...prev, { ...messageData }]));
+            setMessages(prev => ([...prev, { ...messageData }]));
             // }
         }
     }
-
-    useEffect(() => {
-        axios.get('http://localhost:8000/people', {
-            headers: {
-                Authorization: 'Bearer ' + sessionStorage.getItem('token')
-            }
-        }).then(res => {
-            const offlinePeopleArr = res.data
-                .filter(p => p._id !== id)
-                .filter(p => !Object.keys(onlinePeople).includes(p._id));
-            const offlinePeople = {};
-            offlinePeopleArr.forEach(p => {
-                offlinePeople[p._id] = p;
-            });
-            setOfflinePeople(offlinePeople);
-        });
-    }, [onlinePeople]);
 
     // const onlinePeopleExclOurUser = { ...onlinePeople }
     // delete onlinePeopleExclOurUser[id];
 
     const messagesWithoutDupes = uniqBy(messages, '_id');
+
+    const answerCall = () => {
+        navigate({
+            pathname: "/meeting",
+            search: createSearchParams({
+                video: true,
+                recipient: selectedUserId,
+                answerCall: true,
+            }).toString()
+        });
+    }
+
+    function startCall() {
+        // ws.send(JSON.stringify({
+        //     call: true,
+        //     recipient: selectedUserId,
+        // }));
+        navigate({
+            pathname: "/meeting",
+            search: createSearchParams({
+                video: false,
+                recipient: selectedUserId,
+                answerCall: false,
+            }).toString()
+        });
+    }
+
+    function startVideoCall() {
+        navigate({
+            pathname: "/meeting",
+            search: createSearchParams({
+                video: true,
+                recipient: selectedUserId,
+                answerCall: false,
+            }).toString()
+        });
+    }
 
     return (
         <div className="flex h-screen">
@@ -141,7 +196,7 @@ export default function Chat() {
                             id={userId}
                             online={true}
                             username={onlinePeople[userId]}
-                            onClick={() => { setSelectedUserId(userId);}}
+                            onClick={() => { setSelectedUserId(userId); }}
                             selected={userId === selectedUserId} />
                     ))}
                     {Object.keys(offlinePeople).map(userId => (
@@ -155,7 +210,17 @@ export default function Chat() {
                     ))}
                 </div>
             </div>
-            <div className="flex flex-col bg-blue-50 w-2/3 p-2">
+            <div className="flex flex-col bg-blue-50 w-2/3 p-2 relative">
+                {!!selectedUserId && (
+                    <div className="callIcons">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" onClick={startCall}>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" onClick={startVideoCall}>
+                            <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                )}
                 <div className="flex-grow">
                     {!selectedUserId && (
                         <div className="flex h-full flex-grow items-center justify-center">
@@ -194,12 +259,6 @@ export default function Chat() {
                             onChange={ev => setNewMessageText(ev.target.value)}
                             placeholder="Type your message here"
                             className="bg-white flex-grow border rounded-sm p-2" />
-                        <label className="bg-blue-200 p-2 text-gray-600 cursor-pointer rounded-sm border border-blue-200">
-                            {/* <input type="file" className="hidden" onChange={sendFile} /> */}
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                <path fillRule="evenodd" d="M18.97 3.659a2.25 2.25 0 00-3.182 0l-10.94 10.94a3.75 3.75 0 105.304 5.303l7.693-7.693a.75.75 0 011.06 1.06l-7.693 7.693a5.25 5.25 0 11-7.424-7.424l10.939-10.94a3.75 3.75 0 115.303 5.304L9.097 18.835l-.008.008-.007.007-.002.002-.003.002A2.25 2.25 0 015.91 15.66l7.81-7.81a.75.75 0 011.061 1.06l-7.81 7.81a.75.75 0 001.054 1.068L18.97 6.84a2.25 2.25 0 000-3.182z" clipRule="evenodd" />
-                            </svg>
-                        </label>
                         <button type="submit" className="bg-blue-500 p-2 text-white rounded-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -207,6 +266,17 @@ export default function Chat() {
                         </button>
                     </form>
                 )}
+
+                <div>
+                    {receivingCall ? (
+                        <div className="caller">
+                            {/* <h1 >{name} is calling...</h1> */}
+                            <button variant="contained" color="primary" onClick={answerCall}>
+                                Answer
+                            </button>
+                        </div>
+                    ) : null}
+                </div>
             </div>
         </div>
     );
