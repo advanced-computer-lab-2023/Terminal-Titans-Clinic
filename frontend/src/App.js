@@ -14,6 +14,7 @@ import HealthPackages from "./Pages/HealthPackages";
 import ViewmyHealthRecords from "./components/viewHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
+import PatientHome from "./components/PatientHomePage";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
@@ -21,26 +22,12 @@ import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 import AdminPharmPage from "./Pages/AdminPharmPage";
-import PharmHomescreen from "./Pages/PharmHomePage";
-import OrderDetails from './Pages/OrderDetails.js';
-import OrderScreen from './Pages/OrderScreen.js';
-import Meds2 from './Pages/Meds';
-import CheckoutMed from './Pages/CheckoutMed';
-import Cancel from './Pages/Cancel';
-import PaymentPagePharm from './components/paymentMethodPharm';
-import ViewReqPharmDoc from './components/viewReqPharmDoc';
-import PharmacistScreen from './Pages/pharmacistScreen';
-import CartScreen from './Pages/cartScreen';
-import ViewMyPatientInfo from './Pages/viewMyPatientInfo';
-
-
 
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { useState } from 'react';
 import Room from './components/Room';
 import Chat from './components/Chat';
-import ViewMyPatientsList from "./Pages/viewMyPatientsList";
 
 function App() {
 
@@ -68,7 +55,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<Patient />} />
+          <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
@@ -82,19 +69,6 @@ function App() {
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
-          <Route path='viewMyPatients' element={<ViewMyPatientsList />} />
-          <Route path="/pharmHome" element={<PharmHomescreen />} />
-          <Route path="/orderDetails/:orderId" element={<OrderDetails />} />
-          <Route path="/orderDetails" element={<OrderScreen />} />
-          <Route path="/medicine" element={<Meds2 />} />
-          <Route path="/medicine/:medicineId" element={<Meds2 />} />
-          <Route path="/checkoutMed" element={<CheckoutMed />} />
-          <Route path="/cancel" element={<Cancel />} />
-          <Route path="/paymentPharm" element={<PaymentPagePharm />} />
-          <Route path="/viewReqPharmcDoc" element={<ViewReqPharmDoc />} />
-          <Route path="/cart" element={<CartScreen />} />
-          <Route path="/pharmacistScreen" element={<PharmacistScreen />} />
-          <Route path='/viewMyPatientInfo' element={<ViewMyPatientInfo />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
