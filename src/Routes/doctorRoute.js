@@ -782,6 +782,33 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
     }
 });
 
+router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
+    const doctor = await doctorModel.findById(req.user)
+    if (!doctor) {
+        return res.status(500).json({ message: "You are not a doctor", success: false })
+    }
+
+    const appId = req.params._id;
+    const newdate= req.body.Date ;
+    const aptmnt=await appointmentModel.find({DoctorId:req.user._id ,Date:newdate});
+
+console.log(aptmnt);
+   if(aptmnt && aptmnt.length>0){
+      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
+ }
+    await docAvailableSlots.deleteMany({ DoctorId: req.user._id, Date: newdate });
+
+console.log(appId);
+    const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
+        Status :"rescheduled"}},{ new: true });
+ 
+
+
+    return res.status(200).json({ Result: result, success: true });
+}
+
+)
+
 // requirement number 36
 router.get('/selectPatientName/:id', protect, async (req, res) => {
     try {

@@ -464,12 +464,14 @@ router.post('/bookAppointment', protect, async (req, res) => {
         const appId = req.params._id;
         const newdate= req.body.Date ;
         const appointment= await appointmentModel.findById(appId);
-        //add ba3d manzt el available slots
-        //const dId = appointment.DoctorId ;
-       // const availslot = await docAvailableSlots.findOne({ DoctorId: dId, Date: newdate });
-       // if (!availslot){
-       //     return (res.status(400).send({ error: "This slot is not available", success: false }));
-      //  }
+        const Did = appointment.DoctorId ;
+        const aptmnt=await appointmentModel.find({DoctorId:Did ,Date:newdate});
+
+        console.log(aptmnt);
+           if(aptmnt && aptmnt.length>0){
+              return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
+         }
+            await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
 console.log(appId);
         const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
             Status :"rescheduled"}},{ new: true });
