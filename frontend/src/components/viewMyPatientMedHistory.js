@@ -2,28 +2,22 @@
 import "../Styles/LoginForm.css";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Form from 'react-bootstrap/Form';
+
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader'
 import ListItemButton from '@mui/material/ListItemButton';
-import Button from 'react-bootstrap/Button';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-
 import { set } from "mongoose";
-function ViewMyPatientHealthRecords() {
+function ViewMyPatientMedHistory() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('Id');
     const [myPatient, setMyPatient] = useState({});
-    const [userHealthRecords, setUserHealthRecords] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [upload,setUpload]=useState(false)
-
-    
+    const [userHealthHistoryPDF, setUserHealthHistoryPDF] = useState([]);
+    const [userHealthHistoryIMG, setUserHealthHistoryIMG] = useState([]);
     const [curDoc, setCurDoc] = useState('');
 const getMyPatient=async()=>{
-    await axios.get(`http://localhost:8000/doctor/getPatientInfoAndHealth3/${userId}`, {
+    await axios.get(`http://localhost:8000/doctor/getPatientInfoAndHealth2/${userId}`, {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
         }
@@ -31,13 +25,16 @@ const getMyPatient=async()=>{
         (res) => {
             const data = res.data;
             
-            setUserHealthRecords(data.Result.healthDoc)
-            console.log(data.Result.healthDoc)
-            if(data.Result.healthDoc.length>0){
-                const src=`data:application/pdf;base64,${arrayBufferToBase64(data.Result.healthDoc[0].data)}`
+          setUserHealthHistoryPDF(data.Result.medicalHistoryPDF)
+            setUserHealthHistoryIMG(data.Result.medicalHistoryImage)
+            if(data.Result.medicalHistoryPDF.length>0){
+                const src=`data:${data.Result.medicalHistoryPDF[0].contentType};base64,${arrayBufferToBase64(data.Result.medicalHistoryPDF[0].data.data)}`
                 setCurDoc(src)
             }
-            
+            else if(data.Result.medicalHistoryImage.length>0){
+                const src=`data:${data.Result.medicalHistoryImage[0].contentType};base64,${arrayBufferToBase64(data.Result.medicalHistoryImage[0].data.data)}`
+                setCurDoc(src)
+            }
          
   
         }
@@ -54,57 +51,18 @@ function arrayBufferToBase64(buffer) {
   
     return btoa(binary);
   }
-  const handleFileChange = (e) => {
-    // Handle file selection
-    const file = e.target.files[0];
-    setSelectedFile(file);
-  };
-  const handleSubmit = async () => {
-    // handleAddClick();
-     const formData = new FormData();
-     // const pat=aptmnts.PatientId;
- 
-       formData.append('file', selectedFile);
-    
-     const response = await axios.post(
-       `http://localhost:8000/doctor/addrecord/${userId}`,
-       formData,
-       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-   ).then(() => {
-    setUpload('true');
-
-  }).catch((err) => alert(err.message));
-     // if (response.status === 200) {
-       // console.log(response.data);
-     // }
-   }
-  
 useEffect(()=>{
         getMyPatient();
-        setUpload(false)
-        setSelectedFile(null)
-    },[upload]
+    },[]
     )
    const showDoc = (item) => {
     console.log(item)
-      const src=`data:application/pdf;base64,${arrayBufferToBase64(item.data)}`
+      const src=`data:${item.contentType};base64,${arrayBufferToBase64(item.data.data)}`
     setCurDoc(src)
     }
     return (
-<div>
-<Form.Label>Upload Health Record</Form.Label>
-<Form.Group controlId="formFile" className="mb-3"style={{display:"flex"}}>
-        
-        <Form.Control type="file" style={{width:"80%" ,height:"10%"}}onChange={handleFileChange} />
-        <Button variant="primary" onClick={handleSubmit} style={{padding: "0px 20px;"}}> 
-        Upload < FileUploadIcon />
-      </Button>
-      </Form.Group>
-     
-     
 
 <div style={{ display: "flex"}}>
-
       <div style={{width:" 20%"}}>
       <List
         sx={{
@@ -120,7 +78,7 @@ useEffect(()=>{
        
           <li key={`d`}>
             <ul>
-              {userHealthRecords.map((item,index) => (
+              {userHealthHistoryPDF.map((item,index) => (
                 <ListItemButton component="a" href="#simple-list">
 
                         <ListItemText primary={'Document ' + (parseInt(index) + 1)} onClick={() => { showDoc(item) }} />
@@ -129,7 +87,15 @@ useEffect(()=>{
             
           
         ))}
-        
+         {userHealthHistoryIMG.map((item,index) => (
+                <ListItemButton component="a" href="#simple-list">
+
+                        <ListItemText primary={'Document ' + (parseInt(index) +userHealthHistoryPDF.length+1 )} onClick={() => { showDoc(item) }} />
+                       
+                    </ListItemButton>
+            
+          
+        ))}
         </ul>
         </li>
       </List>
@@ -142,8 +108,7 @@ useEffect(()=>{
       </div>
     </div>
     </div>
-    </div>
     );
 }
 
-export default ViewMyPatientHealthRecords;
+export default ViewMyPatientMedHistory;

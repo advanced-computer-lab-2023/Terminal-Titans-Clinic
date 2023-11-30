@@ -12,9 +12,9 @@ import ViewAppointments from "./Pages/ViewAppoitments";
 import SignIn from "./Pages/SignIn";
 import HealthPackages from "./Pages/HealthPackages";
 import ViewmyHealthRecords from "./components/viewHealthRecords";
-import ViewmyPatientsHealthRecords from "./components/viewMyPatientHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
+import PatientHome from "./components/PatientHomePage";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
@@ -26,6 +26,8 @@ import AdminPharmPage from "./Pages/AdminPharmPage";
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { useState } from 'react';
+import Room from './components/Room';
+import Chat from './components/Chat';
 
 function App() {
 
@@ -53,7 +55,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<Patient />} />
+          <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
@@ -62,12 +64,13 @@ function App() {
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
-          <Route path="/viewMyPatientHealthRecords" element={<ViewmyPatientsHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
-          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc/>} />
+          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
+          <Route path="/meeting" element={<Room />} />
+          <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
         </Routes>
       </Router>

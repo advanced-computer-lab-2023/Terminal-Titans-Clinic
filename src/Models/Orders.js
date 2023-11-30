@@ -15,6 +15,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  discount: {
+    type: Number,
+    default: 0
+
+  },
   address: {
     type: String,
     required: false

@@ -1,0 +1,46 @@
+.checkout {
+    text-align: center;
+    padding-left: 300;
+    padding-right: 300;
+    margin-left: 300;
+  }
+  
+  .timeline {
+    display: flex;
+    align-items: center; /* Vertically center the circles and lines */
+    justify-content: space-between;
+    margin: 20px;
+    
+  }
+  
+  .circle {
+    width: 20px;
+    height: 20px;
+    background-color: #000;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .line {
+    background-color: #000;
+    width: 560px; /* Width of the line */
+    height: 1px; /* Adjust the line thickness */
+    margin: 0 auto; /* Center the line horizontally */
+  }
+  
+  .active .line {
+    height: 3px; /* Adjust the line height when a circle is active */
+  }
+  
+  .content {
+    margin-top: 20px;
+  }
+  
+  .text {
+    font-weight: normal;
+  }
+  
+  .bold-text {
+    font-weight: bold;
+  }
+  
