@@ -9,6 +9,7 @@ import docAvailableSlots from '../Models/docAvailableSlotsModel.js';
 import { escape } from 'querystring';
 import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
+import prescriptionModel from '../Models/prescriptionsModel.js';
 
 import multer from 'multer';
 const storage = multer.memoryStorage();
@@ -152,6 +153,36 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
     }
 });
 
+//requirement 26
+//get all prescriptions of the logged in doctor
+router.get('/getPrescriptions',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptions=await prescriptionModel.find({DoctorId:req.user._id});
+        res.status(200).json({
+            success: true,
+            prescriptions: prescriptions
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+}); 
 
 
 // requirement number 33
@@ -679,7 +710,7 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
 //requirement 53
 //add/delete medicine to/from the prescription from the pharmacy platform
 
-router.post('addOrDeleteMedFromPresc',protect,async(req,res)=>{
+router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
     try{
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
@@ -727,7 +758,7 @@ router.post('addOrDeleteMedFromPresc',protect,async(req,res)=>{
 
 //requirement 54
 //add/update dosage for each medicine added to the prescription
-router.post('updateDosage',protect,async(req,res)=>{
+router.post('/updateDosage',protect,async(req,res)=>{
     try{
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
@@ -775,7 +806,7 @@ router.post('updateDosage',protect,async(req,res)=>{
 
 //requirement 63
 //add a patient's prescription
-router.post('addPrescription',protect,async(req,res)=>{
+router.post('/addPrescription',protect,async(req,res)=>{
     try{
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
