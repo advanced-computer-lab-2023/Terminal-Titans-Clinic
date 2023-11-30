@@ -455,13 +455,13 @@ router.post('/bookAppointment', protect, async (req, res) => {
 //reschedule an appointment req.47
 
 
-    router.post('/rescheduleAppointment', protect, async (req, res) => {
+    router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
         const exists = await patientModel.findOne(req.user);
         if (!exists) {
             return res.status(400).json({ message: "Patient not found", success: false })
         }
     
-        const appId = req.body._id;
+        const appId = req.params._id;
         const newdate= req.body.Date ;
         const appointment= await appointmentModel.findById(appId);
         //add ba3d manzt el available slots
@@ -471,15 +471,18 @@ router.post('/bookAppointment', protect, async (req, res) => {
        //     return (res.status(400).send({ error: "This slot is not available", success: false }));
       //  }
 console.log(appId);
-        const result = await appointmentModel.findByIdAndUpdate( appId , { Date : newdate },{
-            Status :"rescheduled"});
+        const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
+            Status :"rescheduled"}},{ new: true });
      
- result.save();
+
        // await docAvailableSlots.deleteOne({ DoctorId: dId, Date: newdate });
         return res.status(200).json({ Result: result, success: true });
     }
 
 )
+
+
+
 
 
 router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req, res) => {
