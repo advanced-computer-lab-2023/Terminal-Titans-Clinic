@@ -22,6 +22,7 @@ import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 import AdminPharmPage from "./Pages/AdminPharmPage";
+import PharmacistScreen from "./Pages/pharmacistScreen";
 
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -57,6 +58,7 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/pharmacistHome" element={<PharmacistScreen/>}></Route>
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
           <Route path="/docViewAppointments" element={<DocViewAppointments />} />

@@ -56,6 +56,11 @@ export default function SignIn() {
                    else
                    window.location.pathname='/Health-Plus/EmploymentContract'
                 }
+                else if (response.data.Result.type === 'Pharmacist') {
+                 
+                   window.location.pathname= '/Health-Plus/pharmacistHome'
+  
+                }
                 else {
                     // go to patient page
                     window.location.pathname= '/Health-Plus/patientHome'
