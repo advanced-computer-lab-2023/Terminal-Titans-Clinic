@@ -18,6 +18,7 @@ import healthModel from '../Models/healthModel.js';
 import MedicineModel from '../Models/Medicine.js';
 import CartItem from '../Models/Cart.js';
 import Order from '../Models/Orders.js';
+import transactionsModel from '../Models/transactionsModel.js';
 import { Console } from 'console';
 
 import RegisteredFamilyMemberModel from '../Models/RegisteredFamilyMemberModel.js';
@@ -418,8 +419,21 @@ router.post('/bookAppointment', protect, async (req, res) => {
     }
     const dId = req.body.dId;
     const date = req.body.date;
+    const doc=await doctorModel.findById(dId);
     const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
+    let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+    const packId = myHealthStatus.packageId;
+    var discountP = 0;
+    if (packId) {
+        const allPackages = await healthPackageModel.find({ _id: packId });
+        if (allPackages.length > 0)
+            discountP = allPackages[0].doctorDiscountInPercentage;
+        else
+            return (res.status(400).send({ error: "cant find package", success: false }));
+    }
+    let discount = 100 - discountP;   
+    var price = (doc.HourlyRate * 1.1) * discount / 100;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: req.user._id, FamilyMemId: famId });
         if (!famMember) {
@@ -430,7 +444,8 @@ router.post('/bookAppointment', protect, async (req, res) => {
             FamilyMemId: famId,
             DoctorId: dId,
             Status: "upcoming",
-            Date: date
+            Date: date,
+            Price: price
         });
         newAppointment.save();
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
@@ -443,7 +458,8 @@ router.post('/bookAppointment', protect, async (req, res) => {
         PatientId: req.user._id,
         DoctorId: dId,
         Status: "upcoming",
-        Date: date
+        Date: date,
+        Price: price
     });
     newAppointment.save();
     await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
@@ -504,8 +520,13 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
             FamilyMemId: famId,
             DoctorId: dId,
             Status: "upcoming",
-            Date: date
+            Date: date,
+            Price: req.params.fees
         });
+        let price=req.params.fees;
+        addTransaction(-1*price,pId, 'Card', 'Book Appointment');
+        addTransaction(price/1.1, dId, 'Card', 'Book Appointment');
+
         newAppointment.save();
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
         return res.redirect('http://localhost:3000/Health-Plus/patientHome')
@@ -518,15 +539,18 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         PatientId: pId,
         DoctorId: dId,
         Status: "upcoming",
-        Date: date
+        Date: date,
+        Price: req.params.fees
     });
     let fees=req.params.fees;
     var doc=await doctorModel.findById(dId);
 
     newAppointment.save();
     if (dId) {
-        giveDoctorMoney(req, res, doc, fees);
+        giveDoctorMoney(req, res, doc, fees/1.1);
     }
+    addTransaction(price,pId, 'Card', 'Book Appointment');
+        addTransaction(price/1.1, dId, 'Card', 'Book Appointment');
     await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
     return res.redirect('http://localhost:3000/Health-Plus/patientHome')
 
@@ -879,7 +903,7 @@ router.post('/subscribeHealthPackage', protect, async (req, res) => {
         return res.status(500).json({ error: 'Error' });
     }
 });
-router.get('/subscribeHealthPackageCard/:pid/:packageId', async (req, res) => {
+router.get('/subscribeHealthPackageCard/:pid/:packageId/:fees', async (req, res) => {
     const userId = req.params.pid;
     const healthPackageId = req.params.packageId;
     try {
@@ -912,6 +936,8 @@ router.get('/subscribeHealthPackageCard/:pid/:packageId', async (req, res) => {
                 healthPackageId: healthPackage
             })
             await myHealthStatus.save();
+            addTransaction(-1*req.params.fees,userId, 'Card', 'Package Subscribition');
+
         }
 
         // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
@@ -973,6 +999,7 @@ router.post('/subscribeHealthPackageforFamily', protect, async (req, res) => {
                 healthPackageId: healthPackage
             })
             await myHealthStatus.save();
+
      //   }
 
         // const registeredFamilyMembers = await RegFamMem.find({ Patient2Id: userId });
@@ -1515,7 +1542,13 @@ const processWalletPayment = async (req, res, userId, fees, doctor) => {
     try {
         await patientModel.findByIdAndUpdate(userId, user);
         if (doctor) {
-            giveDoctorMoney(req, res, doctor, fees);
+            giveDoctorMoney(req, res, doctor, fees/1.1);
+            addTransaction(-1*fees,userId, 'wallet', 'Book Appointment');
+        addTransaction(fees/1.1, dId, 'wallet', 'Book Appointment');
+        }
+        else{
+            addTransaction(-1*fees,userId, 'wallet', 'Package subscription');
+
         }
 
         console.log('Wallet payment processed successfully');
@@ -1563,7 +1596,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
     if(req.body.familyMember){
         fam=true
     }
-    const fees = calculateFees(doctor.HourlyRate, discount);
+    const fees = calculateFees(doctor.HourlyRate*1.1, discount);
     try {
         if (paymentType === "wallet") {
             return await processWalletPayment(req, res, userId, fees, doctor);
@@ -1640,7 +1673,7 @@ const processSubCardPayment = async (req, res, fees, description, doctor, subscr
                 },
                 quantity: 1,
             }],
-            success_url: `http://localhost:8000/patient/subscribeHealthPackageCard/${pid}/${packageId}`,
+            success_url: `http://localhost:8000/patient/subscribeHealthPackageCard/${pid}/${packageId}/${fees}`,
 
             
             cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
@@ -2256,6 +2289,8 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
         status:'processing'
       });
       await newOrder.save();
+      addTransaction(-1*total,patientId, req.params.paymentMethod, 'Medicine Purchase');
+
     }
   
       // Clear the cart by removing all cart items
@@ -2594,7 +2629,7 @@ router.get('/viewPrescription/:prescriptionId', protect, async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     try {
-        const prescription = await prescriptionModel.findById(req.params.prescriptionId);
+        const prescription = await prescriptionsModel.findById(req.params.prescriptionId);
         if (!prescription) {
             return res.status(400).json({ message: "Prescription not found", success: false })
         }
@@ -2604,6 +2639,16 @@ router.get('/viewPrescription/:prescriptionId', protect, async (req, res) => {
         console.error('Error getting prescription', error.message);
     }
 });
+const addTransaction = (amount, userId, paymentMethod, description) => {
+    const newTransaction = new transactionsModel({
+        amount: amount,
+        userId: userId,
+        paymentMethod: paymentMethod,
+        description: description
+    });
+    newTransaction.save();
+}
+   
 
 
 export default router;

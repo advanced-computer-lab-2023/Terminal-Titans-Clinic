@@ -10,6 +10,7 @@ import { escape } from 'querystring';
 import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import prescriptionModel from '../Models/prescriptionsModel.js';
+import transactionsModel from '../Models/transactionsModel.js';
 
 import multer from 'multer';
 const storage = multer.memoryStorage();
@@ -37,7 +38,7 @@ router.get('/getCurrentDoctor', protect, async (req, res) => {
 })
 
 // requirement number 14 later
-router.get('/updateDoctor', protect, async (req, res) => {
+router.put('/updateDoctor', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findById(req.user)
         if (!doctor) {
@@ -49,9 +50,9 @@ router.get('/updateDoctor', protect, async (req, res) => {
             }}
         const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: req.user._id },
             {
-                Email: req.query.Email || doctor.Email,
-                HourlyRate: req.query.HourlyRate || doctor.HourlyRate,
-                Affiliation: req.query.Affiliation || doctor.Affiliation
+                Email: req.body.Email || doctor.Email,
+                HourlyRate: req.body.HourlyRate || doctor.HourlyRate,
+                Affiliation: req.body.Affiliation || doctor.Affiliation
             });
         if (!updatedDoctor || updatedDoctor.length == 0) {
             res.status(400).json({ message: "Doctor not found", success: false })
@@ -1188,6 +1189,37 @@ router.post('updatePrescription',protect,async(req,res)=>{
     }
 
 })
+router.get('/getTransactionHistory',protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        console.log(exists.Wallet)
+        const transactions=await transactionsModel.find({userId:req.user._id});
+        res.status(200).json({
+            success: true,
+            transactions:transactions,
+            wallet:exists.Wallet
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+});
+
 
 
 

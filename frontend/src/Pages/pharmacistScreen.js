@@ -1,17 +1,17 @@
 
 import Button from 'react-bootstrap/Button';
-import Nav from "../components/Navbar-Pharmacist"
+// import Nav from "../components/Navbar-Pharmacist"
 import Tess from "../components/Addmed"
 import Body from '../components/PharmScreenBody';
 
-function pharmacistScreen() {
+function PharmacistScreen() {
     return (
     <div>
-       <Nav/>
+       {/* <Nav/> */}
        <Body/>
         <Tess/>
     </div>   
         
     )
 }
-export default pharmacistScreen;
+export default PharmacistScreen;

@@ -23,6 +23,11 @@ import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
 import AdminPharmPage from "./Pages/AdminPharmPage";
 import PharmacistScreen from "./Pages/pharmacistScreen";
+import PatientList from "./Pages/viewMyPatientsList";
+import ViewPatInfo from "./Pages/viewMyPatientInfo";
+import ViewDocProfile from "./Pages/DocProfilePage";
+
+
 
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -58,7 +63,7 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
-          <Route path="/pharmacistHome" element={<PharmacistScreen/>}></Route>
+          <Route path="/pharmacistHome" element={<PharmacistScreen/>}/>
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
           <Route path="/docViewAppointments" element={<DocViewAppointments />} />
@@ -71,9 +76,13 @@ function App() {
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
+          <Route path="/viewMyPatientsList" element={<PatientList />} />
+          <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />
+          <Route path="/viewDocProfile" element={<ViewDocProfile />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
+
         </Routes>
       </Router>
     </div>

@@ -2,8 +2,9 @@ import * as React from 'react'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import 'typeface-roboto';
 // import 'typeface-roboto';
-import './PharmScreenBody.css'
+import '../Styles/PharmScreenBody.css'
 
 
 export default function Body(){
