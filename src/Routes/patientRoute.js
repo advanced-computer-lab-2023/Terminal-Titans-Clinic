@@ -419,10 +419,10 @@ router.post('/bookAppointment', protect, async (req, res) => {
     }
     const dId = req.body.dId;
     const date = req.body.date;
-    const doc=await doctorModel.findById(dId);
+const doc=await doctorModel.findById(dId);
     const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
-    let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
     const packId = myHealthStatus.packageId;
     var discountP = 0;
     if (packId) {
@@ -499,6 +499,54 @@ console.log(appId);
 
 )
 
+//req 49 cancel appointment
+router.put('/cancelAppointment/:_id', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+
+    const Pid = patient._id
+    const appId = req.params._id;
+    const appointment= await appointmentModel.findByIdAndUpdate( appId ,  { $set:{  Status :"cancelled"}},{ new: true });
+   
+
+    if (!appointment) {
+        
+        return res.status(404).json({ message: "Appointment not found", success: false });
+    }
+
+
+    const Did = appointment.DoctorId;
+    const doc =await doctorModel.findById(Did);
+
+    const date= appointment.Date;
+    const maxdate = date.setHours(date.getHours() - 24);
+    const currdate = new Date();
+    if(currdate<maxdate){
+
+        giveDoctorMoney(req, res, doc, appointment.Price/1.1);
+
+ 
+
+        patient.Wallet = patient.Wallet + appointment.Price ;
+        try {
+            await patientModel.findByIdAndUpdate(Pid, patient);
+            console.log('you have recieved your refund successfully');
+            
+        } catch (e) {
+            console.error('Error recieving your refund:', e.message);
+            return res.status(400).send({ error: e.message });
+        }
+
+            }
+       
+
+            return res.status(200).json({appointment, message: "appointment is cancelled successfully", success: true });
+
+
+
+});
 
 
 
@@ -523,7 +571,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
             Date: date,
             Price: req.params.fees
         });
-        let price=req.params.fees;
+let price=req.params.fees;
         addTransaction(-1*price,pId, 'Card', 'Book Appointment');
         addTransaction(price/1.1, dId, 'Card', 'Book Appointment');
 
@@ -549,7 +597,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
     if (dId) {
         giveDoctorMoney(req, res, doc, fees/1.1);
     }
-    addTransaction(price,pId, 'Card', 'Book Appointment');
+addTransaction(price,pId, 'Card', 'Book Appointment');
         addTransaction(price/1.1, dId, 'Card', 'Book Appointment');
     await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
     return res.redirect('http://localhost:3000/Health-Plus/patientHome')
@@ -936,7 +984,7 @@ router.get('/subscribeHealthPackageCard/:pid/:packageId/:fees', async (req, res)
                 healthPackageId: healthPackage
             })
             await myHealthStatus.save();
-            addTransaction(-1*req.params.fees,userId, 'Card', 'Package Subscribition');
+addTransaction(-1*req.params.fees,userId, 'Card', 'Package Subscribition');
 
         }
 
@@ -2289,7 +2337,7 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
         status:'processing'
       });
       await newOrder.save();
-      addTransaction(-1*total,patientId, req.params.paymentMethod, 'Medicine Purchase');
+addTransaction(-1*total,patientId, req.params.paymentMethod, 'Medicine Purchase');
 
     }
   
