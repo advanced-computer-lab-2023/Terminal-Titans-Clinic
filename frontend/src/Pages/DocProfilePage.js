@@ -15,8 +15,7 @@ import PaidIcon from '@mui/icons-material/Paid';
 import ViewDocProfile from '../components/DocProfileInfoComponent';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ViewDocTransactions from '../components/DocTransactions';
-import AppBar from '@mui/material/AppBar';
-import Typography from '@mui/material/Typography';
+
 
 const drawerWidth = 260;
 

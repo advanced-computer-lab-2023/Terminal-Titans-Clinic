@@ -6,29 +6,96 @@ import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory';
 import ViewMyPatientHealthRec from '../components/viewMyPatientHealthRecords';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Toolbar from '@mui/material/Toolbar';
+import profileImage from "../Assets/profile.png";
 
+
+const drawerWidth = 260;
 
 function ViewPatInfo() {
+    const [show, setShow] = useState(0);
 
+
+
+    const drawer = (
+      <div>
+        <Toolbar />
+        
+        <List>
+        <ListItem key='photo' disablePadding>
+              
+               
+              <div style={{ textAlign: "center" , paddingLeft:'25px'}}>
+                          <img src={profileImage} width='200'   alt="Image description" />
+                      </div>
+              
+            </ListItem>
+            <br></br>
+            <Divider />
+          
+  
+            <ListItem key='profile' disablePadding>
+              <ListItemButton  onClick={() => setShow(0)}>
+                
+                <ListItemText primary='Patient Profile' />
+              </ListItemButton>
+            </ListItem>
+  
+            <ListItem key='medHistory' disablePadding>
+              <ListItemButton   onClick={() => setShow(1)}>
+               
+                <ListItemText primary='Medical History' />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key='healthRec' disablePadding>
+              <ListItemButton   onClick={() => setShow(2)}>
+                
+                <ListItemText primary='Health Records' />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key='prescriptions' disablePadding>
+              <ListItemButton   onClick={() => setShow(2)}>
+                
+                <ListItemText primary='Prescriptions' />
+              </ListItemButton>
+            </ListItem>
+         
+        </List>
+        <Divider />
+        
+      </div>
+    );
     return (
-        <Tabs
-            defaultActiveKey="basicInfo"
-            id="uncontrolled-tab-example"
-            className="mb-3 d-flex justify-content-center"
-            transition={true}
+        <Box sx={{ display: 'flex'}}>
+             <Box
+        position="fixed"
+        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
+      >
+       
+         {show==0? <ViewMyPatientBasicInfo/>:show==1?<ViewMyPatientMedHistory/>:<ViewMyPatientHealthRec/>}
+      </Box>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
         >
-            <Tab eventKey="basicInfo" title="Basic Info">
-                <ViewMyPatientBasicInfo />
-            </Tab>
-            <Tab eventKey="medicalHistory" title="Medical History">
-                <ViewMyPatientMedHistory/>
-            </Tab>
-            <Tab eventKey="healthRec" title="Health Records">
-                <ViewMyPatientHealthRec/>
-            </Tab>
-            <Tab eventKey="prescriptions" title="Prescriptions">
-            </Tab>
-        </Tabs>
+          {drawer}
+        </Drawer>
+        
+    </Box>
+       
+        
     );
 }
 

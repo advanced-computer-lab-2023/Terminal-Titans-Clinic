@@ -65,10 +65,10 @@ const getPatientName= async () => {
     value={name}
     onChange={(e) => setName(e.target.value)}/>
    
-    <Button variant="primary"  onClick={(event) => { getPatientName() }} size="sm">Search</Button>
+    <Button variant="dark"  onClick={(event) => { getPatientName() }} size="sm">Search</Button>
     
     <FormControlLabel
-        control={<Checkbox checked={checked} onChange={handleChange}/>} 
+        control={<Checkbox checked={checked} onChange={handleChange} />} 
         label="Upcoming"
         sx={{ marginLeft: 100 }}
     />
@@ -97,7 +97,11 @@ const getPatientName= async () => {
                             <td>{patient.Mobile}</td>
                             <td>{patient.Email}</td>
                             <td>{patient.DateOfBirth?.substring(0,10)}</td>
-                            <td><button type="button" className="btn btn-primary"   sx={{ padding: 10 } } size="sm" onClick={() => window.location.href=`/Health-Plus/viewMyPatientInfo?Id=${patient.id}` }>view</button></td>
+                            <td>
+                            <Button variant="dark" style={{ width: '45%' }} onClick={() => window.location.href=`/Health-Plus/viewMyPatientInfo?Id=${patient.id}`} >
+                                View
+                              </Button>
+                              </td>
                               </React.Fragment>
                     </tr>
                 ))}

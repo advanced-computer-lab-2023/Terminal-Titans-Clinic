@@ -62,7 +62,7 @@ useEffect(()=>{
     return (
         <div>
             <div id="login-form"  style={{ width: "600px " }}>
-                <form style={{paddingTop:'0px', marginTop:'-30px'}}>
+                <form style={{paddingTop:'0px'}}>
                     
                     <div className="form-group">
                        {!edit? 

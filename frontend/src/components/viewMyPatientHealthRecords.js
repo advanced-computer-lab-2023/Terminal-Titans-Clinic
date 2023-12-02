@@ -106,9 +106,10 @@ useEffect(()=>{
 <Form.Group controlId="formFile" className="mb-3"style={{display:"flex"}}>
         
         <Form.Control type="file" style={{width:"80%" ,height:"10%"}}onChange={handleFileChange} />
-        <Button variant="primary" onClick={handleSubmit} style={{padding: "0px 20px;"}}> 
+        <Button variant="outline-dark" onClick={handleSubmit} style={{padding: "0px 20px;"}}> 
         Upload < FileUploadIcon />
       </Button>
+      
       </Form.Group>
      
      
@@ -116,17 +117,7 @@ useEffect(()=>{
 <div style={{ display: "flex"}}>
 
     
-      <div style={{width: "80%"}}>
-        <div style={{ marginLeft: '100px'}}>
-      <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthRecords.length} page={index+1} onChange={handleChange} />
-      <Typography>Showing: Document {index+1}</Typography>
-
-      <div >
-      <iframe src={curDoc}  width="800" height="600"></iframe>
-   </div>
-      </div>
-    
-    </div>
+      
     <div style={{width:" 20%"}}>
       <List
         sx={{
@@ -156,6 +147,17 @@ useEffect(()=>{
         </li>
       </List>
       </div>
+      <div style={{width: "80%"}}>
+        <div style={{ }}>
+      <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthRecords.length} page={index+1} onChange={handleChange} />
+      <Typography>Showing: Document {index+1}</Typography>
+
+      <div >
+      <iframe src={curDoc}  width="800" height="600"></iframe>
+   </div>
+      </div>
+    
+    </div>
     </div>
     </div>
     );
