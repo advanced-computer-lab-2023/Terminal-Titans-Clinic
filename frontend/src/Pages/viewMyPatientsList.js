@@ -96,7 +96,7 @@ const getPatientName= async () => {
                             <td>{patient.Gender}</td>
                             <td>{patient.Mobile}</td>
                             <td>{patient.Email}</td>
-                            <td>{patient.DateOfBirth}</td>
+                            <td>{patient.DateOfBirth?.substring(0,10)}</td>
                             <td><button type="button" className="btn btn-primary"   sx={{ padding: 10 } } size="sm" onClick={() => window.location.href=`/Health-Plus/viewMyPatientInfo?Id=${patient.id}` }>view</button></td>
                               </React.Fragment>
                     </tr>

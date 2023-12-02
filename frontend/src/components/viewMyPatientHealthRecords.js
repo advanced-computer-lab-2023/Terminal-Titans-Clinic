@@ -10,6 +10,9 @@ import ListSubheader from '@mui/material/ListSubheader'
 import ListItemButton from '@mui/material/ListItemButton';
 import Button from 'react-bootstrap/Button';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import Typography from '@mui/material/Typography';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
 import { set } from "mongoose";
 function ViewMyPatientHealthRecords() {
@@ -19,7 +22,7 @@ function ViewMyPatientHealthRecords() {
     const [userHealthRecords, setUserHealthRecords] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const [upload,setUpload]=useState(false)
-
+  const [index, setIndex] = useState(0);
     
     const [curDoc, setCurDoc] = useState('');
 const getMyPatient=async()=>{
@@ -85,11 +88,18 @@ useEffect(()=>{
         setSelectedFile(null)
     },[upload]
     )
-   const showDoc = (item) => {
+   const showDoc = (item,index) => {
+    setIndex(index)
     console.log(item)
       const src=`data:application/pdf;base64,${arrayBufferToBase64(item.data)}`
     setCurDoc(src)
     }
+    const handleChange = (event, value) => {
+      setIndex(index)
+
+      showDoc(userHealthRecords[value-1],value-1)
+
+    };
     return (
 <div>
 <Form.Label>Upload Health Record</Form.Label>
@@ -105,7 +115,19 @@ useEffect(()=>{
 
 <div style={{ display: "flex"}}>
 
-      <div style={{width:" 20%"}}>
+    
+      <div style={{width: "80%"}}>
+        <div style={{ marginLeft: '100px'}}>
+      <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthRecords.length} page={index+1} onChange={handleChange} />
+      <Typography>Showing: Document {index+1}</Typography>
+
+      <div >
+      <iframe src={curDoc}  width="800" height="600"></iframe>
+   </div>
+      </div>
+    
+    </div>
+    <div style={{width:" 20%"}}>
       <List
         sx={{
           width: '100%',
@@ -118,12 +140,12 @@ useEffect(()=>{
         subheader={<li />}
       >
        
-          <li key={`d`}>
+          <li key={`d`} style={{marginTop:"5%"}}>
             <ul>
               {userHealthRecords.map((item,index) => (
                 <ListItemButton component="a" href="#simple-list">
 
-                        <ListItemText primary={'Document ' + (parseInt(index) + 1)} onClick={() => { showDoc(item) }} />
+                        <ListItemText primary={'Document ' + (parseInt(index) + 1)} onClick={() => { showDoc(item,index) }} />
                        
                     </ListItemButton>
             
@@ -134,13 +156,6 @@ useEffect(()=>{
         </li>
       </List>
       </div>
-      <div style={{width: "80%"}}>
-     
-      <div >
-      <iframe src={curDoc}  width="800" height="600"></iframe>
-   
-      </div>
-    </div>
     </div>
     </div>
     );

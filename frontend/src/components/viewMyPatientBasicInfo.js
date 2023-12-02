@@ -42,7 +42,7 @@ useEffect(()=>{
                         <input type="text" id="name"  style={{width: "50%", border:"0px"}} value={myPatient.Name} readOnly />
 
                         <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px"}} value='Date of birth' readOnly />
-                        <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px"}} value={myPatient.DateOfBirth} readOnly />
+                        <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px"}} value={myPatient.DateOfBirth?.substring(0,10)} readOnly />
 
                         <input type="text" id="Email"  style={{width: "50%", border:"0px"}} value='Email' readOnly />
                         <input type="text" id="Email"  style={{width: "50%", border:"0px"}} value={myPatient.Email} readOnly />
