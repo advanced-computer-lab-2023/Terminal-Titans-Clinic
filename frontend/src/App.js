@@ -26,7 +26,7 @@ import PharmacistScreen from "./Pages/pharmacistScreen";
 import PatientList from "./Pages/viewMyPatientsList";
 import ViewPatInfo from "./Pages/viewMyPatientInfo";
 import ViewDocProfile from "./Pages/DocProfilePage";
-import ViewMyProfile from "./components/ViewMyProfile";
+import ViewMyProfile from "./Pages/viewMyProfile";
 
 
 

@@ -2,6 +2,7 @@ import ViewMyProfile from '../components/ViewMyProfile';
 import React, { useState, useEffect } from 'react';
 import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory';
 import ViewMyPatientHealthRec from '../components/viewMyPatientHealthRecords';
+import ChangePasswordForm from '../components/ChangePasswordForm';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -36,22 +37,28 @@ function ViewMyInfo() {
               </ListItemButton>
             </ListItem>
   
-            <ListItem key='medHistory' disablePadding>
+            <ListItem key='healthRec' disablePadding>
               <ListItemButton   onClick={() => setShow(1)}>
                
-                <ListItemText primary='Medical History' />
-              </ListItemButton>
-            </ListItem>
-            <ListItem key='healthRec' disablePadding>
-              <ListItemButton   onClick={() => setShow(2)}>
-                
                 <ListItemText primary='Health Records' />
               </ListItemButton>
             </ListItem>
-            <ListItem key='prescriptions' disablePadding>
+            <ListItem key='medhistory' disablePadding>
               <ListItemButton   onClick={() => setShow(2)}>
                 
-                <ListItemText primary='Prescriptions' />
+                <ListItemText primary='Medical History' />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key='changepass' disablePadding>
+              <ListItemButton   onClick={() => setShow(3)}>
+                
+                <ListItemText primary='Change Password' />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key='FamilyMembersInfo' disablePadding>
+              <ListItemButton   onClick={() => setShow(4)}>
+                
+                <ListItemText primary='FamilyMembers Information' />
               </ListItemButton>
             </ListItem>
          
@@ -67,7 +74,7 @@ function ViewMyInfo() {
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
       >
        
-         {show==0? <ViewMyProfile/>:show==1?<ViewMyPatientMedHistory/>:<ViewMyPatientHealthRec/>}
+         {show==0? <ViewMyProfile/>:show==1?<ViewMyPatientMedHistory/>:show==2?<ViewMyPatientHealthRec/>:show==3?<ChangePasswordForm/>:<ViewMyProfile/>}
       </Box>
         <Drawer
           variant="permanent"
