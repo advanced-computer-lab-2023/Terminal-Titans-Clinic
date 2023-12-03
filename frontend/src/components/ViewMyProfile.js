@@ -1,25 +1,20 @@
-// import React from "react";
 import "../Styles/LoginForm.css";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import profileImage from "../Assets/profile.png";
-function ViewMyPatientBasicInfo() {
+function ViewMyProfile() {
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('Id');
+    const userId = params.get('id');
     const [myPatient, setMyPatient] = useState({});
 
 const getMyPatient=async()=>{
-    await axios.get(`http://localhost:8000/doctor/getPatientInfoAndHealth/${userId}`, {
+    await axios.get('http://localhost:8000/patient/ViewMyProfile', {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
         }
       }).then(
         (res) => {
           const patInfoData = res.data
-          console.log(patInfoData)
-         setMyPatient(patInfoData.Result.patient)
-         
-  
+         setMyPatient(patInfoData.Result)
         }
       );
 }
@@ -54,14 +49,15 @@ useEffect(()=>{
                         <input type="text" id="EmergencyMobile"  style={{width: "50%", border:"0px", padding:'8px'}} value={myPatient.EmergencyMobile} readOnly />
                         <input type="text" id="EmergencyContactRelationToThePatient"  style={{width: "50%", border:"0px", padding:'8px'}} value='Relation' readOnly />
                         <input type="text" id="EmergencyContactRelationToThePatient"  style={{width: "50%", border:"0px", padding:'8px'}} value={myPatient.EmergencyContactRelationToThePatient} readOnly />
-                 
-                 
-                    </div>
+                        <input type="text" id="Wallet"  style={{width: "50%", border:"0px", padding:'8px'}} value='Wallet' readOnly />
+                        <input type="text" id="Wallet"  style={{width: "50%", border:"0px", padding:'8px'}} value={myPatient.Wallet} readOnly />
+                        
 
+                                 
+                    </div>
                 </form>
             </div>
         </div>
     );
 }
-
-export default ViewMyPatientBasicInfo;
+export default ViewMyProfile;

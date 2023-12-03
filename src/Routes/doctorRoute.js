@@ -919,6 +919,8 @@ router.post('/getAppointment', protect, async (req, res) => {
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
+    console.log(req.body.startDate)
+    console.log(req.body.endDate)
     
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');

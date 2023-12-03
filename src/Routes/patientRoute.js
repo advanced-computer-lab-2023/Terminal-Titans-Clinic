@@ -19,6 +19,7 @@ import MedicineModel from '../Models/Medicine.js';
 import CartItem from '../Models/Cart.js';
 import Order from '../Models/Orders.js';
 import transactionsModel from '../Models/transactionsModel.js';
+import nodemailer from 'nodemailer';
 import { Console } from 'console';
 
 import RegisteredFamilyMemberModel from '../Models/RegisteredFamilyMemberModel.js';
@@ -43,6 +44,32 @@ router.get('/getCurrentPatient', protect, async (req, res) => {
     else
         res.status(200).json({ Result: patient, success: true })
 })
+
+const mailSender = async (email, title, body) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            }
+        });
+        // Send emails to users
+        let info = await transporter.sendMail({
+            from: 'Terminal Titans',
+            to: email,
+            subject: title,
+            html: body,
+        });
+        console.log("Email info: ", info);
+        return info;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', protect, async (req, res) => {
@@ -199,6 +226,17 @@ router.get('/viewFamMem', protect, async (req, res) => {
     res.status(200).json({ Result: famMembers, success: true });
 
 })
+router.get('/ViewMyProfile', protect, async (req, res) => {
+    const patient = await patientModel.findById(req.user);
+    if (!patient) {
+        res.status(400).json({ message: "Patient not found", success: false })
+    }
+    else
+
+        res.status(200).json({ Result: patient, success: true })
+})
+
+
 
 // requirement number 23
 router.post('/getAppointment', protect, async (req, res) => {
@@ -422,7 +460,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
 const doc=await doctorModel.findById(dId);
     const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
     const famId = req.body.famId;
-let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,status: 'Subscribed'}) ;
+let myHealthStatus =await healthPackageStatus.findOne({patientId:exists._id,status: 'Subscribed'}) ;
     const packId = myHealthStatus.packageId;
     var discountP = 0;
     if (packId) {
@@ -463,7 +501,27 @@ let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,stat
     });
     newAppointment.save();
     await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
-    res.status(200).json({ Result: newAppointment, success: true });
+
+    try {
+        const mailResponse = await mailSender(
+            exists.Email,
+            "Booked:appointment",
+            `<p>It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${newAppointment.Date}<p>`
+            
+        );
+        if (mailResponse) {
+            console.log("Email sent successfully: ", mailResponse);
+            res.status(200).json({ message: 'Email sent', success: true })
+        }
+        else {
+            res.status(400).json({ message: 'Error sending email', success: false });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error sending email', success: false })
+    }
+
+
+    return res.status(200).json({ Result: newAppointment, success: true });
 
 
 })
@@ -481,6 +539,7 @@ let myHealthStatus =await healthPackageStatus.findOne({patientId:currPat.id,stat
         const newdate= req.body.Date ;
         const appointment= await appointmentModel.findById(appId);
         const Did = appointment.DoctorId ;
+        const doc = await doctorModel.findById(Did);
         const aptmnt=await appointmentModel.find({DoctorId:Did ,Date:newdate});
 
         console.log(aptmnt);
@@ -492,8 +551,25 @@ console.log(appId);
         const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
             Status :"rescheduled"}},{ new: true });
      
-
-       // await docAvailableSlots.deleteOne({ DoctorId: dId, Date: newdate });
+            try {
+                const mailResponse = await mailSender(
+                    exists.Email,
+                    "rescheduled:appointment",
+                    `<p>It is confirmed. You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}<p>`
+                    
+                );
+                if (mailResponse) {
+                    console.log("Email sent successfully: ", mailResponse);
+                    res.status(200).json({ message: 'Email sent', success: true })
+                }
+                else {
+                    res.status(400).json({ message: 'Error sending email', success: false });
+                }
+            } catch (error) {
+                res.status(500).json({ message: 'Error sending email', success: false })
+            }
+        
+      
         return res.status(200).json({ Result: result, success: true });
     }
 

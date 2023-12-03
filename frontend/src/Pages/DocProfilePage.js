@@ -16,6 +16,7 @@ import ViewDocProfile from '../components/DocProfileInfoComponent';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ViewDocTransactions from '../components/DocTransactions';
 
+
 const drawerWidth = 260;
 
 function ResponsiveDrawer(props) {
@@ -76,7 +77,13 @@ const [show, setShow] = useState(0);
 
   return (
     <Box sx={{ display: 'flex'}}>
-             
+             <Box
+        position="fixed"
+        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
+      >
+       
+         {show==0? <ViewDocProfile/>:show==1?<ChangePasswordForm/>:<ViewDocTransactions/>}
+      </Box>
         <Drawer
           variant="permanent"
           sx={{
@@ -87,9 +94,7 @@ const [show, setShow] = useState(0);
         >
           {drawer}
         </Drawer>
-        <div security='true' style={{width:'100%',height:'100%',paddingLeft:'200px',paddingTop:'0px'}}>
-     {show==0? <ViewDocProfile/>:show==1?<ChangePasswordForm/>:<ViewDocTransactions/>}
-        </div>
+        
     </Box>
   );
 }

@@ -46,6 +46,19 @@ const tiers = [
     buttonVariant: 'contained',
   },
 ];
+function getLinkForTier(title) {
+  switch (title) {
+    case 'Prescriptions':
+      return '/Health-Plus/prescriptions';
+    case 'HealthPackages':
+      return '/Health-Plus/healthPackages';
+    case 'Appointments':
+      return '/Health-Plus/bookAppointments';
+    default:
+      return '/';
+  }
+}
+
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -77,10 +90,10 @@ export default function Pricing() {
             <Link
               variant="button"
               color="text.primary"
-              href="#"
+              href="/Health-Plus/viewMyProfile"
               sx={{ my: 1, mx: 1.5 }}
             >
-              FamilyMembers Information
+              Other Informations
             </Link>
             <Link
               variant="button"
@@ -117,65 +130,67 @@ export default function Pricing() {
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
         <Grid container spacing={5} alignItems="flex-end">
-          {tiers.map((tier) => (
-            // Enterprise card is full width at sm breakpoint
-            <Grid
-              item
-              key={tier.title}
-              xs={12}
-             // sm={tier.title === 'Enterprise' ? 12 : 6}
-              md={4}
-            >
-              <Card>
-                <CardHeader
-                  title={tier.title}
-                  subheader={tier.subheader}
-                  titleTypographyProps={{ align: 'center' }}
-                  //action={tier.title === 'Pro' ? <StarIcon /> : null}
-                  subheaderTypographyProps={{
-                    align: 'center',
-                  }}
-                  sx={{
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'light'
-                        ? theme.palette.grey[200] //color of the card
-                        : theme.palette.grey[700],
-                  }}
-                />
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'baseline',
-                      mb: 2,
-                    }}
+              {tiers.map((tier) => (
+        <Grid
+          item
+          key={tier.title}
+          xs={12}
+          md={4}
+        >
+          <Card>
+            <CardHeader
+              title={tier.title}
+              subheader={tier.subheader}
+              titleTypographyProps={{ align: 'center' }}
+              subheaderTypographyProps={{
+                align: 'center',
+              }}
+              sx={{
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light'
+                    ? theme.palette.grey[200]
+                    : theme.palette.grey[700],
+              }}
+            />
+            <CardContent>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'baseline',
+                  mb: 2,
+                }}
+              />
+              <ul>
+                {tier.description.map((line) => (
+                  <Typography
+                    component="li"
+                    variant="subtitle1"
+                    align="center"
+                    key={line}
                   >
-                  </Box>
-                  <ul>
-                    {tier.description.map((line) => (
-                      <Typography
-                        component="li"
-                        variant="subtitle1"
-                        align="center"
-                        key={line}
-                      >
-                        {line}
-                      </Typography>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    fullWidth
-                    variant={tier.buttonVariant}
-                  >                  
-                    {tier.buttonText}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
+                    {line}
+                  </Typography>
+                ))}
+              </ul>
+            </CardContent>
+            <CardActions>
+              <Button
+                fullWidth
+                variant={tier.buttonVariant}
+              >
+              <Link
+                href={getLinkForTier(tier.title)} 
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                {tier.buttonText}
+               </Link>
+              </Button>
+            </CardActions>
+           </Card>
+          </Grid>
           ))}
+
         </Grid>
       </Container>
     </ThemeProvider>
