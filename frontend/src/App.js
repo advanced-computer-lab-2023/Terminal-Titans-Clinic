@@ -26,6 +26,7 @@ import PharmacistScreen from "./Pages/pharmacistScreen";
 import PatientList from "./Pages/viewMyPatientsList";
 import ViewPatInfo from "./Pages/viewMyPatientInfo";
 import ViewDocProfile from "./Pages/DocProfilePage";
+import ViewMyProfile from "./components/ViewMyProfile";
 
 
 
@@ -82,6 +83,7 @@ function App() {
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
+          <Route path="/viewMyProfile" element={<ViewMyProfile />} />
 
         </Routes>
       </Router>

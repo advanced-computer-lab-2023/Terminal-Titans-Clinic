@@ -226,6 +226,17 @@ router.get('/viewFamMem', protect, async (req, res) => {
     res.status(200).json({ Result: famMembers, success: true });
 
 })
+router.get('/ViewMyProfile', protect, async (req, res) => {
+    const patient = await patientModel.findById(req.user);
+    if (!patient) {
+        res.status(400).json({ message: "Patient not found", success: false })
+    }
+    else
+
+        res.status(200).json({ Result: patient, success: true })
+})
+
+
 
 // requirement number 23
 router.post('/getAppointment', protect, async (req, res) => {
