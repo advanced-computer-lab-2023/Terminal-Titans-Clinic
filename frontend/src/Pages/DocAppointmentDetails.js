@@ -137,7 +137,7 @@ useEffect(()=>{
         <Button variant="dark" style={{ width: '48%',marginRight:'4%',marginTop:'4%' }} onClick={followup}>
     Save</Button>
     <Button variant="dark" style={{ width: '48%' ,marginTop:'4%'}} onClick={handleClickFollowUp}>
-    Cancel</Button>
+    Back</Button>
         </PopupBody>
      </BasePopup>
     

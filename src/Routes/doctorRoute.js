@@ -656,15 +656,17 @@ router.get('/viewContract', protect, async (req, res) => {
 
     const salary= Math.floor(doctor.HourlyRate / 2);
    /// const markup = Math.floor(salary/10);
-    const contact='Employee: '+doctor.Name+'\n'+' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor '+salary+' per appointment and that the clinic have a markup of 10% for the appointment' ;
-    return res.status(200).json({message:contact, success: true})
+    let result={
+        salary:salary,
+        name:doctor.Name,
+    }
+    return res.status(200).json({result:result, success: true})
 
 });
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
     console.log('k')
-    console.log(req.user);
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
@@ -676,9 +678,9 @@ router.post('/addavailableslots', protect, async (req, res) => {
    // console.log(doctor);
     let flag= true;
     let dTimeTemp = req.body.date; 
-    console.log(dTimeTemp); 
+    console.log("line 678"+dTimeTemp); 
     let startDate = new Date(dTimeTemp);
-    startDate.setHours(startDate.getHours() + 2)
+    startDate.setHours(startDate.getHours())
     //const startDate = req.body.Date
     console.log(startDate)
     let endDate = new Date(startDate);
@@ -1283,28 +1285,39 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     }
     const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
     var slots= await docAvailableSlots.find({DoctorId:req.user._id});
-   
+   console.log(slots);
     var result={};
     for(var x in slots){
         var date=slots[x].Date;
-        if(result.date){
-            result.date.push(date);
+        const day=date.getDate();
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
+
+        if(result[dateKey]){
+            result[dateKey].push(date);
         }
         else{
-            result.date=[date];
+            result[dateKey]=[date];
         }
         }
 
     for(var x in appointments){
         var date=appointments[x].Date;
-        if(result.date){
-            result.date.push(date);
+        const day=date.getDate();
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
+
+        if(result[dateKey]){
+            result[dateKey].push(date);
         }
         else{
-            result.date=[date];
+            result[dateKey]=[date];
         }
     }
-
+    console.log(result);
+return res.status(200).json(result);
 });
 
 export default router;
