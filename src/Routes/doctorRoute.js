@@ -11,6 +11,7 @@ import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import prescriptionModel from '../Models/prescriptionsModel.js';
 import transactionsModel from '../Models/transactionsModel.js';
+import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
@@ -24,6 +25,43 @@ const router = express.Router()
 //    const doctors = await doctorModel.find({})
 //     res.status(200).render('doctorPage',doctors)
 // })
+
+
+router.get('/notifications', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ notifications, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving notifications', success: false });
+    }
+});
+
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
+        console.log( 'Notification marked as read');
+        res.status(200).json({ notification, success: true });
+      
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error marking notifications as read', success: false });
+    }
+});
+
 
 const mailSender = async (email, title, body) => {
     try {
@@ -846,24 +884,29 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
 //reschedule an appointment req.47
 
 
-router.put('/DrescheduleAppointment/:_id', protect, async (req, res) => {
-    const doc = await doctorModel.findOne(req.user);
+router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
+    const doc = await doctorModel.findById(req.user)
     if (!doc) {
-        return res.status(400).json({ message: "You are not a doctor", success: false })
+        return res.status(500).json({ message: "You are not a doctor", success: false })
     }
+    console.log('ana');
 
     const appId = req.params._id;
     const newdate= req.body.Date ;
     const appointment= await appointmentModel.findById(appId);
+    if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found", success: false });
+    }
     const Pid = appointment.PatientId ;
+    const DID= req.user._id;
     const patient = await patientsModel.findById(Pid);
-    const aptmnt=await appointmentModel.find({DoctorId: doc._id ,Date:newdate});
+    const aptmnt=await appointmentModel.find({DoctorId: DID ,Date:newdate});
 
-    console.log(aptmnt);
+    console.log('aptmpt:' ,aptmnt);
        if(aptmnt && aptmnt.length>0){
           return (res.status(400).send({ error: "You are not available during this slot", success: false }));
      }
-        await docAvailableSlots.deleteMany({ DoctorId: doc._id, Date: newdate });
+        await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
     console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
         Status :"rescheduled"}},{ new: true });
@@ -896,6 +939,22 @@ router.put('/DrescheduleAppointment/:_id', protect, async (req, res) => {
             else {
                 console.log("Error sending email to patient");
             }
+
+            const DnewNotification = new notificationModel({
+                userId: DID, 
+                Message: `You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}`,
+
+            });
+            await DnewNotification.save();
+
+            const newNotification = new notificationModel({
+                userId: Pid, 
+                Message: `Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}`,
+
+            });
+            
+            await newNotification.save();
+            console.log('noticationsent');
        
    return res.status(200).json({ Result: result, success: true });
 
