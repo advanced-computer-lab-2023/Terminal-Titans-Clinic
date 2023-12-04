@@ -547,11 +547,25 @@ let myHealthStatus =await healthPackageStatus.findOne({patientId:exists._id,stat
               return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
          }
             await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
-console.log(appId);
+        console.log(appId);
         const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
             Status :"rescheduled"}},{ new: true });
+
+
+            const DmailResponse = await mailSender(
+                    doc.Email,
+                    "rescheduled:appointment",
+                    `<p>Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}<p>`
+                    
+                );
+                if (DmailResponse) {
+                    console.log("Email to doctor sent successfully: ", DmailResponse);
+                   
+                }
+                else {
+                    console.log("Error sending email to doctor");
+                }
      
-            try {
                 const mailResponse = await mailSender(
                     exists.Email,
                     "rescheduled:appointment",
@@ -559,20 +573,16 @@ console.log(appId);
                     
                 );
                 if (mailResponse) {
-                    console.log("Email sent successfully: ", mailResponse);
-                    res.status(200).json({ message: 'Email sent', success: true })
+                    console.log("Email to patient sent successfully: ", mailResponse);
+                   
                 }
                 else {
-                    res.status(400).json({ message: 'Error sending email', success: false });
+                    console.log("Error sending email to patient");
                 }
-            } catch (error) {
-                res.status(500).json({ message: 'Error sending email', success: false })
+           
+       return res.status(200).json({ Result: result, success: true });
+    
             }
-        
-      
-        return res.status(200).json({ Result: result, success: true });
-    }
-
 )
 
 //req 49 cancel appointment

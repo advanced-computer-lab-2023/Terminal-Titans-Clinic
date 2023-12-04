@@ -11,7 +11,7 @@ import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import prescriptionModel from '../Models/prescriptionsModel.js';
 import transactionsModel from '../Models/transactionsModel.js';
-
+import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
 const storage = multer.memoryStorage();
@@ -24,6 +24,31 @@ const router = express.Router()
 //    const doctors = await doctorModel.find({})
 //     res.status(200).render('doctorPage',doctors)
 // })
+
+const mailSender = async (email, title, body) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            }
+        });
+        // Send emails to users
+        let info = await transporter.sendMail({
+            from: 'Terminal Titans',
+            to: email,
+            subject: title,
+            html: body,
+        });
+        console.log("Email info: ", info);
+        return info;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
 
 router.get('/getCurrentDoctor', protect, async (req, res) => {
     const doctor = await doctorModel.findById(req.user)
@@ -818,31 +843,63 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
     }
 });
 
-router.put('/rescheduleAppointment/:id', protect, async (req, res) => {
-    const doctor = await doctorModel.findById(req.user)
-    if (!doctor) {
-        return res.status(500).json({ message: "You are not a doctor", success: false })
+//reschedule an appointment req.47
+
+
+router.put('/DrescheduleAppointment/:_id', protect, async (req, res) => {
+    const doc = await doctorModel.findOne(req.user);
+    if (!doc) {
+        return res.status(400).json({ message: "You are not a doctor", success: false })
     }
 
-    const appId = req.params.id;
-    const newdate= req.body.date ;
-    const aptmnt=await appointmentModel.find({DoctorId:req.user._id ,Date:newdate});
+    const appId = req.params._id;
+    const newdate= req.body.Date ;
+    const appointment= await appointmentModel.findById(appId);
+    const Pid = appointment.PatientId ;
+    const patient = await patientsModel.findById(Pid);
+    const aptmnt=await appointmentModel.find({DoctorId: doc._id ,Date:newdate});
 
-console.log(aptmnt);
-   if(aptmnt && aptmnt.length>0){
-      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
- }
-    await docAvailableSlots.deleteMany({ DoctorId: req.user._id, Date: newdate });
-
-console.log(appId);
+    console.log(aptmnt);
+       if(aptmnt && aptmnt.length>0){
+          return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+     }
+        await docAvailableSlots.deleteMany({ DoctorId: doc._id, Date: newdate });
+    console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
         Status :"rescheduled"}},{ new: true });
+
+
+        const DmailResponse = await mailSender(
+                doc.Email,
+                "rescheduled:appointment",
+                `<p>It is confirmed. You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}<p>`
+                
+            );
+            if (DmailResponse) {
+                console.log("Email to doctor sent successfully: ", DmailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to doctor");
+            }
  
+            const mailResponse = await mailSender(
+                patient.Email,
+                "rescheduled:appointment",
+                `<p>Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}<p>`
+                
+            );
+            if (mailResponse) {
+                console.log("Email to patient sent successfully: ", mailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to patient");
+            }
+       
+   return res.status(200).json({ Result: result, success: true });
 
-
-    return res.status(200).json({ Result: result, success: true });
-}
-
+        }
 )
 
 // requirement number 36
