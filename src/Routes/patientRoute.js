@@ -662,17 +662,68 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const date= appointment.Date;
     const maxdate = date.setHours(date.getHours() - 24);
-    const currdate = new Date();
+    const currdate = Date.now();
+
+    const DmailResponse = await mailSender(
+        doc.Email,
+        "cancelled:appointment",
+        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}<p>`
+        
+    );
+    if (DmailResponse) {
+        console.log("Email to doctor sent successfully: ", DmailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to doctor");
+    }
+
+
+    const mailResponse = await mailSender(
+        patient.Email,
+        "cancelled:appointment",
+        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}<p>`
+        
+    );
+    if (mailResponse) {
+        console.log("Email to patient sent successfully: ", mailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to patient");
+    }
+
+    const DnewNotification = new notificationModel({
+        userId: Did, 
+        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await DnewNotification.save();
+
+    const newNotification = new notificationModel({
+        userId: Pid, 
+        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await newNotification.save();
+    console.log('noticationsent');
+
+
+    
     if(currdate<maxdate){
 
-        giveDoctorMoney(req, res, doc, appointment.Price/1.1);
+        giveDoctorMoney(req, res, doc, -appointment.Price/1.1);
 
  
 
         patient.Wallet = patient.Wallet + appointment.Price ;
+        
         try {
             await patientModel.findByIdAndUpdate(Pid, patient);
             console.log('you have recieved your refund successfully');
+            return res.status(200).json({appointment, message: "appointment is cancelled successfully and you have recieved a refund", success: true });
             
         } catch (e) {
             console.error('Error recieving your refund:', e.message);
@@ -680,10 +731,10 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
         }
 
             }
-       
+   else {
 
-            return res.status(200).json({appointment, message: "appointment is cancelled successfully", success: true });
-
+            return res.status(200).json({appointment, message: "appointment is cancelled successfully, however, you did not recieve a refund", success: true });
+   }
 
 
 });
