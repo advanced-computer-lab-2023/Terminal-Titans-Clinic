@@ -13,6 +13,7 @@ import prescriptionModel from '../Models/prescriptionsModel.js';
 import transactionsModel from '../Models/transactionsModel.js';
 
 import multer from 'multer';
+import { exists } from 'fs';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -521,15 +522,14 @@ router.post('/assignfollowUp', protect, async (req, res) => {
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
-    const PID = req.body.PatientId;
+    const PID = req.body.patientId;
+    console.log(req.body);
     const date = req.body.date;
-    console.log(date)
     let newDate = new Date(date);
     newDate.setHours(newDate.getHours() + 2)
     const DID= req.user._id;
    const aptmnt=await appointmentModel.find({DoctorId:DID,Date:newDate});
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
-console.log(aptmnt)
    if(aptmnt && aptmnt.length>0){
       return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
  }
@@ -538,7 +538,9 @@ console.log(aptmnt)
             PatientId: PID,
             DoctorId: DID,
             Status: "upcoming",
-            Date: newDate
+            Date: newDate,
+            Price: 0,
+            FamilyMemId: req.body.FamilyMemId,
         });
         await newAppointment.save();
         res.status(200).json({ Result: newAppointment, success: true });
@@ -814,14 +816,14 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
     }
 });
 
-router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
+router.put('/rescheduleAppointment/:id', protect, async (req, res) => {
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
 
-    const appId = req.params._id;
-    const newdate= req.body.Date ;
+    const appId = req.params.id;
+    const newdate= req.body.date ;
     const aptmnt=await appointmentModel.find({DoctorId:req.user._id ,Date:newdate});
 
 console.log(aptmnt);
@@ -952,6 +954,7 @@ router.post('/getAppointment', protect, async (req, res) => {
     let final = [];
     for (let x in temp) {///if you need the patient's name in front end
         let result = {}
+        result.id=temp[x]._id;
         const patient = await patientsModel.find({ _id: temp[x].PatientId })
         if (patient.length > 0)
             result.Name = patient[0].Name;
@@ -959,6 +962,10 @@ router.post('/getAppointment', protect, async (req, res) => {
         result.DoctorId = temp[x].DoctorId;
         result.Date = temp[x].Date;
         result.Status = temp[x].Status;
+        if(temp[x].FamilyMemId){
+        let familyMember = await unRegFamMem.findOne({ _id: temp[x].FamilyMemId })
+        result.familyMember = familyMember.Name;
+        }
         final.push(result);
 
     }
@@ -1222,7 +1229,82 @@ router.get('/getTransactionHistory',protect,async(req,res)=>{
     }
 });
 
+router.get('/getAppointment/:id', protect, async (req, res) => {
+   const exists = await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    }
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
+    const appointment = await appointmentModel.findById(req.params.id);
+    if (!appointment) {
+        return res.status(400).json({
+            success: false,
+            message: "Appointment not found"
+        });
+    }
+        let result = {}
+        const patient = await patientsModel.findOne({ _id: appointment.PatientId })
+        if (patient)
+            result.Name = patient.Name;
+        result.PatientId =appointment.PatientId;
+        result.DoctorId = appointment.DoctorId;
+        result.Date = appointment.Date;
+        result.Status = appointment.Status;
+        if(appointment.FamilyMemId){
+            let familyMember = await unRegFamMem.findOne({ _id: appointment.FamilyMemId })
+            result.familyMember = familyMember.Name;
+            result.FamilyMemId=appointment.FamilyMemId;
+            }
 
+    return res.status(200).json({
+        success: true,
+        appointment: result
+    });
+}  );
+router.get('/getAllFreeSlots', protect, async (req, res) => {
+    var exists=await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    }
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
+    const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
+    var slots= await docAvailableSlots.find({DoctorId:req.user._id});
+   
+    var result={};
+    for(var x in slots){
+        var date=slots[x].Date;
+        if(result.date){
+            result.date.push(date);
+        }
+        else{
+            result.date=[date];
+        }
+        }
 
+    for(var x in appointments){
+        var date=appointments[x].Date;
+        if(result.date){
+            result.date.push(date);
+        }
+        else{
+            result.date=[date];
+        }
+    }
+
+});
 
 export default router;

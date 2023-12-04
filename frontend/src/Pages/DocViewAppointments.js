@@ -67,6 +67,8 @@ const   DocViewAppointments = () => {
     setEndDate('');
     setStatus('');
     handleClick(event);
+    getAptmnts();
+
 
     
   }
@@ -97,6 +99,7 @@ const   DocViewAppointments = () => {
       <DemoContainer components={['DateTimePicker', 'DateTimePicker']}>
         
         <DateTimePicker
+        
           label="Start Date"
           value={startDate}
           onChange={(newValue) => setStartDate(newValue)}
@@ -127,7 +130,8 @@ const   DocViewAppointments = () => {
   <div>
   <Button variant="outline-dark" style={{ width: '45%',marginRight:'5%' }} onClick={saveFilter}>
       Save
-    </Button><Button variant="outline-dark" style={{ width: '45%' }} onClick={resetFilter}>
+    </Button>
+    <Button variant="outline-dark" style={{ width: '45%' }} onClick={resetFilter}>
       Reset
     </Button>
   </div>
@@ -145,6 +149,7 @@ const   DocViewAppointments = () => {
                 <th>Patient Name</th>
                 <th>Family Member</th>
                 <th>Date</th>
+                <th>Time</th>
                 <th>Status</th>
                 <th>View </th>
 
@@ -156,11 +161,12 @@ const   DocViewAppointments = () => {
                         <React.Fragment key={index}>
                          
                             <td>{aptmnt.Name}</td>
-                            <td>{aptmnt.FamMem?aptmnt.FamMem:'-'}</td>
-                            <td>{aptmnt.Date?.substring(0,10)}</td>
+                            <td>{aptmnt.familyMember?aptmnt.familyMember:'-'}</td>
+                            <td>{aptmnt.Date.substring(0,10)}</td>
+                            <td>{aptmnt.Date.substring(11,16)}</td>
                             <td>{aptmnt.Status}</td>
-                            <td><Button variant="dark" style={{ width: '45%' }} >
-                                View
+                            <td><Button variant="dark" style={{ width: '45%' }}   onClick={() => window.location.href=`/Health-Plus/docViewAppointmentsDetails?Id=${aptmnt.id}`}>
+                                View 
                               </Button></td> 
                               </React.Fragment> 
                     </tr>

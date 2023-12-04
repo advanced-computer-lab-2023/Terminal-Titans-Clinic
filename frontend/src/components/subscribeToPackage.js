@@ -23,7 +23,7 @@ const PackagesTab = () => {
   const fetchData = async () => {
     console.log(sessionStorage.getItem("token") )
     try {
-        const response = await axios.get(`http://localhost:8000/patient/viewRegFamMem`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+        const response = await axios.get(`http://localhost:8000/patient/viewFamMem`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
         );
         const data = response.data;
           setRegFamily(data.Result.registered)
