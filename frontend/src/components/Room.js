@@ -216,7 +216,8 @@ function Room() {
         if (connectionRef.current){
             connectionRef.current.destroy()
             socket.emit("endCall", { to: callerUser })
-            navigate('/chat');
+            // href to chat
+            window.location.href = "/chat";
         }
     }
 
