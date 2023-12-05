@@ -27,6 +27,8 @@ import PatientList from "./Pages/viewMyPatientsList";
 import ViewPatInfo from "./Pages/viewMyPatientInfo";
 import ViewDocProfile from "./Pages/DocProfilePage";
 import ViewMyProfile from "./Pages/viewMyProfile";
+import DocAppointmentDetails from "./Pages/DocAppointmentDetails";
+import AddAvailableSlots from "./Pages/AddAvailableSlots";
 
 
 
@@ -80,10 +82,12 @@ function App() {
           <Route path="/viewMyPatientsList" element={<PatientList />} />
           <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />
           <Route path="/viewDocProfile" element={<ViewDocProfile />} />
+          <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
+          <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
 
         </Routes>
       </Router>

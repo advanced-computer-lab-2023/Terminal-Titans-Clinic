@@ -8,7 +8,7 @@ import Button from 'react-bootstrap/Button';
 
 function ViewmyHealthRecords() {
     
-    const [userHealthRecord, setUserHealthRecord] = useState([]);
+const [userHealthRecord, setUserHealthRecord] = useState([]);
 const [userHealthHistoryPDF, setUserHealthHistoryPDF] = useState([]);
 const [userHealthHistoryIMG, setUserHealthHistoryIMG] = useState([]);
 const [selectedFile, setSelectedFile] = useState(null);
