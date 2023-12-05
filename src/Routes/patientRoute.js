@@ -467,9 +467,7 @@ router.post('/bookAppointment', protect, async (req, res) => {
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
     const packId = myHealthStatus.packageId;
     var discountP = 0;
-    if (aptmnt.length < 1) {
-        return (res.status(400).send({ error: "This slot is no longer available", success: false }));
-    }
+  
     if (packId) {
         const allPackages = await healthPackageModel.find({ _id: packId });
         if (allPackages.length > 0)
@@ -497,6 +495,9 @@ router.post('/bookAppointment', protect, async (req, res) => {
     await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
     }
     else{
+        if (aptmnt.length < 1) {
+            return (res.status(400).send({ error: "This slot is no longer available", success: false }));
+        }
   
     const newAppointment = new appointmentModel({
         PatientId: req.user._id,
