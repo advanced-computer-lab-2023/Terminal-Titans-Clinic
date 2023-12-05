@@ -358,7 +358,6 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
         let list = []
         for (let x in healthRecords) {
             list.push(healthRecords[x].HealthDocument.data)
-
         }
         // const medicalHistory = patient.HealthHistory
         // let list1=[]
@@ -373,9 +372,7 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
         
         //console.log(patient)
         const result = {
-           
             "healthDoc": list,
-            
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -1172,6 +1169,7 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
+        generatePDF(prescription);
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1220,6 +1218,7 @@ router.post('/updateDosage',protect,async(req,res)=>{
             }
             return item;
         });
+        generatePDF(prescription);
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1234,6 +1233,139 @@ router.post('/updateDosage',protect,async(req,res)=>{
         });
     }
 
+})
+
+ function generatePDF(presc){
+    // Create a new PDF document
+    const doc = new PDFDocument();
+  
+    // Add content to the PDF
+    doc.pipe(fs.createWriteStream('prescription.pdf'));
+    doc.fontSize(25).text('Prescription', 100, 100);
+    doc.fontSize(15).text('Patient name: '+presc.patient.Name, 100, 150);
+    doc.fontSize(15).text('Doctor name: '+presc.doctor.Name, 100, 200);
+    doc.fontSize(15).text('Date: '+presc.prescription.Date, 100, 250);
+    doc.fontSize(15).text('Status: '+presc.prescription.status, 100, 300);
+    doc.fontSize(15).text('Items: ', 100, 350);
+    for(let i=0;i<presc.medicines.length;i++){
+        doc.fontSize(15).text('Medicine name: '+presc.medicines[i].Name, 100, 400+i*50);
+        doc.fontSize(15).text('Dosage: '+presc.prescription.items[i].dosage, 100, 450+i*50);
+    }
+    doc.end();
+  
+    // Save the PDF to a buffer
+    const buffer = new Promise((resolve) => {
+      const chunks = [];
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.end();
+    });
+    const document = { pdfData: buffer };
+    prescription.pdf=document;
+    prescription.save();
+    return;
+  };
+//requirement 59
+//download selected prescription (PDF) 
+router.post('/downloadPrescription', protect, async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        const patient=await patientsModel.findById(prescription.PatientId);
+        if(!patient){
+            return res.status(400).json({
+                success: false,
+                message: "Patient not found"
+            });
+        }
+        const doctor=await doctorModel.findById(prescription.DoctorId);
+        if(!doctor){
+            return res.status(400).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+        const medicines=[];
+        for(let i=0;i<prescription.items.length;i++){
+            const medicine=await medicineModel.findById(prescription.items[i].medicineId);
+            medicines.push(medicine);
+        }
+        const result={
+            patient:patient,
+            doctor:doctor,
+            medicines:medicines,
+            prescription:prescription
+        }
+        //construct a pdf with the prescription contents
+        // const doc = new PDFDocument();
+        // doc.pipe(fs.createWriteStream('prescription.pdf'));
+        // doc.fontSize(25).text('Prescription', 100, 100);
+        // doc.fontSize(15).text('Patient name: '+result.patient.Name, 100, 150);
+        // doc.fontSize(15).text('Doctor name: '+result.doctor.Name, 100, 200);
+        // doc.fontSize(15).text('Date: '+result.prescription.Date, 100, 250);
+        // doc.fontSize(15).text('Status: '+result.prescription.status, 100, 300);
+        // doc.fontSize(15).text('Items: ', 100, 350);
+        // for(let i=0;i<result.medicines.length;i++){
+        //     doc.fontSize(15).text('Medicine name: '+result.medicines[i].Name, 100, 400+i*50);
+        //     doc.fontSize(15).text('Dosage: '+result.prescription.items[i].dosage, 100, 450+i*50);
+        // }
+        // doc.end();
+        // fs.readFileSync('./public/assets/images/logo.png')
+        // var img = nativeImage.createFromPath("./public/assets/images/logo.png");
+        // var base64Data = img.toDataURL().replace(/^data:image\/png;base64,/, "");
+        // fs.writeFileSync("./public/assets/images/logo.png", base64Data, 'base64');
+        // let options = {
+        //     format: 'A4',
+        //     header: {
+        //         height: "45mm",
+        //         contents: '<div style="text-align: center;">Author: Marc Bachmann</div>'
+        //     },
+        //     footer: {
+        //         height: "28mm",
+        //         contents: {
+        //             first: 'Cover page',
+        //             2: 'Second page', // Any page number is working. 1-based index
+        //             default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
+        //             last: 'Last Page'
+        //         }
+        //     }
+        // };
+        // pdf.create(fs.readFileSync('./prescription.pdf'), options).toFile('./public/assets/images/prescription.pdf', function (err, res) {
+        //     if (err) return console.log(err);
+        //     console.log(res); // { filename: '/app/businesscard.pdf' }
+        // }
+        // );
+        res.status(200).json({
+            success: true,
+            result:result
+        });
+
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
 })
 
 //requirement 63
