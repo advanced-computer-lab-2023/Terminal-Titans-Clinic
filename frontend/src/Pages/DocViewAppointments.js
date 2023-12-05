@@ -88,7 +88,10 @@ const   DocViewAppointments = () => {
 
     return (
         <div>
-    <h1>Appointments List</h1>
+    <div   style={{ width: "100% ",backgroundColor:'black' }}>
+           
+           <h1 style={{color:'white', textAlign:'center'}}>Appointments List </h1>
+           </div>
     <Button variant="outline-dark" style={{ float: 'right' }} onClick={handleClick}>
       <FilterListIcon />
       Filter

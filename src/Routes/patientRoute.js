@@ -19,6 +19,7 @@ import MedicineModel from '../Models/Medicine.js';
 import CartItem from '../Models/Cart.js';
 import Order from '../Models/Orders.js';
 import transactionsModel from '../Models/transactionsModel.js';
+import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import { Console } from 'console';
 
@@ -44,6 +45,8 @@ router.get('/getCurrentPatient', protect, async (req, res) => {
     else
         res.status(200).json({ Result: patient, success: true })
 })
+
+
 
 const mailSender = async (email, title, body) => {
     try {
@@ -526,6 +529,40 @@ let myHealthStatus =await healthPackageStatus.findOne({patientId:exists._id,stat
 
 })
 
+router.get('/notifications', protect, async (req, res) => {
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ notifications, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving notifications', success: false });
+    }
+});
+
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
+        console.log( 'Notification marked as read');
+        res.status(200).json({ notification, success: true });
+      
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error marking notifications as read', success: false });
+    }
+});
 //reschedule an appointment req.47
 
 
@@ -547,11 +584,25 @@ let myHealthStatus =await healthPackageStatus.findOne({patientId:exists._id,stat
               return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
          }
             await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
-console.log(appId);
+        console.log(appId);
         const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
             Status :"rescheduled"}},{ new: true });
+
+
+            const DmailResponse = await mailSender(
+                    doc.Email,
+                    "rescheduled:appointment",
+                    `<p>Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}<p>`
+                    
+                );
+                if (DmailResponse) {
+                    console.log("Email to doctor sent successfully: ", DmailResponse);
+                   
+                }
+                else {
+                    console.log("Error sending email to doctor");
+                }
      
-            try {
                 const mailResponse = await mailSender(
                     exists.Email,
                     "rescheduled:appointment",
@@ -559,20 +610,33 @@ console.log(appId);
                     
                 );
                 if (mailResponse) {
-                    console.log("Email sent successfully: ", mailResponse);
-                    res.status(200).json({ message: 'Email sent', success: true })
+                    console.log("Email to patient sent successfully: ", mailResponse);
+                   
                 }
                 else {
-                    res.status(400).json({ message: 'Error sending email', success: false });
+                    console.log("Error sending email to patient");
                 }
-            } catch (error) {
-                res.status(500).json({ message: 'Error sending email', success: false })
-            }
-        
-      
-        return res.status(200).json({ Result: result, success: true });
-    }
 
+                const DnewNotification = new notificationModel({
+                    userId: Did, 
+                    Message: `Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}`,
+    
+                });
+                
+                await DnewNotification.save();
+
+                const newNotification = new notificationModel({
+                    userId: req.user._id, 
+                    Message: `You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}`,
+    
+                });
+                
+                await newNotification.save();
+                console.log('noticationsent');
+           
+       return res.status(200).json({ Result: result, success: true });
+    
+            }
 )
 
 //req 49 cancel appointment
@@ -598,17 +662,68 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const date= appointment.Date;
     const maxdate = date.setHours(date.getHours() - 24);
-    const currdate = new Date();
+    const currdate = Date.now();
+
+    const DmailResponse = await mailSender(
+        doc.Email,
+        "cancelled:appointment",
+        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}<p>`
+        
+    );
+    if (DmailResponse) {
+        console.log("Email to doctor sent successfully: ", DmailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to doctor");
+    }
+
+
+    const mailResponse = await mailSender(
+        patient.Email,
+        "cancelled:appointment",
+        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}<p>`
+        
+    );
+    if (mailResponse) {
+        console.log("Email to patient sent successfully: ", mailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to patient");
+    }
+
+    const DnewNotification = new notificationModel({
+        userId: Did, 
+        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await DnewNotification.save();
+
+    const newNotification = new notificationModel({
+        userId: Pid, 
+        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await newNotification.save();
+    console.log('noticationsent');
+
+
+    
     if(currdate<maxdate){
 
-        giveDoctorMoney(req, res, doc, appointment.Price/1.1);
+        giveDoctorMoney(req, res, doc, -appointment.Price/1.1);
 
  
 
         patient.Wallet = patient.Wallet + appointment.Price ;
+        
         try {
             await patientModel.findByIdAndUpdate(Pid, patient);
             console.log('you have recieved your refund successfully');
+            return res.status(200).json({appointment, message: "appointment is cancelled successfully and you have recieved a refund", success: true });
             
         } catch (e) {
             console.error('Error recieving your refund:', e.message);
@@ -616,10 +731,10 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
         }
 
             }
-       
+   else {
 
-            return res.status(200).json({appointment, message: "appointment is cancelled successfully", success: true });
-
+            return res.status(200).json({appointment, message: "appointment is cancelled successfully, however, you did not recieve a refund", success: true });
+   }
 
 
 });

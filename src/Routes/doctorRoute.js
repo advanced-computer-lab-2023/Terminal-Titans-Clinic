@@ -11,7 +11,8 @@ import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import prescriptionModel from '../Models/prescriptionsModel.js';
 import transactionsModel from '../Models/transactionsModel.js';
-
+import notificationModel from '../Models/notificationModel.js';
+import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
 const storage = multer.memoryStorage();
@@ -24,6 +25,68 @@ const router = express.Router()
 //    const doctors = await doctorModel.find({})
 //     res.status(200).render('doctorPage',doctors)
 // })
+
+
+router.get('/notifications', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ notifications, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving notifications', success: false });
+    }
+});
+
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
+        console.log( 'Notification marked as read');
+        res.status(200).json({ notification, success: true });
+      
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error marking notifications as read', success: false });
+    }
+});
+
+
+const mailSender = async (email, title, body) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            }
+        });
+        // Send emails to users
+        let info = await transporter.sendMail({
+            from: 'Terminal Titans',
+            to: email,
+            subject: title,
+            html: body,
+        });
+        console.log("Email info: ", info);
+        return info;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
 
 router.get('/getCurrentDoctor', protect, async (req, res) => {
     const doctor = await doctorModel.findById(req.user)
@@ -656,15 +719,17 @@ router.get('/viewContract', protect, async (req, res) => {
 
     const salary= Math.floor(doctor.HourlyRate / 2);
    /// const markup = Math.floor(salary/10);
-    const contact='Employee: '+doctor.Name+'\n'+' The initial term of this employment shall commence once accepting this contract and continue until terminated by either party with 30 days written notice.\nThe Employer agrees to pay the doctor '+salary+' per appointment and that the clinic have a markup of 10% for the appointment' ;
-    return res.status(200).json({message:contact, success: true})
+    let result={
+        salary:salary,
+        name:doctor.Name,
+    }
+    return res.status(200).json({result:result, success: true})
 
 });
 
 router.post('/addavailableslots', protect, async (req, res) => {
 
     console.log('k')
-    console.log(req.user);
     const doctor = await doctorModel.findById(req.user)
     if (!doctor) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
@@ -676,9 +741,9 @@ router.post('/addavailableslots', protect, async (req, res) => {
    // console.log(doctor);
     let flag= true;
     let dTimeTemp = req.body.date; 
-    console.log(dTimeTemp); 
+    console.log("line 678"+dTimeTemp); 
     let startDate = new Date(dTimeTemp);
-    startDate.setHours(startDate.getHours() + 2)
+    startDate.setHours(startDate.getHours())
     //const startDate = req.body.Date
     console.log(startDate)
     let endDate = new Date(startDate);
@@ -816,31 +881,84 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
     }
 });
 
-router.put('/rescheduleAppointment/:id', protect, async (req, res) => {
-    const doctor = await doctorModel.findById(req.user)
-    if (!doctor) {
+//reschedule an appointment req.47
+
+
+router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
+    const doc = await doctorModel.findById(req.user)
+    if (!doc) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
+    console.log('ana');
 
-    const appId = req.params.id;
-    const newdate= req.body.date ;
-    const aptmnt=await appointmentModel.find({DoctorId:req.user._id ,Date:newdate});
+    const appId = req.params._id;
+    const newdate= req.body.Date ;
+    const appointment= await appointmentModel.findById(appId);
+    if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found", success: false });
+    }
+    const Pid = appointment.PatientId ;
+    const DID= req.user._id;
+    const patient = await patientsModel.findById(Pid);
+    const aptmnt=await appointmentModel.find({DoctorId: DID ,Date:newdate});
 
-console.log(aptmnt);
-   if(aptmnt && aptmnt.length>0){
-      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
- }
-    await docAvailableSlots.deleteMany({ DoctorId: req.user._id, Date: newdate });
-
-console.log(appId);
+    console.log('aptmpt:' ,aptmnt);
+       if(aptmnt && aptmnt.length>0){
+          return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+     }
+        await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
+    console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
         Status :"rescheduled"}},{ new: true });
+
+
+        const DmailResponse = await mailSender(
+                doc.Email,
+                "rescheduled:appointment",
+                `<p>It is confirmed. You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}<p>`
+                
+            );
+            if (DmailResponse) {
+                console.log("Email to doctor sent successfully: ", DmailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to doctor");
+            }
  
+            const mailResponse = await mailSender(
+                patient.Email,
+                "rescheduled:appointment",
+                `<p>Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}<p>`
+                
+            );
+            if (mailResponse) {
+                console.log("Email to patient sent successfully: ", mailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to patient");
+            }
 
+            const DnewNotification = new notificationModel({
+                userId: DID, 
+                Message: `You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}`,
 
-    return res.status(200).json({ Result: result, success: true });
-}
+            });
+            await DnewNotification.save();
 
+            const newNotification = new notificationModel({
+                userId: Pid, 
+                Message: `Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}`,
+
+            });
+            
+            await newNotification.save();
+            console.log('noticationsent');
+       
+   return res.status(200).json({ Result: result, success: true });
+
+        }
 )
 
 // requirement number 36
@@ -1283,28 +1401,39 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     }
     const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
     var slots= await docAvailableSlots.find({DoctorId:req.user._id});
-   
+   console.log(slots);
     var result={};
     for(var x in slots){
         var date=slots[x].Date;
-        if(result.date){
-            result.date.push(date);
+        const day=date.getDate();
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
+
+        if(result[dateKey]){
+            result[dateKey].push(date);
         }
         else{
-            result.date=[date];
+            result[dateKey]=[date];
         }
         }
 
     for(var x in appointments){
         var date=appointments[x].Date;
-        if(result.date){
-            result.date.push(date);
+        const day=date.getDate();
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
+
+        if(result[dateKey]){
+            result[dateKey].push(date);
         }
         else{
-            result.date=[date];
+            result[dateKey]=[date];
         }
     }
-
+    console.log(result);
+return res.status(200).json(result);
 });
 
 export default router;
