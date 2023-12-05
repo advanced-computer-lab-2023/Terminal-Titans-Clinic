@@ -50,29 +50,35 @@ function createData(
 // }
 
 function Row(props) {
-  const { row } = props;
+  const { row, fetchHealthPackageData } = props;
   const [open, setOpen] = React.useState(false);
 
   const [openDialogue, setOpenDialogue] = React.useState(false);
+  const [patientSelected, setPatientSelected] = React.useState('');
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (id) => {
+    setPatientSelected(id);
     setOpenDialogue(true);
   };
 
   const handleClose = () => {
+    setPatientSelected('');
     setOpenDialogue(false);
   };
 
   const handleAgree = () => {
     axios({
       method: 'put',
-      url: 'http://localhost:8000/patient/cancelSub',
+      url: 'http://localhost:8000/patient/cancelMySub',
       headers: {
         Authorization: 'Bearer ' + sessionStorage.getItem('token')
-      }
+      },
+      data: {
+        patientId: patientSelected
+      },
     }).then((response) => {
       console.log(response);
-      alert(response.data.message + " Please refresh the page to see the changes")
+      fetchHealthPackageData();
     }).catch((error) => {
       alert(error.response.data.message)
     });
@@ -102,7 +108,7 @@ function Row(props) {
             <TableCell align="right">{row.familyDiscount}</TableCell>
             <TableCell align="right">{row.doctorDiscount}</TableCell>
             <TableCell align="right">
-              <Button variant="outlined" startIcon={<CancelIcon />} color="error" onClick={handleClickOpen}>
+              <Button variant="outlined" startIcon={<CancelIcon />} color="error" onClick={() => handleClickOpen(row.patientId)}>
                 Cancel
               </Button>
             </TableCell>
@@ -188,9 +194,9 @@ export default function CollapsibleTable() {
       const result = responseViewSubs.data.result;
       const resultStatus = responseViewSubsStatus.data.result;
       let temp = [];
-      temp.push(createData(result.myUser._id, result.myUser.Name, result.myUser.packageType, result.myUser.subsriptionFeesInEGP, result.myUser.medicinDiscountInPercentage, result.myUser.familyDiscountInPercentage, result.myUser.doctorDiscountInPercentage, resultStatus.myUser));
+      temp.push(createData(result.myUser.PatientId, result.myUser.Name, result.myUser.packageType, result.myUser.subsriptionFeesInEGP, result.myUser.medicinDiscountInPercentage, result.myUser.familyDiscountInPercentage, result.myUser.doctorDiscountInPercentage, resultStatus.myUser));
       for (let i = 0; i < result.familyMembers.length; i++) {
-        temp.push(createData(result.familyMembers[i]._id, result.familyMembers[i].Name, result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP, result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage, result.familyMembers[i].doctorDiscountInPercentage, resultStatus.familyMembers[i]));
+        temp.push(createData(result.familyMembers[i].PatientId, result.familyMembers[i].Name, result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP, result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage, result.familyMembers[i].doctorDiscountInPercentage, resultStatus.familyMembers[i]));
       }
       setRows(temp);
       // setPatientHealthPackageData(result.myUser);
@@ -219,7 +225,7 @@ export default function CollapsibleTable() {
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <Row key={row.name} row={row} />
+            <Row key={row.name} row={row} fetchHealthPackageData={fetchHealthPackageData} />
           ))}
         </TableBody>
       </Table>

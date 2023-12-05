@@ -29,6 +29,7 @@ import NotRegisteredFamilyMemberModel from '../Models/NotRegisteredFamilyMemberM
 import multer from 'multer';
 import { pid } from 'process';
 import { TransformStreamDefaultController } from 'node:stream/web';
+import userModel from '../Models/userModel.js';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -1254,15 +1255,15 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
         let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId, status: 'Subscribed' });
         // console.log(userHealthPackageStatus)
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
-        let userHealth = {}
+        let userHealth = new Object()
 
         if (userHealthPackageStatus?.status == 'Subscribed')
             userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
 
-        userHealth.PatientId = user?._id;
-        userHealth.Name = user?.Name;
-        userHealth.Email = user?.Email;
-        userHealth.Username = user?.Username;
+        userHealth["PatientId"] = user?._id;
+        userHealth["Name"] = user?.Name;
+        userHealth["Email"] = user?.Email;
+        userHealth["Username"] = user?.Username;
 
         let result = { 'myUser': userHealth, 'familyMembers': [] };
 
@@ -1416,15 +1417,19 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
 
 //hena bas msh mota2aked bet cancel sah wala laa (req 32)
 router.put('/cancelMySub', protect, async (req, res) => {
-    let exists = await patientModel.findById(req.user);
-    if (!exists || req.user.__t != "Patient") {
+    console.log(req.user._id);
+    let exists = await patientModel.findById(req.user._id).select('-HealthHistory');
+    console.log(exists);
+    if (!exists || req.user.__t != "patient") {
         return res.status(500).json({
             success: false,
             message: "Not authorized"
         });
     }
-
-    if (req.body.id == req.user._id) {
+    const patientId = new mongoose.Types.ObjectId(req.body.patientId);
+    console.log(patientId);
+    console.log(req.user._id);
+    if (patientId == req.user._id) {
         try {
             // get the patient package
             const user = await patientModel.findById(req.user._id);
@@ -1455,7 +1460,7 @@ router.put('/cancelMySub', protect, async (req, res) => {
         }
     } else {
         try {
-            const famId = req.body.id;
+            const famId = patientId;
             var FamMem = await RegFamMem.findOne({
                 $or: [
                     { PatientId: req.user._id, Patient2Id: famId },
@@ -2806,7 +2811,7 @@ const processPharmWalletPayment = async (req, res, userId, address) => {
 
 router.post('/payment', protect, async (req, res) => {
     let exists = await patientModel.findById(req.user);
-    if (!exists || req.user.__t != "Patient") {
+    if (!exists || req.user.__t != "patient") {
         return res.status(500).json({
             success: false,
             message: "Not authorized"

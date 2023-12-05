@@ -224,7 +224,9 @@ export default function Chat() {
                             online={true}
                             username={onlinePeople[userId]}
                             onClick={() => { setSelectedUserId(userId); }}
-                            selected={userId === selectedUserId} />
+                            selected={userId === selectedUserId} 
+                            inChat={true}
+                            />
                     ))}
                     {Object.keys(offlinePeople).map(userId => (
                         <Contact
@@ -250,6 +252,7 @@ export default function Chat() {
                     </div>
                 )}
                 <div className="flex-grow">
+                    <div className="spaceTop"></div>
                     {!selectedUserId && (
                         <div className="flex h-full flex-grow items-center justify-center">
                             <div className="text-gray-300">&larr; Select a person from the sidebar</div>
