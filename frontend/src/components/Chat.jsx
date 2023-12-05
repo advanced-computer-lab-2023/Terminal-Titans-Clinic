@@ -233,7 +233,8 @@ export default function Chat() {
                             online={false}
                             username={offlinePeople[userId].Username}
                             onClick={() => setSelectedUserId(userId)}
-                            selected={userId === selectedUserId} />
+                            selected={userId === selectedUserId}
+                            inChat={true} />
                     ))}
                 </div>
             </div>
