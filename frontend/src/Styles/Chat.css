@@ -14,3 +14,8 @@
     gap: 20px;
     z-index: 1;
 }
+
+.spaceTop{
+    height: 10%;
+    width: 100%;
+}

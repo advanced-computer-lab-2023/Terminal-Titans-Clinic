@@ -8,6 +8,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader'
 import ListItemButton from '@mui/material/ListItemButton';
+import Typography from '@mui/material/Typography';
+import Pagination from '@mui/material/Pagination';
+
 import { set } from "mongoose";
 function ViewMyPatientMedHistory() {
     const params = new URLSearchParams(window.location.search);
@@ -16,6 +19,7 @@ function ViewMyPatientMedHistory() {
     const [userHealthHistoryPDF, setUserHealthHistoryPDF] = useState([]);
     const [userHealthHistoryIMG, setUserHealthHistoryIMG] = useState([]);
     const [curDoc, setCurDoc] = useState('');
+const [index, setIndex] = useState(0);
 const getMyPatient=async()=>{
     await axios.get(`http://localhost:8000/doctor/getPatientInfoAndHealth2/${userId}`, {
         headers: {
@@ -55,11 +59,26 @@ useEffect(()=>{
         getMyPatient();
     },[]
     )
-   const showDoc = (item) => {
+   const showDoc = (item,index) => {
+    setIndex(index)
     console.log(item)
       const src=`data:${item.contentType};base64,${arrayBufferToBase64(item.data.data)}`
     setCurDoc(src)
     }
+    const handleChange = (event, value) => {
+      console.log(value)
+      console.log(userHealthHistoryPDF)
+      console.log(userHealthHistoryIMG)
+      setIndex(index)
+      if(value<=userHealthHistoryPDF.length){
+        console.log(userHealthHistoryPDF[value-1])
+showDoc(userHealthHistoryPDF[value-1],value-1)
+      }
+      else{
+        console.log(userHealthHistoryIMG[value-1-userHealthHistoryPDF.length])
+        showDoc(userHealthHistoryIMG[value-1-userHealthHistoryPDF.length],value-1)      }
+
+    };
     return (
 
 <div style={{ display: "flex"}}>
@@ -81,7 +100,7 @@ useEffect(()=>{
               {userHealthHistoryPDF.map((item,index) => (
                 <ListItemButton component="a" href="#simple-list">
 
-                        <ListItemText primary={'Document ' + (parseInt(index) + 1)} onClick={() => { showDoc(item) }} />
+                        <ListItemText primary={'Document ' + (parseInt(index) + 1)} onClick={() => { showDoc(item,index) }} />
                        
                     </ListItemButton>
             
@@ -90,7 +109,7 @@ useEffect(()=>{
          {userHealthHistoryIMG.map((item,index) => (
                 <ListItemButton component="a" href="#simple-list">
 
-                        <ListItemText primary={'Document ' + (parseInt(index) +userHealthHistoryPDF.length+1 )} onClick={() => { showDoc(item) }} />
+                        <ListItemText primary={'Document ' + (parseInt(index) +userHealthHistoryPDF.length+1 )} onClick={() => { showDoc(item,index+userHealthHistoryPDF.length) }} />
                        
                     </ListItemButton>
             
@@ -102,9 +121,13 @@ useEffect(()=>{
       </div>
       <div style={{width: "80%"}}>
      
+      <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthHistoryPDF.length+userHealthHistoryIMG.length} page={index+1} onChange={handleChange} />
+      <Typography>Showing: Document {index+1}</Typography>
+
+      <div >
       <div >
       <iframe src={curDoc}  width="800" height="600"></iframe>
-   
+   </div>
       </div>
     </div>
     </div>

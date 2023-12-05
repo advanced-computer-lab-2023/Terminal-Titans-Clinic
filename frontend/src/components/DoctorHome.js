@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorHome = () => {
   const [wltAmnt, setWltAmnt] = useState([]);
  // const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
+ const navigate = useNavigate();
 
   const fetchwltAmnt = async () => {    
     try {
@@ -53,6 +55,10 @@ const DoctorHome = () => {
       <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={() => window.location.pathname = '/Health-Plus/forgotPassword'}>
         Forgot Password
+      </button>
+      <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
+  onClick={() => window.location.href = 'http://localhost:3006/Health-Plus/patient'}>
+  pharmacy
       </button>
       {/* <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={() => window.location.pathname = '/Health-Plus/EmploymentContract'}>

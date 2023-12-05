@@ -68,37 +68,72 @@ const io = new Server(server, {
 });
 io.attach(server);
 let userSocketMap = new Map();
-// io.on("connection", async (socket) => {
-// 	if (socket.handshake.auth.Authorization) {
-// 		const token = socket.handshake.auth.Authorization.split(" ")[1];
-// 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-// 		// socket.id = decoded.id;
-// 		userSocketMap.set(decoded.id, socket.id);
-// 		socket.emit("me", socket.id)
-// 	}
-// 	// socket.emit("me", socket.id)
+io.on("connection", async (socket) => {
+	try {
+		console.log('hele', socket?.handshake?.auth?.Authorization);
+		if (socket?.handshake?.auth?.Authorization) {
+			const token = socket.handshake.auth.Authorization.split(" ")[1];
+			const decoded = jwt.verify(token, process.env.JWT_SECRET);
+			// socket.id = decoded.id;
+			userSocketMap.set(decoded.id, socket.id);
+			console.log('socket.id', socket.id,);
+			socket.join(decoded.id);
+			socket.emit("me", socket.id)
+		}
 
-// 	socket.on("disconnect", () => {
-// 		socket.broadcast.emit("callEnded")
-// 	})
+		// socket.emit("me", socket.id)
 
-// 	socket.on("callUser", (data) => {
-// 		// loop through all the sockets and find the one with the id
-// 		userSocketMap.forEach((value, key) => {
-// 			if (key == data.userToCall) {
-// 				io.to(value).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
-// 			}
-// 		})
-// 	})
+		socket.on("disconnect", () => {
+			socket.broadcast.emit("callEnded")
+		})
 
-// 	socket.on("answerCall", (data) => {
-// 		io.to(data.to).emit("callAccepted", data.signal)
-// 	})
+		socket.on("callUser", (data) => {
+			// loop through all the sockets and find the one with the id
+			userSocketMap.forEach((value, key) => {
+				console.log('value', value);
+				console.log('key', key);
+				console.log('data.from', data.from);
+				console.log('data.name', data.name);
+				if (key == data.userToCall) {
+					// to room id w from socket id
+					io.to(key).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+				}
+			})
+		})
 
-// 	socket.on("endCall", ({ to }) => {
-// 		io.to(to).emit("callEnded");
-// 	});
-// })
+		socket.on("answerCall", (data) => {
+			console.log('answerCall1', data);
+			userSocketMap.forEach((value, key) => {
+				console.log('value', value);
+				console.log('key', key);
+				console.log('data.to', data.to);
+				if (value == data.to) {
+					console.log('answerCall2', data.to, data.signal);
+					if(io.to(key).emit("callAccepted", data.signal))
+						console.log('sent');
+					else
+						console.log('not sent');
+				}
+				// io.to(data.to).emit("callAccepted", data.signal)
+			})
+		})
+
+		socket.on("endCall", ({ to }) => {
+			console.log('endCall', to);
+			userSocketMap.forEach((value, key) => {
+				console.log('value', value);
+				console.log('key', key);
+				console.log('to', to);
+				if (value == to) {
+					console.log('endCall2', to);
+					io.to(key).emit("callEnded")
+				}
+			})
+			// io.to(to).emit("callEnded");
+		});
+	} catch (error) {
+	}
+})
 
 //chat
 const wss = new WebSocketServer({ server });

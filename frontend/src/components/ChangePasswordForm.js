@@ -2,6 +2,8 @@ import "../Styles/LoginForm.css";
 import React, { useState } from 'react';
 import validator from 'validator'
 import axios from 'axios';
+import Button from '@mui/material/Button';
+
 
 function ChangePasswordForm() {
     const [oldPassword, setoldPassword] = useState('');
@@ -67,7 +69,7 @@ function ChangePasswordForm() {
       
     };
       return (
-        <div style={{ float: 'center', paddingTop: '110px' }}>
+        <div style={{ float: 'center'}}>
 
         <div id="login-form">
           {/* <h1>Sign up</h1> */}
@@ -89,8 +91,13 @@ function ChangePasswordForm() {
                   color: 'red',
                 }}>{errorMessagePass}</h5>}
                <br />
-            <button type="submit" onClick={changePassword}>Submit</button>
-
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={changePassword}
+            >
+             Submit
+            </Button>
           </form>
         </div>
       </div>
