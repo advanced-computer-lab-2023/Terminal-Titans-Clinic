@@ -22,6 +22,10 @@ const prescriptionSchema = new mongoose.Schema({
     Date:{
         type:Date,
         required:true
+    },
+    Pdf:{
+        data: Buffer,
+        contentType: String
     }
     //appointment?
 });
