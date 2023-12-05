@@ -134,8 +134,14 @@ console.log(params.get('success'))
     
 
     const choosePayment = () => {
-        setShowPaymentButtons(true);
-      };
+        // setShowPaymentButtons(true);
+        //window.location.href=`/Health-Plus/appointmentCheckout?doctorId=${patient.id}`  
+        console.log(selectedDoctor);
+        console.log(selectedDate);
+        console.log(famMemId);
+        window.location.href = `/Health-Plus/appointmentCheckout?doctorId=${selectedDoctor}&date=${selectedDate}&famMemId=${famMemId}`;
+
+        };
       
 
     return (

@@ -29,6 +29,7 @@ import ViewDocProfile from "./Pages/DocProfilePage";
 import ViewMyProfile from "./Pages/viewMyProfile";
 import DocAppointmentDetails from "./Pages/DocAppointmentDetails";
 import AddAvailableSlots from "./Pages/AddAvailableSlots";
+import AppointmentCheckout from "./Pages/AppointmentCheckout";
 
 
 
@@ -88,6 +89,7 @@ function App() {
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
+          <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
 
         </Routes>
       </Router>

@@ -1732,7 +1732,44 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         return res.status(400).send({ error: e.message });
     }
 };
+router.get('/bookAppointmentInfo/:doctorId/:date/:famId', protect, async (req, res) => {
+    
+    const userId = req.user._id;
+    const doctorId = req.params.doctorId;
+    const date = req.params.date;
+   
 
+    const familyMemberId = req.params.famId;
+    console.log(date)
+    console.log(doctorId)
+    console.log(familyMemberId)
+    const doctor = await getDoctor(req, res, doctorId);
+    if (!doctor) return;
+    const healthPackage = await getSubscribedHealthPackage(req, res, userId);
+    let discount = 0;
+    if (healthPackage) {
+        discount = healthPackage.doctorDiscountInPercentage;
+    }
+    const fees = calculateFees(doctor.HourlyRate*1.1, discount);
+    var user=await patientModel.findById(userId);
+    const wallet=user.Wallet
+    if(familyMemberId.length && familyMemberId!='null'){
+        console.log('not null')
+       user=await unRegFamMem.findById(familyMemberId);
+    }
+    console.log(fees)
+   
+   let result = {
+        "fees": Math.round(fees * 100) / 100,
+        "user": user.Name,
+        "doctor": doctor.Name,
+        "date": date,
+        "familyMemberId": familyMemberId,
+        "wallet": wallet
+    }
+  
+    return res.status(200).json({ result: result, success: true });
+});
 router.post("/subscribeForPackage", protect, async (req, res) => {
     const { userType, paymentType } = req.query;
     try {
