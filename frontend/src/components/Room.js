@@ -57,7 +57,7 @@ function Room() {
     const callerUser = location.state.callerUser;
     // const callerUserSignal = searchParams.get('callerUserSignal');
     const callerUserSignal = location.state.callerUserSignal;
-    const username = location.state.username;
+    const username = location.state.userName;
     // console.log('isAnswerCall',typeof isAnswerCall,isAnswerCall);
     // const socket = io('http://localhost:8000', {
     //     auth: {
@@ -149,7 +149,7 @@ function Room() {
         peer.on("signal", (data) => {
             console.log('callUser', data);
             console.log('me', me);
-            console.log('name', name);
+            console.log('name', username);
             // Include the user ID in the call information
             socket.emit("callUser", {
                 userToCall: id,
@@ -216,7 +216,8 @@ function Room() {
         if (connectionRef.current){
             connectionRef.current.destroy()
             socket.emit("endCall", { to: callerUser })
-            navigate('/chat');
+            // href to chat
+            window.location.href = "/chat";
         }
     }
 

@@ -11,7 +11,8 @@ import unRegFamMem from '../Models/NotRegisteredFamilyMemberModel.js';
 import RegFamMem from '../Models/RegisteredFamilyMemberModel.js';
 import prescriptionModel from '../Models/prescriptionsModel.js';
 import transactionsModel from '../Models/transactionsModel.js';
-
+import notificationModel from '../Models/notificationModel.js';
+import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
 const storage = multer.memoryStorage();
@@ -24,6 +25,68 @@ const router = express.Router()
 //    const doctors = await doctorModel.find({})
 //     res.status(200).render('doctorPage',doctors)
 // })
+
+
+router.get('/notifications', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ notifications, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving notifications', success: false });
+    }
+});
+
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
+        console.log( 'Notification marked as read');
+        res.status(200).json({ notification, success: true });
+      
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error marking notifications as read', success: false });
+    }
+});
+
+
+const mailSender = async (email, title, body) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            }
+        });
+        // Send emails to users
+        let info = await transporter.sendMail({
+            from: 'Terminal Titans',
+            to: email,
+            subject: title,
+            html: body,
+        });
+        console.log("Email info: ", info);
+        return info;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
 
 router.get('/getCurrentDoctor', protect, async (req, res) => {
     const doctor = await doctorModel.findById(req.user)
@@ -295,7 +358,6 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
         let list = []
         for (let x in healthRecords) {
             list.push(healthRecords[x].HealthDocument.data)
-
         }
         // const medicalHistory = patient.HealthHistory
         // let list1=[]
@@ -310,9 +372,7 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
         
         //console.log(patient)
         const result = {
-           
             "healthDoc": list,
-            
         }
 
         res.status(200).json({ Result: result, success: true })
@@ -818,31 +878,84 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
     }
 });
 
-router.put('/rescheduleAppointment/:id', protect, async (req, res) => {
-    const doctor = await doctorModel.findById(req.user)
-    if (!doctor) {
+//reschedule an appointment req.47
+
+
+router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
+    const doc = await doctorModel.findById(req.user)
+    if (!doc) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
+    console.log('ana');
 
-    const appId = req.params.id;
-    const newdate= req.body.date ;
-    const aptmnt=await appointmentModel.find({DoctorId:req.user._id ,Date:newdate});
+    const appId = req.params._id;
+    const newdate= req.body.Date ;
+    const appointment= await appointmentModel.findById(appId);
+    if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found", success: false });
+    }
+    const Pid = appointment.PatientId ;
+    const DID= req.user._id;
+    const patient = await patientsModel.findById(Pid);
+    const aptmnt=await appointmentModel.find({DoctorId: DID ,Date:newdate});
 
-console.log(aptmnt);
-   if(aptmnt && aptmnt.length>0){
-      return (res.status(400).send({ error: "You alraedy have an appointment during this slot", success: false }));
- }
-    await docAvailableSlots.deleteMany({ DoctorId: req.user._id, Date: newdate });
-
-console.log(appId);
+    console.log('aptmpt:' ,aptmnt);
+       if(aptmnt && aptmnt.length>0){
+          return (res.status(400).send({ error: "You are not available during this slot", success: false }));
+     }
+        await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
+    console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
         Status :"rescheduled"}},{ new: true });
+
+
+        const DmailResponse = await mailSender(
+                doc.Email,
+                "rescheduled:appointment",
+                `<p>It is confirmed. You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}<p>`
+                
+            );
+            if (DmailResponse) {
+                console.log("Email to doctor sent successfully: ", DmailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to doctor");
+            }
  
+            const mailResponse = await mailSender(
+                patient.Email,
+                "rescheduled:appointment",
+                `<p>Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}<p>`
+                
+            );
+            if (mailResponse) {
+                console.log("Email to patient sent successfully: ", mailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to patient");
+            }
 
+            const DnewNotification = new notificationModel({
+                userId: DID, 
+                Message: `You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}`,
 
-    return res.status(200).json({ Result: result, success: true });
-}
+            });
+            await DnewNotification.save();
 
+            const newNotification = new notificationModel({
+                userId: Pid, 
+                Message: `Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}`,
+
+            });
+            
+            await newNotification.save();
+            console.log('noticationsent');
+       
+   return res.status(200).json({ Result: result, success: true });
+
+        }
 )
 
 // requirement number 36
@@ -1056,6 +1169,7 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
+        generatePDF(prescription);
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1104,6 +1218,7 @@ router.post('/updateDosage',protect,async(req,res)=>{
             }
             return item;
         });
+        generatePDF(prescription);
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1118,6 +1233,139 @@ router.post('/updateDosage',protect,async(req,res)=>{
         });
     }
 
+})
+
+ function generatePDF(presc){
+    // Create a new PDF document
+    const doc = new PDFDocument();
+  
+    // Add content to the PDF
+    doc.pipe(fs.createWriteStream('prescription.pdf'));
+    doc.fontSize(25).text('Prescription', 100, 100);
+    doc.fontSize(15).text('Patient name: '+presc.patient.Name, 100, 150);
+    doc.fontSize(15).text('Doctor name: '+presc.doctor.Name, 100, 200);
+    doc.fontSize(15).text('Date: '+presc.prescription.Date, 100, 250);
+    doc.fontSize(15).text('Status: '+presc.prescription.status, 100, 300);
+    doc.fontSize(15).text('Items: ', 100, 350);
+    for(let i=0;i<presc.medicines.length;i++){
+        doc.fontSize(15).text('Medicine name: '+presc.medicines[i].Name, 100, 400+i*50);
+        doc.fontSize(15).text('Dosage: '+presc.prescription.items[i].dosage, 100, 450+i*50);
+    }
+    doc.end();
+  
+    // Save the PDF to a buffer
+    const buffer = new Promise((resolve) => {
+      const chunks = [];
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.end();
+    });
+    const document = { pdfData: buffer };
+    prescription.pdf=document;
+    prescription.save();
+    return;
+  };
+//requirement 59
+//download selected prescription (PDF) 
+router.post('/downloadPrescription', protect, async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        const patient=await patientsModel.findById(prescription.PatientId);
+        if(!patient){
+            return res.status(400).json({
+                success: false,
+                message: "Patient not found"
+            });
+        }
+        const doctor=await doctorModel.findById(prescription.DoctorId);
+        if(!doctor){
+            return res.status(400).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+        const medicines=[];
+        for(let i=0;i<prescription.items.length;i++){
+            const medicine=await medicineModel.findById(prescription.items[i].medicineId);
+            medicines.push(medicine);
+        }
+        const result={
+            patient:patient,
+            doctor:doctor,
+            medicines:medicines,
+            prescription:prescription
+        }
+        //construct a pdf with the prescription contents
+        // const doc = new PDFDocument();
+        // doc.pipe(fs.createWriteStream('prescription.pdf'));
+        // doc.fontSize(25).text('Prescription', 100, 100);
+        // doc.fontSize(15).text('Patient name: '+result.patient.Name, 100, 150);
+        // doc.fontSize(15).text('Doctor name: '+result.doctor.Name, 100, 200);
+        // doc.fontSize(15).text('Date: '+result.prescription.Date, 100, 250);
+        // doc.fontSize(15).text('Status: '+result.prescription.status, 100, 300);
+        // doc.fontSize(15).text('Items: ', 100, 350);
+        // for(let i=0;i<result.medicines.length;i++){
+        //     doc.fontSize(15).text('Medicine name: '+result.medicines[i].Name, 100, 400+i*50);
+        //     doc.fontSize(15).text('Dosage: '+result.prescription.items[i].dosage, 100, 450+i*50);
+        // }
+        // doc.end();
+        // fs.readFileSync('./public/assets/images/logo.png')
+        // var img = nativeImage.createFromPath("./public/assets/images/logo.png");
+        // var base64Data = img.toDataURL().replace(/^data:image\/png;base64,/, "");
+        // fs.writeFileSync("./public/assets/images/logo.png", base64Data, 'base64');
+        // let options = {
+        //     format: 'A4',
+        //     header: {
+        //         height: "45mm",
+        //         contents: '<div style="text-align: center;">Author: Marc Bachmann</div>'
+        //     },
+        //     footer: {
+        //         height: "28mm",
+        //         contents: {
+        //             first: 'Cover page',
+        //             2: 'Second page', // Any page number is working. 1-based index
+        //             default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
+        //             last: 'Last Page'
+        //         }
+        //     }
+        // };
+        // pdf.create(fs.readFileSync('./prescription.pdf'), options).toFile('./public/assets/images/prescription.pdf', function (err, res) {
+        //     if (err) return console.log(err);
+        //     console.log(res); // { filename: '/app/businesscard.pdf' }
+        // }
+        // );
+        res.status(200).json({
+            success: true,
+            result:result
+        });
+
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
 })
 
 //requirement 63

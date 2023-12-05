@@ -1,8 +1,9 @@
 import ViewMyProfile from '../components/ViewMyProfile';
 import React, { useState, useEffect } from 'react';
-import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory';
-import ViewMyPatientHealthRec from '../components/viewMyPatientHealthRecords';
+import PatientMedicalHistory from '../components/PatientMedicalHistory';
+import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory'; //hashelha keda keda w a7ot makanha haga tania
 import ChangePasswordForm from '../components/ChangePasswordForm';
+import HealthPackage from "../components/HealthPackages";
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -11,7 +12,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import profileImage from "../Assets/profile.png";
+
 
 
 const drawerWidth = 260;
@@ -22,12 +23,12 @@ function ViewMyInfo() {
       <div>
         <Toolbar />      
         <List>
-        <ListItem key='photo' disablePadding>            
+        {/* <ListItem key='photo' disablePadding>            
               <div style={{ textAlign: "center" , paddingLeft:'25px'}}>
                           <img src={profileImage} width='200'   alt="Image description" />
                       </div>
               
-            </ListItem>
+            </ListItem> */}
             <br></br>
             <Divider />
             <ListItem key='profile' disablePadding>
@@ -61,6 +62,12 @@ function ViewMyInfo() {
                 <ListItemText primary='FamilyMembers Information' />
               </ListItemButton>
             </ListItem>
+            <ListItem key='healthPackages' disablePadding>
+              <ListItemButton   onClick={() => setShow(5)}>
+                
+                <ListItemText primary='MyHealthPackages' />
+              </ListItemButton>
+            </ListItem>
          
         </List>
         <Divider />
@@ -73,8 +80,8 @@ function ViewMyInfo() {
         position="fixed"
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
       >
-       
-         {show==0? <ViewMyProfile/>:show==1?<ViewMyPatientMedHistory/>:show==2?<ViewMyPatientHealthRec/>:show==3?<ChangePasswordForm/>:<ViewMyProfile/>}
+                                          {/* 7ot hena el health records */}
+         {show==0? <ViewMyProfile/>:show==1?<ViewMyPatientMedHistory/>:show==2?<PatientMedicalHistory/>:show==3?<ChangePasswordForm/>:show==4?<ViewMyProfile/>:<HealthPackage/>}
       </Box>
         <Drawer
           variant="permanent"
