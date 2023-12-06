@@ -15,10 +15,14 @@ import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
+import fs from 'fs';
+import PDFDocument from 'pdfkit';
+import prescDoc from '../Models/prescDoc.js';
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
 const router = express.Router()
+
 
 //get all doctors
 // router.get('/', async (req, res) => {
@@ -26,6 +30,47 @@ const router = express.Router()
 //     res.status(200).render('doctorPage',doctors)
 // })
 
+//get medicine properties from it's id
+router.get('/getMedicine/:id', async (req, res) => {
+    const medicine = await medicineModel.findById(req.params.id)
+    if (!medicine) {
+        res.status(400).json({ message: "Medicine not found", success: false })
+    }
+    else {
+        res.status(200).json({ Result: medicine, success: true })
+    }
+});
+
+// I want to make a method of type string that generates a string of all the contents in the prescription in a format thats gonna look nice as a pdf
+const generatePrescriptionString = (prescription) => {
+    let prescriptionString = '';
+
+    // Add prescription details
+    prescriptionString += `Prescription ID: ${prescription.id}\n`;
+    //get patient name from his id
+    const patientName = patientsModel.findOne({ _id: prescription.PatientId });
+    prescriptionString += `${patientName.FirstName} ${patientName.LastName}\n`
+    prescriptionString += `Patient Name: ${patientName.FirstName} ${patientName.LastName}\n`;
+    //get doctor name from his id
+    const doctorName = doctorModel.findOne({ _id: prescription.DoctorId });
+    prescriptionString += `Doctor Name: ${doctorName.Firstname} ${doctorName.Lastname}\n`;
+    prescriptionString += `Date: ${prescription.Date}\n\n`;
+    const medication = prescription.items;
+
+    // Add medication details
+    if (medication && Array.isArray(medication)) {
+        prescriptionString += 'Medications:\n';
+        medication.forEach((medication, index) => {
+            prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
+        });
+    }
+
+    // Add additional notes
+    prescriptionString += '\nAdditional Notes:\n';
+    prescriptionString += prescription.notes;
+
+    return prescriptionString;
+};
 
 router.get('/notifications', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
@@ -1169,7 +1214,13 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
-        generatePDF(prescription);
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        doc.pipe(fs.createWriteStream('presc.pdf'));
+        doc.end();
+        prescription.Pdf=doc;
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1218,7 +1269,14 @@ router.post('/updateDosage',protect,async(req,res)=>{
             }
             return item;
         });
-        generatePDF(prescription);
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        doc.pipe(fs.createWriteStream('presc.pdf'));
+        doc.end();
+        prescription.Pdf=doc;
+        await prescription.save();
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1384,6 +1442,7 @@ router.post('/addPrescription',protect,async(req,res)=>{
                 return res.status(400).json({ message: "Contract not accepted", success: false })
             }
         }
+        
         const patientId=req.body.patientId;
         const prescription=new prescriptionModel({
             PatientId:patientId,
@@ -1393,10 +1452,49 @@ router.post('/addPrescription',protect,async(req,res)=>{
             Date:Date.now()
         });
         await prescription.save();
-        res.status(200).json({
-            success: true,
-            message: "Prescription added successfully"
-        });
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        const filePath = "./presc.pdf";
+        doc.pipe(fs.createWriteStream(filePath));
+        doc.end()
+
+        await fs.readFile(filePath, function (err, data) {
+        const newrecord = new prescDoc({
+                    prescDoc: {
+                        data: data,
+                        contentType: 'application/pdf'
+                    },
+                    Prescription: prescription.id,
+                });
+                console.log(newrecord);
+                newrecord.save();
+        res.status(200).json({status:"success"});
+      });
+
+        // fs.readFile(filePath, async function (err, data) {
+        //     if (err) throw err;
+        //     console.log(data);
+        //     const newrecord = new prescDoc({
+        //         prescDoc: {
+        //             data: req.file.buffer,
+        //             contentType: req.file.mimetype,
+        //         },
+        //         prescription: prescription.id,
+        //     });
+
+        //     // Continue with the rest of the code here
+        //     newrecord.save();
+        //     await prescription.save();
+        //     res.status(200).json({
+        //         success: true,
+        //         prescription: prescription,
+        //         message: "Prescription added successfully"
+        //     });
+        // });
+        //     newrecord.save();
+       
     }
     catch(error){
         console.log(error);

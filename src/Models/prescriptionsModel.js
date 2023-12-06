@@ -23,10 +23,6 @@ const prescriptionSchema = new mongoose.Schema({
         type:Date,
         required:true
     },
-    Pdf:{
-        data: Buffer,
-        contentType: String
-    }
     //appointment?
 });
 export default model('prescription',prescriptionSchema);
