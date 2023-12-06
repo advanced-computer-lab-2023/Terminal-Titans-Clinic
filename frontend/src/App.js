@@ -15,12 +15,14 @@ import ViewmyHealthRecords from "./components/viewHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
 import PatientHome from "./components/PatientHomePage";
+import AdminHome from "./Pages/AdminHomePage";
 import Doctor from "./Pages/Doctor";
 import AddRegFamMem from "./components/addRegFamilymember";
 import AdminPage from "./Pages/AdminPage";
 import SubPackage from "./Pages/packageSubscribtion";
 import EmploymentContract from "./Pages/EmploymentContract";
 import ViewRegDocDoc from "./components/viewRegDocDoc";
+import ViewDocApplications from "./components/ViewDocApplications";
 import AdminPharmPage from "./Pages/AdminPharmPage";
 import PharmacistScreen from "./Pages/pharmacistScreen";
 import PatientList from "./Pages/viewMyPatientsList";
@@ -29,6 +31,8 @@ import ViewDocProfile from "./Pages/DocProfilePage";
 import ViewMyProfile from "./Pages/viewMyProfile";
 import DocAppointmentDetails from "./Pages/DocAppointmentDetails";
 import AddAvailableSlots from "./Pages/AddAvailableSlots";
+import AdminUserPage from "./components/AdminUserPage";
+import AppointmentCheckout from "./Pages/AppointmentCheckout";
 
 
 
@@ -61,7 +65,10 @@ function App() {
 
         <Routes>
 
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin" element={<AdminHome />} />
+          <Route path="/docApplicationList" element={<ViewDocApplications />} />
+          <Route path="/manageUsers" element={<AdminUserPage />} />
+          {/* <Route path="/admin" element={<AdminPage />} /> */}
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
@@ -88,6 +95,7 @@ function App() {
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
+          <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
 
         </Routes>
       </Router>
