@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-bootstrap/Modal';
-import { useCart } from '../Components/CartContext';
+import { useCart } from './CartContext';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -9,7 +9,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Badge from 'react-bootstrap/Badge';
 import validator from 'validator';
-import Homescreen from '../Screens/Homescreen';
+
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 const Navbar1 = ({ click, onSearch, onFilter }) => {
@@ -29,14 +29,14 @@ const Navbar1 = ({ click, onSearch, onFilter }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const cartResponse = await axios.get('http://localhost:8000/Patient/cartItemCount', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        const cartResponse = await axios.get('http://localhost:8000/Doctor/cartItemCount', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
         if (cartResponse.status === 200) {
           setCartItemCount(cartResponse.data.itemCount);
         } else {
           console.error('Failed to get cart item count. Unexpected response:', cartResponse);
         }
 
-        const medicalUsesResponse = await axios.get('http://localhost:8000/Patient/getAllMedicalUses', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        const medicalUsesResponse = await axios.get('http://localhost:8000/Doctor/getAllMedicalUses', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
         if (medicalUsesResponse.status === 200) {
           setMedicalUses(medicalUsesResponse.data.medicalUses);
         } else {

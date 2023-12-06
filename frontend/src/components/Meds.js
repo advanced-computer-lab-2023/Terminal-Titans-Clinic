@@ -1,8 +1,19 @@
 import "../Styles/Meds.css";
 import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
+
 
 const Meds = ({ medicines }) => {
+    const [show, setShow] = useState(false);
+    const [value, setValue] = useState(0);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+
     if (!medicines || !Array.isArray(medicines)) {
         return null; // or handle this case in a way that makes sense for your application
       }
@@ -20,9 +31,28 @@ const Meds = ({ medicines }) => {
             <p className="info_name">{medicine.Name}</p>
             <p className="infooo">{medicine.MedicalUse.join(' ')}</p>
             <p className="price">${medicine.Price}</p>
-            <Link to={`/medicine?medicineId=${medicine._id}`} className="info_buttom">
+            <Button className="info_buttom" onClick={handleShow}>
               View
-            </Link>
+            </Button>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                <Modal.Title>{medicine.Name}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{medicine.MedicalUse.join(' ')}</Modal.Body>
+                <Modal.Footer>
+                <NumberInput
+                    aria-label="Demo number input"
+                    placeholder="Enter Dosage…"
+                    value={value}
+                    onChange={(event, val) => setValue(val)}
+                />
+
+                <Button variant="primary" onClick={handleClose}>
+                    Add to Prescription
+                </Button>
+                </Modal.Footer>
+            </Modal>
           </div>
         </div>
       ))}

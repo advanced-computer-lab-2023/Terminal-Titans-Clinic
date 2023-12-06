@@ -33,6 +33,7 @@ import AddAvailableSlots from "./Pages/AddAvailableSlots";
 import AdminUserPage from "./components/AdminUserPage";
 import AppointmentCheckout from "./Pages/AppointmentCheckout";
 import PatientRecord from "./components/PatientRecord";
+import AddPresc from "./Pages/AddPresc";
 
 
 
@@ -50,8 +51,6 @@ function App() {
     window.location.href = '/Health-Plus';
   }
 
-
-
   return (
     <div className="App">
       {
@@ -65,7 +64,7 @@ function App() {
       <Router basename="/Health-Plus">
 
         <Routes>
-          <Route path="/addPresc" element={<addPresc />} />
+          <Route path="/addPresc" element={<AddPresc />} />
           <Route path="/medicine" element={<MedsPage />} />
           <Route path="/medicine/:medicineId" element={<MedsPage />} />
 

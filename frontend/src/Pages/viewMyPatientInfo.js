@@ -4,6 +4,7 @@ import ViewMyPatientBasicInfo from "../components/viewMyPatientBasicInfo";
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import ViewMyPatientPresc from '../components/ViewMyPatientPresc';
 import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory';
 import ViewMyPatientHealthRec from '../components/viewMyPatientHealthRecords';
 import Box from '@mui/material/Box';
@@ -16,6 +17,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import profileImage from "../Assets/profile.png";
+
 
 
 const drawerWidth = 260;
@@ -62,7 +64,7 @@ function ViewPatInfo() {
               </ListItemButton>
             </ListItem>
             <ListItem key='prescriptions' disablePadding>
-              <ListItemButton   onClick={() => setShow(2)}>
+              <ListItemButton   onClick={() => setShow(3)}>
                 
                 <ListItemText primary='Prescriptions' />
               </ListItemButton>
@@ -80,7 +82,7 @@ function ViewPatInfo() {
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
       >
        
-         {show==0? <ViewMyPatientBasicInfo/>:show==1?<ViewMyPatientMedHistory/>:<ViewMyPatientHealthRec/>}
+         {show==0? <ViewMyPatientBasicInfo/>:show==1?<ViewMyPatientMedHistory/>:show==2?<ViewMyPatientHealthRec/>:<ViewMyPatientPresc/>}
       </Box>
         <Drawer
           variant="permanent"

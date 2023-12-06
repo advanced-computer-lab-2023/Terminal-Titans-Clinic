@@ -1,5 +1,4 @@
-import "../styles/addpresc.css"
-
+import "../Styles/addPresc.css"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Meds from "../components/Meds";
@@ -10,7 +9,7 @@ import SplitButton from 'react-bootstrap/SplitButton';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 
-const addPresc = () => {
+const AddPresc = () => {
   const [allMedicines, setAllMedicines] = useState([]);
   const [medicalUses, setMedicalUses] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
@@ -18,7 +17,7 @@ const addPresc = () => {
   useEffect(() => {
     const getMedicines = async () => {
       try {
-        const response = await fetch('http://localhost:8000/Patient/getAllMedicine2/', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        const response = await fetch('http://localhost:8000/Doctor/getAllMedicines/', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
         const jsonData = await response.json();
 
         if (Array.isArray(jsonData.meds)) {
@@ -34,57 +33,57 @@ const addPresc = () => {
     getMedicines();
   }, []);
 
-  const handleSearch = async () => {
-    const inputValue = document.getElementById('searchInput').value;
-    try {
-      const response = await axios.get(`http://localhost:8000/Patient/getMedicine/${inputValue}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+//   const handleSearch = async () => {
+//     const inputValue = document.getElementById('searchInput').value;
+//     try {
+//       const response = await axios.get(`http://localhost:8000/Doctor/getMedicine/${inputValue}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
 
-      if (response.status === 200) {
-        const result = response.data.Result;
+//       if (response.status === 200) {
+//         const result = response.data.Result;
 
-        if (result && result.Quantity > 0) {
-          setAllMedicines([response.data.Result]);
-        } else if (result && result.Quantity === 0) {
-          setErrorMessage(`The medicine is out of stock. Here are some alternatives.`);
+//         if (result && result.Quantity > 0) {
+//           setAllMedicines([response.data.Result]);
+//         } else if (result && result.Quantity === 0) {
+//           setErrorMessage(`The medicine is out of stock. Here are some alternatives.`);
 
-          // Set a timer to clear the error message after 2 minutes (adjust as needed)
-          setTimeout(() => {
-            setErrorMessage('');
-          }, 4000); 
+//           // Set a timer to clear the error message after 2 minutes (adjust as needed)
+//           setTimeout(() => {
+//             setErrorMessage('');
+//           }, 4000); 
 
-          const alternativesResponse = await axios.get(`http://localhost:8000/Patient/findAlternatives/${inputValue}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+//           const alternativesResponse = await axios.get(`http://localhost:8000/Doctor/findAlternatives/${inputValue}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
 
-          if (alternativesResponse.status === 200) {
-            setAllMedicines(alternativesResponse.data.Alternatives);
-          } else {
-            console.error('Failed to find alternatives. Unexpected response:', alternativesResponse);
-          }
-        }
-      } else {
-        console.error('Failed to search medicines. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+//           if (alternativesResponse.status === 200) {
+//             setAllMedicines(alternativesResponse.data.Alternatives);
+//           } else {
+//             console.error('Failed to find alternatives. Unexpected response:', alternativesResponse);
+//           }
+//         }
+//       } else {
+//         console.error('Failed to search medicines. Unexpected response:', response);
+//       }
+//     } catch (error) {
+//       console.error('Error:', error);
+//     }
+//   };
 
-  const handleMedicalUseFilter = async (medicalUse) => {
-    try {
-      const response = await axios.get(`http://localhost:8000/Patient/filterMedical/${medicalUse}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
-      if (response.status === 200) {
-        setAllMedicines(response.data.Result);
-      } else {
-        console.error('Failed to filter medicines. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+//   const handleMedicalUseFilter = async (medicalUse) => {
+//     try {
+//       const response = await axios.get(`http://localhost:8000/Doctor/filterMedical/${medicalUse}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+//       if (response.status === 200) {
+//         setAllMedicines(response.data.Result);
+//       } else {
+//         console.error('Failed to filter medicines. Unexpected response:', response);
+//       }
+//     } catch (error) {
+//       console.error('Error:', error);
+//     }
+//   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const medicalUsesResponse = await axios.get('http://localhost:8000/Patient/getAllMedicalUses', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        const medicalUsesResponse = await axios.get('http://localhost:8000/Doctor/getAllMedicalUses', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
         if (medicalUsesResponse.status === 200) {
           setMedicalUses(medicalUsesResponse.data.medicalUses);
         } else {
@@ -107,8 +106,7 @@ const addPresc = () => {
 
   return (
     <div>
-      <Navbar />
-      <InputGroup className="mb-3">
+      {/* <InputGroup className="mb-3">
         <SplitButton
           variant="outline-secondary"
           title="Search"
@@ -128,8 +126,8 @@ const addPresc = () => {
           type="search"
           placeholder="Search"
           aria-label="Text input for search"
-        />
-      </InputGroup>
+        /> 
+      </InputGroup>*/}
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
@@ -150,4 +148,4 @@ const addPresc = () => {
   );
 };
 
-export default addPresc;
+export default AddPresc;

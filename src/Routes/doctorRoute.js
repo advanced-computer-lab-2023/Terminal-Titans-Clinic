@@ -18,12 +18,38 @@ import { exists } from 'fs';
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import prescDoc from '../Models/prescDoc.js';
+import MedicineModel from '../Models/Medicine.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const router = express.Router()
 
 
+router.get('/getAllMedicines', protect, async (req, res) => {
+    try {
+        console.log('HERE')
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+      const meds = await MedicineModel.find({ Archived: false});
+  
+      // Add a new property 'isOverTheCounter' to each medicine object
+  
+      res.status(200).json({ success: true, meds});
+    } catch (error) {
+      console.error('Error fetching medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 //get all doctors
 // router.get('/', async (req, res) => {
 //    const doctors = await doctorModel.find({})
@@ -41,7 +67,154 @@ router.get('/getMedicine/:id', async (req, res) => {
     }
 });
 
+router.get('/prescItemCount', protect, async (req, res) => {
+    const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
 
+
+    try {
+      // Assuming you have a field named userId in the CartItem model
+      const cartItems = await CartItem.find({ userId: req.user._id });
+  
+      const itemCount = cartItems.length;
+  
+      console.log(itemCount);
+      res.json({ itemCount });
+    } catch (error) {
+      console.error('Error getting cart item count:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(400).json({ message: "Doctor not found", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+              return  res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+            res.status(200).json({ Result: doctor, success: true })
+        }
+  
+      const medicalUse = req.params.MedicalUse.toLowerCase();
+      console.log(medicalUse);
+  
+      if (!medicalUse) {
+        return res.status(400).send({ message: 'Please fill the input', success: false });
+      }
+  
+      const filteredMedicines = await MedicineModel.find({
+        MedicalUse: medicalUse,
+        OverTheCounter: true,
+        Archived: false,
+      });
+  
+      if (!filteredMedicines.length) {
+        return res.status(400).send({
+          message: 'No medicines found with the specified medical use and conditions.',
+          success: false,
+        });
+      }
+  
+      console.log(filteredMedicines);
+      res.status(200).send({ Result: filteredMedicines, success: true });
+    } catch (error) {
+      console.error('Error filtering medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  router.get('/getAllMedicalUses', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+
+
+  
+      const medicines = await MedicineModel.find({Archived:false, OverTheCounter: true});
+  
+      // Extract unique medical uses using Set
+      const medicalUsesSet = new Set();
+      medicines.forEach((medicine) => {
+        medicine.MedicalUse.forEach((use) => {
+          medicalUsesSet.add(use);
+        });
+      });
+  
+      const medicalUses = Array.from(medicalUsesSet);
+  
+      res.status(200).json({ success: true, medicalUses });
+    } catch (error) {
+      console.error('Error fetching medical uses:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  router.get('/findAlternatives/:Name', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+
+
+  
+      const Name = req.params.Name.toLowerCase();
+      console.log(Name);
+  
+      if (!Name) {
+        return res.status(400).send({ message: 'Please fill the input', success: false });
+      }
+  
+      const searchedMedicine = await MedicineModel.findOne({ Name, OverTheCounter: true, Archived: false });
+  
+      if (!searchedMedicine) {
+        // If the searched medicine is not found, check for alternatives based on medical use
+        const alternatives = await MedicineModel.find({ MedicalUse: searchedMedicine.MedicalUse, OverTheCounter: true, Archived: false, Quantity: { $gt: 0 } });
+        console.log(alternatives);
+        if (alternatives.length === 0) {
+          return res.status(400).send({ message: "No alternatives found for this medicine", success: false });
+        }
+  
+        return res.status(200).json({ Alternatives: alternatives, success: true });
+      }
+  
+      if (searchedMedicine.Quantity <= 0) {
+        // If the searched medicine is out of stock, get alternatives based on medical use
+        const alternatives = await MedicineModel.find({ MedicalUse: searchedMedicine.MedicalUse, OverTheCounter: true, Archived: false, Quantity: { $gt: 0 } });
+        console.log(alternatives);
+        if (alternatives.length === 0) {
+          return res.status(400).send({ message: "Medicine is out of stock and no alternatives found", success: false });
+        }
+  
+        return res.status(200).json({ Alternatives: alternatives, success: true });
+      }
+  
+      return res.status(400).send({ message: "This medicine is not eligible for alternatives", success: false });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to find alternatives", success: false });
+    }
+  });
 //for testing (return all appointments)
 router.get('/appointments', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/MedPage.css';
-import Navbar from '../Components/Navbar';
+import '../Styles/MedPage.css';
+import Navbar from '../components/Navbar';
 
 function arrayBufferToBase64(buffer) {
     let binary = '';
