@@ -47,6 +47,10 @@ const PharmacistSchema = new mongoose.Schema({
       data: Buffer,
       contentType:String,
       
+    },
+    Wallet: {
+      type: Number,
+      default: 0
     }
 
   }, { timestamps: true });

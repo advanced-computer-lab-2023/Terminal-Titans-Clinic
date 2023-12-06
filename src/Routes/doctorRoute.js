@@ -1567,5 +1567,28 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     console.log(result);
 return res.status(200).json(result);
 });
-
+router.get('/getAllMedicine2', protect, async (req, res) => {
+    try {
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+      const meds = await MedicineModel.find({ Archived: false});
+  
+      // Add a new property 'isOverTheCounter' to each medicine object
+  
+      res.status(200).json({ success: true, meds});
+    } catch (error) {
+      console.error('Error fetching medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 export default router;
