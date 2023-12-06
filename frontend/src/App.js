@@ -41,6 +41,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import Room from './components/Room';
 import Chat from './components/Chat';
+import MedsPage from "./Pages/MedsPage";
 
 function App() {
 
@@ -64,6 +65,9 @@ function App() {
       <Router basename="/Health-Plus">
 
         <Routes>
+          <Route path="/addPresc" element={<addPresc />} />
+          <Route path="/medicine" element={<MedsPage />} />
+          <Route path="/medicine/:medicineId" element={<MedsPage />} />
 
           <Route path="/admin" element={<AdminHome />} />
           <Route path="/docApplicationList" element={<ViewDocApplications />} />
