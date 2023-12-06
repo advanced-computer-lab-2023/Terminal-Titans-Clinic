@@ -26,10 +26,13 @@ function PatientHealthRecords() {
             const data = response.data;
             setUserHealthHistoryPDF(data.Result.medicalHistoryPDF)
             setUserHealthHistoryIMG(data.Result.medicalHistoryImage)
-            const firstPdf = data.Result.medicalHistoryPDF[0];
-            if (firstPdf) {
-                const src = `data:application/pdf;base64,${arrayBufferToBase64(firstPdf.data)}`
-                setCurrentDocumentSrc(src);
+            if(data.Result.medicalHistoryPDF.length>0){
+                const src=`data:${data.Result.medicalHistoryPDF[0].contentType};base64,${arrayBufferToBase64(data.Result.medicalHistoryPDF[0].data.data)}`
+                setCurrentDocumentSrc(src)
+            }
+            else if(data.Result.medicalHistoryImage.length>0){
+                const src=`data:${data.Result.medicalHistoryImage[0].contentType};base64,${arrayBufferToBase64(data.Result.medicalHistoryImage[0].data.data)}`
+                setCurrentDocumentSrc(src)
             }
 
         } catch (error) {
@@ -81,20 +84,21 @@ function PatientHealthRecords() {
         }
     }
 
-    const handleChange = (event, index) => {
+    const handleChange = (event, value) => {
         setIndex(index);
-        const selectedRecord = index <= userHealthHistoryPDF.length ? userHealthHistoryPDF[index - 1] : userHealthHistoryIMG[index - userHealthHistoryPDF.length - 1];
-        handleDocumentClick(selectedRecord, index - 1);
+        if(value<=userHealthHistoryPDF.length){
+            handleDocumentClick(userHealthHistoryPDF[value-1],value-1)
+          }
+          else{
+            handleDocumentClick(userHealthHistoryIMG[value-1-userHealthHistoryPDF.length],value-1)      }
     };
 
     const handleDocumentClick = (record, index) => {
-        setIndex(index);
-        const documentSrc = record.type === 'pdf'
-            ? `data:application/pdf;base64,${arrayBufferToBase64(record.data.data)}`
-            : `data:image/jpeg;base64,${arrayBufferToBase64(record.data.data)}`;
-
-        setCurrentDocumentSrc(documentSrc);
+        setIndex(index)
+          const src=`data:${record.contentType};base64,${arrayBufferToBase64(record.data.data)}`
+          setCurrentDocumentSrc(src)
     };
+    
 
     useEffect(() => {
         uploadMedHistory();
@@ -132,7 +136,7 @@ function PatientHealthRecords() {
                         <li key={`d`} style={{ marginTop: "5%" }}>
                             <ul>
                                 {userHealthHistoryPDF.map((record, index) => (
-                                    <ListItemButton component="a" href="#simple-list" key={index}>
+                                    <ListItemButton component="a" href="#simple-list">
                                         <ListItemText
                                             primary={'Document ' + (parseInt(index) + 1)}
                                             onClick={() => handleDocumentClick(record, index)}
@@ -141,10 +145,11 @@ function PatientHealthRecords() {
                                     </ListItemButton>
                                 ))}
                                 {userHealthHistoryIMG.map((record, index) => (
-                                    <ListItemButton component="a" href="#simple-list" key={index}>
+                                    <ListItemButton component="a" href="#simple-list" >
                                         <ListItemText
                                             primary={'Document ' + (parseInt(index) + userHealthHistoryPDF.length + 1)}
-                                            onClick={() => handleDocumentClick(record, index)}
+                                            onClick={() => handleDocumentClick(record, index+userHealthHistoryPDF.length)}
+                                           
                                         />
                                         <Button variant="outline-danger" onClick={() => deleteRecord(record._id)}>Delete</Button>
                                     </ListItemButton>
@@ -159,11 +164,12 @@ function PatientHealthRecords() {
                         <Typography>Showing: Document {index + 1}</Typography>
 
                         <div>
-                            {currentDocumentSrc.includes('pdf') ? (
+                            {/* {currentDocumentSrc.includes('pdf') ? (
                                 <iframe src={currentDocumentSrc} width="800" height="600"></iframe>
                             ) : (
                                 <img src={currentDocumentSrc} style={{ width: '100%' }} />
-                            )}
+                            )} */}
+                                  <iframe src={currentDocumentSrc}  width="800" height="600"></iframe>
                         </div>
                     </div>
                 </div>

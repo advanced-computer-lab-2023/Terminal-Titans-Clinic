@@ -1,7 +1,7 @@
 import ViewMyProfile from '../components/ViewMyProfile';
 import React, { useState, useEffect } from 'react';
 import PatientMedicalHistory from '../components/PatientMedicalHistory';
-import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory'; //hashelha keda keda w a7ot makanha haga tania
+import PatientRecord from '../components/PatientRecord';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import HealthPackage from "../components/HealthPackages";
 import Box from '@mui/material/Box';
@@ -79,9 +79,8 @@ function ViewMyInfo() {
              <Box
         position="fixed"
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
-      >
-                                          {/* 7ot hena el health records */}
-         {show==0? <ViewMyProfile/>:show==1?<ViewMyPatientMedHistory/>:show==2?<PatientMedicalHistory/>:show==3?<ChangePasswordForm/>:show==4?<ViewMyProfile/>:<HealthPackage/>}
+      >                                         
+         {show==0? <ViewMyProfile/>:show==1?<PatientRecord/>:show==2?<PatientMedicalHistory/>:show==3?<ChangePasswordForm/>:show==4?<ViewMyProfile/>:<HealthPackage/>}
       </Box>
         <Drawer
           variant="permanent"

@@ -11,7 +11,6 @@ import Payment from "./Pages/Payment";
 import ViewAppointments from "./Pages/ViewAppoitments";
 import SignIn from "./Pages/SignIn";
 import HealthPackages from "./Pages/HealthPackages";
-import ViewmyHealthRecords from "./components/viewHealthRecords";
 import DocViewAppointments from "./Pages/DocViewAppointments";
 import Patient from "./Pages/Patient";
 import PatientHome from "./components/PatientHomePage";
@@ -33,6 +32,7 @@ import DocAppointmentDetails from "./Pages/DocAppointmentDetails";
 import AddAvailableSlots from "./Pages/AddAvailableSlots";
 import AdminUserPage from "./components/AdminUserPage";
 import AppointmentCheckout from "./Pages/AppointmentCheckout";
+import PatientRecord from "./components/PatientRecord";
 
 
 
@@ -80,7 +80,6 @@ function App() {
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
-          <Route path="/viewHealthRecords" element={<ViewmyHealthRecords />} />
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
@@ -96,6 +95,7 @@ function App() {
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
+          <Route path="/patientRecord" element={<PatientRecord />} />
 
         </Routes>
       </Router>

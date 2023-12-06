@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 function ViewMyProfile() {
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('id');
     const [myPatient, setMyPatient] = useState({});
 
 const getMyPatient=async()=>{

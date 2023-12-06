@@ -232,6 +232,7 @@ router.get('/viewFamMem', protect, async (req, res) => {
 })
 router.get('/ViewMyProfile', protect, async (req, res) => {
     const patient = await patientModel.findById(req.user);
+    console.log(patient);
     if (!patient) {
         res.status(400).json({ message: "Patient not found", success: false })
     }
@@ -1616,7 +1617,7 @@ router.post('/addHistory', upload.array('files', 10), protect, async (req, res) 
             { new: true }
         );
 
-        console.log(updatedPatient.HealthHistory);
+       // console.log(updatedPatient.HealthHistory);
         res.status(200).json({
             success: true,
             message: "Health history updated successfully",
@@ -1960,7 +1961,7 @@ router.get('/viewmyHealthRecords', protect, async (req, res) => {
     try {
         const healthRecord = await healthModel.find({ PatientId: patient._id });
         let list = []
-        console.log(healthRecord)
+        // console.log(healthRecord)
 
         for (let x in healthRecord) {
             list.push(healthRecord[x].HealthDocument.data)
