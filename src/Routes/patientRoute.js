@@ -456,7 +456,7 @@ router.get('/getDoctorAvailableSlots/:dId', async (req, res) => {
 //req43
 async function bookApppByWallet(doctor,date,price,patientId,famId){
     const dId=doctor;
-    console.log(dId+"    did");
+    
 var newAppointment;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: patientId, FamilyMemId: famId });
@@ -471,56 +471,79 @@ var newAppointment;
             Date: date,
             Price: price
         });
+
+        newAppointment.save();
+    await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
     }
     else{
-         newAppointment = new appointmentModel({
-            PatientId: patientId,
-            DoctorId: dId,
-            Status: "upcoming",
-            Date: date,
-            Price: price
-        });
-        
-    }
-        newAppointment.save();
-        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
-        const pat=await patientModel.findById(patientId);
-        const doc=await doctorModel.findById(dId);
-    try {
-        const mailResponse = await mailSender(
-            pat.Email,
-            "Booked:appointment",
-            `<p>It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}<p>`
+//         if (aptmnt.length < 1) {
+// return false;
+//         }
+  
+    const newAppointment = new appointmentModel({
+        PatientId: patientId,
+        DoctorId: dId,
+        Status: "upcoming",
+        Date: date,
+        Price: price
 
-        );
-        if (mailResponse) {
-            console.log("Email sent successfully: ", mailResponse);
-        }
-       
-    } catch (error) {
-        return false;
-    }
-    try {
-        const mailResponse = await mailSender(
-            doc.Email,
-            "Booked:appointment",
-            `<p>It is confirmed. ${pat.Name} has booked an appointment with you on the following date: ${date}<p>`
-
-        );
-        if (mailResponse) {
-            console.log("Email sent successfully: ", mailResponse);
-            
-        }
-        
-    } catch (error) {
-        return false;
-    }
-
-
-
-return;
+    });
+    newAppointment.save();
+    await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+   
 }
-// 
+const pat=await patientModel.findById(patientId);
+const doc=await doctorModel.findById(dId);
+    
+    const DmailResponse = await mailSender(
+        doc.Email,
+        "Booked:appointment",
+        `<p>Patient:  ${pat.Name} booked an appointment on the following date: ${date}<p>`
+        
+    );
+    if (DmailResponse) {
+        console.log("Email to doctor sent successfully: ", DmailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to doctor");
+    }
+
+    const mailResponse = await mailSender(
+        pat.Email,
+        "Booked:appointment",
+        `<p>It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}<p>`
+        
+    );
+    if (mailResponse) {
+        console.log("Email to patient sent successfully: ", mailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to patient");
+    }
+
+    const DnewNotification = new notificationModel({
+        userId: dId, 
+        Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
+
+    });
+
+    await DnewNotification.save();
+
+    const newNotification = new notificationModel({
+        userId: pat._id, 
+        Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
+
+    });
+
+    await newNotification.save();
+    console.log('noticationsent');
+
+    return res.status(200).json({ Result: newAppointment, success: true });
+
+
+}
 
 router.get('/notifications', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
@@ -566,48 +589,66 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     }
 
     const appId = req.params._id;
-    const newdate = req.body.Date;
-    const appointment = await appointmentModel.findById(appId);
-    const Did = appointment.DoctorId;
+    const newdate= req.body.Date ;
+    const appointment= await appointmentModel.findById(appId);
+    const Did = appointment.DoctorId ;
     const doc = await doctorModel.findById(Did);
-    const aptmnt = await appointmentModel.find({ DoctorId: Did, Date: newdate });
-
+    const aptmnt=await appointmentModel.find({DoctorId:Did ,Date:newdate});
     console.log(aptmnt);
-    if (aptmnt && aptmnt.length > 0) {
-        return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
-    }
-    await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
+       if(aptmnt && aptmnt.length>0){
+          return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
+     }
+        await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
     console.log(appId);
-    const result = await appointmentModel.findByIdAndUpdate(appId, {
-        $set: {
-            Date: newdate,
-            Status: "rescheduled"
-        }
-    }, { new: true });
+    const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
+        Status :"rescheduled"}},{ new: true });
+        const DmailResponse = await mailSender(
+                doc.Email,
+                "rescheduled:appointment",
+                `<p>Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}<p>`
+                
+            );
+            if (DmailResponse) {
+                console.log("Email to doctor sent successfully: ", DmailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to doctor");
+            }
+ 
+            const mailResponse = await mailSender(
+                exists.Email,
+                "rescheduled:appointment",
+                `<p>It is confirmed. You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}<p>`
+                
+            );
+            if (mailResponse) {
+                console.log("Email to patient sent successfully: ", mailResponse);
+               
+            }
+            else {
+                console.log("Error sending email to patient");
+            }
 
-    try {
-        const mailResponse = await mailSender(
-            exists.Email,
-            "rescheduled:appointment",
-            `<p>It is confirmed. You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}<p>`
+            const DnewNotification = new notificationModel({
+                userId: Did, 
+                Message: `Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}`,
 
-        );
-        if (mailResponse) {
-            console.log("Email sent successfully: ", mailResponse);
-            res.status(200).json({ message: 'Email sent', success: true })
-        }
-        else {
-            res.status(400).json({ message: 'Error sending email', success: false });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error sending email', success: false })
-    }
+            });
 
+            await DnewNotification.save();
 
-    return res.status(200).json({ Result: result, success: true });
-}
+            const newNotification = new notificationModel({
+                userId: req.user._id, 
+                Message: `You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}`,
 
-)
+            });
+
+            await newNotification.save();
+            console.log('noticationsent');
+
+   return res.status(200).json({ Result: result, success: true });
+        });
 
 //req 49 cancel appointment
 router.put('/cancelAppointment/:_id', protect, async (req, res) => {
@@ -759,9 +800,25 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         } catch (error) {
             return false;
         }
+        try {
+            const mailResponse = await mailSender(
+                doc.Email,
+                "Booked:appointment",
+                `<p>It is confirmed. ${pat.Name} has booked an appointment with you on the following date: ${date}<p>`
+    
+            );
+            if (mailResponse) {
+                console.log("Email sent successfully: ", mailResponse);
+                
+            }
+            
+        } catch (error) {
+            return false;
+        }
         return res.redirect('http://localhost:3000/Health-Plus/patientHome')
 
     }
+    else{
     if (!aptmnt) {
         return (res.status(400).send({ error: "This slot is no longer available", success: false }));
     }
@@ -819,13 +876,29 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
     } catch (error) {
         return false;
     }
+    const DnewNotification = new notificationModel({
+        userId: doc._id, 
+        Message: `Patient:  ${[pat].Name} booked an appointment on the following date: ${date}`,
+
+    });
+
+    await DnewNotification.save();
+
+    const newNotification = new notificationModel({
+        userId: pat._id, 
+        Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
+
+    });
+
+    await newNotification.save();
     return res.redirect('http://localhost:3000/Health-Plus/patientHome')
 
     //res.status(200).json({ Result: newAppointment, success: true });
 
+ //   return res.redirect('http://localhost:3000/Health-Plus/patientHome')
 
-})
-
+}
+});
 //view a list of all my upcoming / past appointments
 //req45
 router.get('/viewAppointments', protect, async (req, res) => {
