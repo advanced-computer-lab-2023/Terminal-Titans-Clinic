@@ -1,8 +1,8 @@
-// export default Meds2;
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
-import '../Styles/Meds.css';
+import '../styles/MedPage.css';
+import Navbar from '../Components/Navbar';
 
 function arrayBufferToBase64(buffer) {
     let binary = '';
@@ -16,7 +16,7 @@ function arrayBufferToBase64(buffer) {
     return btoa(binary);
 }
 
-function Meds2() {
+function MedsPage() {
     const [medicines, setMedicines] = useState([]);
     const location = useLocation();
     const { medicineId } = useParams();
@@ -128,6 +128,9 @@ function Meds2() {
     };
 
     return (
+        <div>
+            <Navbar/>
+        
         <div className="meds">
             <div className="medscreen_left">
                 <div className="left_img">
@@ -173,7 +176,8 @@ function Meds2() {
                 </div>
             </div>
         </div>
+        </div>
     );
 };
 
-export default Meds2;
+export default MedsPage;
