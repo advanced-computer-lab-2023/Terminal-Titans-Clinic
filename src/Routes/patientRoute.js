@@ -461,7 +461,7 @@ var newAppointment;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: patientId, FamilyMemId: famId });
         if (!famMember) {
-            return ;
+            return false;
         }
          newAppointment = new appointmentModel({
             PatientId: patientId,
@@ -779,7 +779,9 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         let price = req.params.fees;
         addTransaction(-1 * price, pId, 'Card', 'Book Appointment');
         addTransaction(price / 1.1, dId, 'Card', 'Book Appointment');
-
+        if (dId) {
+            giveDoctorMoney(req, res, doc, fees / 1.1);
+        }
         newAppointment.save();
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
        
@@ -801,20 +803,36 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
             return false;
         }
         try {
-            const mailResponse = await mailSender(
+            const DmailResponse = await mailSender(
                 doc.Email,
                 "Booked:appointment",
                 `<p>It is confirmed. ${pat.Name} has booked an appointment with you on the following date: ${date}<p>`
     
             );
-            if (mailResponse) {
-                console.log("Email sent successfully: ", mailResponse);
+            if (DmailResponse) {
+                console.log("Email sent successfully: ", DmailResponse);
                 
             }
             
         } catch (error) {
             return false;
         }
+        const DnewNotification = new notificationModel({
+            userId: dId, 
+            Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
+    
+        });
+    
+        await DnewNotification.save();
+    
+        const newNotification = new notificationModel({
+            userId:pId, 
+            Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
+    
+        });
+    
+        await newNotification.save();
+        console.log('noticationsent');
         return res.redirect('http://localhost:3000/Health-Plus/patientHome')
 
     }
@@ -862,14 +880,14 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         return false;
     }
     try {
-        const mailResponse = await mailSender(
+        const DmailResponse = await mailSender(
             doc.Email,
             "Booked:appointment",
             `<p>It is confirmed. ${pat.Name} has booked an appointment with you on the following date: ${date}<p>`
 
         );
-        if (mailResponse) {
-            console.log("Email sent successfully: ", mailResponse);
+        if (DmailResponse) {
+            console.log("Email sent successfully: ", DmailResponse);
             
         }
         
@@ -878,7 +896,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
     }
     const DnewNotification = new notificationModel({
         userId: doc._id, 
-        Message: `Patient:  ${[pat].Name} booked an appointment on the following date: ${date}`,
+        Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
 
     });
 
