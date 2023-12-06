@@ -42,7 +42,7 @@ export default function AppointmentCheckout() {
 
     const getAppointment=async()=>{
     
-        await axios.get(`http://localhost:8000/patient/bookAppointmentInfo/${doctorId}/${date}/${famId}`, 
+        await axios.get(`http://localhost:8000/Patient/bookAppointmentInfo/${doctorId}/${date}/${famId}`, 
             { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
           ).then(
             (res) => {
@@ -58,6 +58,51 @@ export default function AppointmentCheckout() {
     useEffect(() => {
         getAppointment();
     }, [])
+    const handlePayment = async () => {
+      try {
+        const paymentMethod=value;
+          const response = await axios.post(
+            `http://localhost:8000/Patient/payForAppointment/`,
+            {
+              familyMember: {
+                _id: famId
+              },
+              doctor: {
+                _id: doctorId
+              },
+              date: date
+            },
+            {
+              headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem("token") 
+              },
+              params: {
+                userType: famId==null?"patient":"familyMember",
+                paymentType: paymentMethod
+              },
+            }
+          );
+          console.log('llll')
+          if (response.status === 200) {
+            if(paymentMethod==="card"){
+  
+              const url = response.data.url;
+              window.location = url;
+            }else{
+              alert('Successfull payment');
+  
+            }
+            
+          } else {
+            
+            alert('Unsuccessfull payment');
+          }
+        }
+        catch (error) {
+          console.log(error);
+          alert('Unsuccessfull payment');
+        }
+    };
   return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
@@ -108,7 +153,9 @@ export default function AppointmentCheckout() {
       </CardContent>
       
       <CardActions>
-        <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}>Proceed</Button>
+        <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
+        onClick={handlePayment}
+        >Proceed</Button>
       </CardActions>
     </Card>
     </div>

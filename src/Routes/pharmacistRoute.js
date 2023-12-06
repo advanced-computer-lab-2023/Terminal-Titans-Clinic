@@ -6,9 +6,74 @@ import multer from 'multer';
 import protect from '../middleware/authMiddleware.js';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+import notificationModel from '../Models/notificationModel.js';
+import nodemailer from 'nodemailer';
 
 
 const router = express.Router();
+
+
+router.get('/notifications', protect, async (req, res) => {
+  const exists = await doctorModel.findOne(req.user);
+  if (!exists) {
+      return res.status(400).json({ message: "Patient not found", success: false })
+  }
+  try {
+      const userId = req.user._id; 
+      const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
+      res.status(200).json({ notifications, success: true });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Error retrieving notifications', success: false });
+  }
+});
+
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+  const exists = await patientModel.findOne(req.user);
+  if (!exists) {
+      return res.status(400).json({ message: "Patient not found", success: false })
+  }
+  try {
+      
+     const ID = req.params._id;
+      const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
+      console.log( 'Notification marked as read');
+      res.status(200).json({ notification, success: true });
+    
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Error marking notifications as read', success: false });
+  }
+});
+
+
+const mailSender = async (email, title, body) => {
+  try {
+      let transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+              user: process.env.MAIL_USER,
+              pass: process.env.MAIL_PASS,
+          }
+      });
+      // Send emails to users
+      let info = await transporter.sendMail({
+          from: 'Terminal Titans',
+          to: email,
+          subject: title,
+          html: body,
+      });
+      console.log("Email info: ", info);
+      return info;
+  } catch (error) {
+      console.log(error.message);
+  }
+};
+
 //search for medicine based on name
 router.get('/getMedicine', protect, async (req, res) => {
   let exists = await user.findById(req.user);
@@ -351,6 +416,31 @@ router.get('/sellMedicine', protect, async (req, res) => {
     console.log(medcheck.Name);
     console.log(medcheck.Quantity--);
     console.log(medcheck.Sales++);
+
+    if (medcheck.Quantity === 0) {
+      const mailResponse = await mailSender(
+        doc.Email,
+        "OUT OF STOCK",
+        `<p>${medcheck.Name} medicine is out of stock<p>`
+        
+    );
+    if (mailResponse) {
+        console.log("Email to pharmacist sent successfully: ", DmailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to pharmacist");
+    }
+    const newNotification = new notificationModel({
+      userId: req.user._id, 
+      Message: `${medcheck.Name} medicine is out of stock<p>`,
+
+  });
+
+  await newNotification.save();
+
+
+    }
 
     res.status(200).json({ message: "Medicine sold successfully", success: true });
   }

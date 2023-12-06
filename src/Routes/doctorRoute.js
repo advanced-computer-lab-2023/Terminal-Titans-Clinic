@@ -15,16 +15,80 @@ import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
 import { exists } from 'fs';
+import fs from 'fs';
+import PDFDocument from 'pdfkit';
+import prescDoc from '../Models/prescDoc.js';
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
 const router = express.Router()
+
 
 //get all doctors
 // router.get('/', async (req, res) => {
 //    const doctors = await doctorModel.find({})
 //     res.status(200).render('doctorPage',doctors)
 // })
+
+//get medicine properties from it's id
+router.get('/getMedicine/:id', async (req, res) => {
+    const medicine = await medicineModel.findById(req.params.id)
+    if (!medicine) {
+        res.status(400).json({ message: "Medicine not found", success: false })
+    }
+    else {
+        res.status(200).json({ Result: medicine, success: true })
+    }
+});
+
+// I want to make a method of type string that generates a string of all the contents in the prescription in a format thats gonna look nice as a pdf
+const generatePrescriptionString = (prescription) => {
+    let prescriptionString = '';
+
+    // Add prescription details
+    prescriptionString += `Prescription ID: ${prescription.id}\n`;
+    //get patient name from his id
+    const patientName = patientsModel.findOne({ _id: prescription.PatientId });
+    prescriptionString += `${patientName.FirstName} ${patientName.LastName}\n`
+    prescriptionString += `Patient Name: ${patientName.FirstName} ${patientName.LastName}\n`;
+    //get doctor name from his id
+    const doctorName = doctorModel.findOne({ _id: prescription.DoctorId });
+    prescriptionString += `Doctor Name: ${doctorName.Firstname} ${doctorName.Lastname}\n`;
+    prescriptionString += `Date: ${prescription.Date}\n\n`;
+    const medication = prescription.items;
+
+    // Add medication details
+    if (medication && Array.isArray(medication)) {
+        prescriptionString += 'Medications:\n';
+        medication.forEach((medication, index) => {
+            prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
+        });
+    }
+
+    // Add additional notes
+    prescriptionString += '\nAdditional Notes:\n';
+    prescriptionString += prescription.notes;
+
+    return prescriptionString;
+};
+
+
+//for testing (return all appointments)
+
+router.get('/appointments', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const appointments = await appointmentModel.find({DoctorId:userId});
+        res.status(200).json({ appointments, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving appointments', success: false });
+    }
+});
 
 
 router.get('/notifications', protect, async (req, res) => {
@@ -886,7 +950,6 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     if (!doc) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    console.log('ana');
 
     const appId = req.params._id;
     const newdate= req.body.Date ;
@@ -955,6 +1018,99 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
        
    return res.status(200).json({ Result: result, success: true });
 
+        }
+)
+
+router.put('/cancelAppointment/:_id', protect, async (req, res) => {
+    const doc = await doctorModel.findById(req.user)
+    if (!doc) {
+        return res.status(500).json({ message: "You are not a doctor", success: false })
+    }
+    
+    const appId = req.params._id;
+    const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{Status :"cancelled"}},{ new: true });
+    if (!result) {
+        return res.status(404).json({ message: "Appointment not found", success: false });
+    }
+    const Pid = result.PatientId ;
+    const DID= req.user._id;
+    const patient = await patientsModel.findById(Pid);
+    const date = result.Date;
+
+
+    const DmailResponse = await mailSender(
+        doc.Email,
+        "cancelled:appointment",
+        `<p>It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date}<p>`
+        
+    );
+    if (DmailResponse) {
+        console.log("Email to doctor sent successfully: ", DmailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to doctor");
+    }
+
+
+    const mailResponse = await mailSender(
+        patient.Email,
+        "cancelled:appointment",
+        `<p>Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date} <p>`
+        
+    );
+    if (mailResponse) {
+        console.log("Email to patient sent successfully: ", mailResponse);
+       
+    }
+    else {
+        console.log("Error sending email to patient");
+    }
+
+    const DnewNotification = new notificationModel({
+        userId: DID, 
+        Message: `It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await DnewNotification.save();
+
+    const newNotification = new notificationModel({
+        userId: Pid, 
+        Message: `Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date}`,
+
+    });
+    
+    await newNotification.save();
+    const refund= result.Price;
+    const doctorfees= refund/1.1
+
+    console.log('noticationsent');
+
+    doc.Wallet = doc.Wallet - doctorfees;
+
+    try {
+        await doctorModel.findByIdAndUpdate(DID,doc);
+        console.log('Money transferred to Doctor successfully');
+    } catch (e) {
+        console.error('Error transferring money to Doctor:', e.message);
+        return res.status(400).send({ error: e.message });
+    }
+//const pre = patient.Wallet
+//console.log(pre);
+        patient.Wallet = patient.Wallet + refund ;
+        try {
+            await patientsModel.findByIdAndUpdate(Pid,patient);
+            console.log('Money transferred to patient successfully');
+        } catch (e) {
+            console.error('Error transferring money to patient:', e.message);
+            return res.status(400).send({ error: e.message });
+        }   
+       // const aft = patient.Wallet
+       //console.log(aft);
+         
+      return res.status(200).json({result, message: "appointment is cancelled successfully ", success: true });
+            
         }
 )
 
@@ -1169,7 +1325,13 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
-        generatePDF(prescription);
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        doc.pipe(fs.createWriteStream('presc.pdf'));
+        doc.end();
+        prescription.Pdf=doc;
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1218,7 +1380,14 @@ router.post('/updateDosage',protect,async(req,res)=>{
             }
             return item;
         });
-        generatePDF(prescription);
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        doc.pipe(fs.createWriteStream('presc.pdf'));
+        doc.end();
+        prescription.Pdf=doc;
+        await prescription.save();
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -1384,6 +1553,7 @@ router.post('/addPrescription',protect,async(req,res)=>{
                 return res.status(400).json({ message: "Contract not accepted", success: false })
             }
         }
+        
         const patientId=req.body.patientId;
         const prescription=new prescriptionModel({
             PatientId:patientId,
@@ -1393,10 +1563,49 @@ router.post('/addPrescription',protect,async(req,res)=>{
             Date:Date.now()
         });
         await prescription.save();
-        res.status(200).json({
-            success: true,
-            message: "Prescription added successfully"
-        });
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        doc.text(generatePrescriptionString (prescription));
+        // get a blob when you're done
+        const filePath = "./presc.pdf";
+        doc.pipe(fs.createWriteStream(filePath));
+        doc.end()
+
+        await fs.readFile(filePath, function (err, data) {
+        const newrecord = new prescDoc({
+                    prescDoc: {
+                        data: data,
+                        contentType: 'application/pdf'
+                    },
+                    Prescription: prescription.id,
+                });
+                console.log(newrecord);
+                newrecord.save();
+        res.status(200).json({status:"success"});
+      });
+
+        // fs.readFile(filePath, async function (err, data) {
+        //     if (err) throw err;
+        //     console.log(data);
+        //     const newrecord = new prescDoc({
+        //         prescDoc: {
+        //             data: req.file.buffer,
+        //             contentType: req.file.mimetype,
+        //         },
+        //         prescription: prescription.id,
+        //     });
+
+        //     // Continue with the rest of the code here
+        //     newrecord.save();
+        //     await prescription.save();
+        //     res.status(200).json({
+        //         success: true,
+        //         prescription: prescription,
+        //         message: "Prescription added successfully"
+        //     });
+        // });
+        //     newrecord.save();
+       
     }
     catch(error){
         console.log(error);
@@ -1567,5 +1776,28 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     console.log(result);
 return res.status(200).json(result);
 });
-
+router.get('/getAllMedicine2', protect, async (req, res) => {
+    try {
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+      const meds = await MedicineModel.find({ Archived: false});
+  
+      // Add a new property 'isOverTheCounter' to each medicine object
+  
+      res.status(200).json({ success: true, meds});
+    } catch (error) {
+      console.error('Error fetching medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 export default router;

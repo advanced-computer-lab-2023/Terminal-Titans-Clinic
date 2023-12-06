@@ -96,6 +96,7 @@ console.log(params.get('success'))
                     </div>    
                     <div className={`timeslot ${selectedTimeSlot === date ? 'selected' : ''}`}onClick={async() => {
                         setSelectedDate(date);
+                        console.log(selectedDate);
                         setSelectedTimeSlot(date);
                         choosePayment();
                         
@@ -139,6 +140,7 @@ console.log(params.get('success'))
         console.log(selectedDoctor);
         console.log(selectedDate);
         console.log(famMemId);
+
         window.location.href = `/Health-Plus/appointmentCheckout?doctorId=${selectedDoctor}&date=${selectedDate}&famMemId=${famMemId}`;
 
         };
