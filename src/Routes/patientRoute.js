@@ -21,6 +21,7 @@ import Order from '../Models/Orders.js';
 import transactionsModel from '../Models/transactionsModel.js';
 import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
+import followupRequest from '../Models/followupRequest.js';
 import { Console } from 'console';
 
 import RegisteredFamilyMemberModel from '../Models/RegisteredFamilyMemberModel.js';
@@ -74,6 +75,57 @@ const mailSender = async (email, title, body) => {
     }
 };
 
+
+//req. 64
+router.post('/followup/:pid/:did/:date/:famId', protect, async (req, res) => {
+    const exist = patientModel.findOne(req.user);
+   if (!exist) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    const pId = req.params.pid;
+    const dId = req.params.did;
+    const date = req.params.date;
+    const famId = req.params.famId;
+    const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
+    if (!aptmnt) {
+        return (res.status(400).send({ error: "This slot is not available", success: false }));
+    }
+
+
+    var newfollowup;
+    if (famId) {
+        const famMember = await familyMember.find({ PatientId: pId, FamilyMemId: famId });
+        if (!famMember) {
+            return false;   
+        }
+        newfollowup = new followupRequest({
+            PatientId: pid,
+            FamilyMemId: famId,
+            DoctorId: dId,
+            Status: "pending",
+            Date: date,
+        });
+
+        newfollowup.save();
+   
+    }
+    else{
+
+    const newfollowup = new followupRequest({
+        PatientId: pid,
+        DoctorId: dId,
+        Status: "pending",
+        Date: date,
+
+    });
+    newfollowup.save();
+}
+    
+return res.status(200).json({ Result: newfollowup, success: true });
+    
+    
+    
+})
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', protect, async (req, res) => {

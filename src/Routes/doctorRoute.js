@@ -19,6 +19,7 @@ import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import prescDoc from '../Models/prescDoc.js';
 import MedicineModel from '../Models/Medicine.js';
+import followupRequest from '../Models/followupRequest.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -219,7 +220,7 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
 router.get('/appointments', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         const userId = req.user._id; 
@@ -234,7 +235,7 @@ router.get('/appointments', protect, async (req, res) => {
 router.get('/notifications', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         const userId = req.user._id; 
@@ -246,11 +247,58 @@ router.get('/notifications', protect, async (req, res) => {
     }
 });
 
-router.put('/readnotification/:_id', protect, async (req, res) => {
-
-    const exists = await patientModel.findOne(req.user);
+router.get('/getfollowups', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const followups = await followupRequest.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ followups, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving follow-up requests', success: false });
+    }
+});
+
+router.put('/acceptfollowup/:_id', protect, async (req, res) => {
+
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Doctor not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const followup = await followupRequest.findByIdAndUpdate( ID ,{ $set:{Status :'accepted'}},{ new: true });
+        console.log( 'follow-up accepted');
+        
+      
+    } catch (error) {
+        console.error('Error:', error);
+        
+    }
+    
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
+        const newAppointment = new appointmentModel({
+            PatientId: followup.PatientId,
+            DoctorId: followuo.DoctorId,
+            Status: "upcoming",
+            Date: followup.Date,
+            Price: 0,
+            FamilyMemId: followup.FamilyMemId,
+        });
+        await newAppointment.save();
+        res.status(200).json({ Result: newAppointment, success: true });
+    
+});
+
+router.put('/readnotification/:_id', protect, async (req, res) => {
+
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         
