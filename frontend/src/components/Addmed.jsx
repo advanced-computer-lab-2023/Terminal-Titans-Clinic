@@ -26,7 +26,7 @@ export default function Addmed() {
     
     
       event.preventDefault();
-      const name = document.getElementsByName("Name")[0]?.value;
+      const name = document.getElementsByName("Name")[0]?.value.toLowerCase();
       const price = document.getElementsByName("Price")[0]?.value;
       const quantity = document.getElementsByName("Quantity")[0]?.value;
       const activeIngredients = document.getElementsByName("ActiveIngredients")[0]?.value;
@@ -41,6 +41,7 @@ export default function Addmed() {
       formData.append("MedicalUse", medicalUse);
       formData.append("OverTheCounter", overTheCounter);
       formData.append("photo", photo);
+      console.log(formData);
       await fetch("http://localhost:8000/Pharma/addMedicine", {
           method: "POST",
           body: formData
@@ -66,6 +67,7 @@ export default function Addmed() {
     boxShadow: '1px 2px 9px #111',
     margin: '4em',
     padding: '1em',
+    borderRadius:'10px'
   };
   return (
     
@@ -165,3 +167,4 @@ export default function Addmed() {
     </Form>
   );
 }
+

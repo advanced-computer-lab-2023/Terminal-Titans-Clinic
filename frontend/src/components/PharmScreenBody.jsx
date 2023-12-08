@@ -3,8 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import 'typeface-roboto';
-// import 'typeface-roboto';
-import '../Styles/PharmScreenBody.css'
+import './PharmScreenBody.css'
 
 
 export default function Body(){
@@ -15,7 +14,7 @@ export default function Body(){
 
       return(
         <div>
-          <div zstyle={{
+          <div style={{
              backgroundImage: `url(${require("../Assets/Pharmacy-home.png")})`, // Replace 'your-image.jpg' with your actual image file path
              backgroundSize: 'cover',
              backgroundPosition: 'center',
