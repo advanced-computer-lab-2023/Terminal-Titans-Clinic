@@ -24,7 +24,7 @@ router.post('/patient', upload.single('history'), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
         || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.body.emergencyRel) {
-        console.log(req);
+      //  console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -226,7 +226,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Please wait for admin approval', success: false })
         }
 
-        console.log(user);
+      //  console.log(user);
         console.log(username);
         console.log(password);
         if (user && (await bcrypt.compare(password, user.Password))) {

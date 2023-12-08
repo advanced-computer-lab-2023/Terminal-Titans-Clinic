@@ -51,7 +51,7 @@ function getLinkForTier(title) {
     case 'Prescriptions':
       return '/Health-Plus/prescriptions';
     case 'HealthPackages':
-      return '/Health-Plus/healthPackages';
+      return '/Health-Plus/packageSubscribtion';
     case 'Appointments':
       return '/Health-Plus/bookAppointments';
     default:

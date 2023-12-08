@@ -4,7 +4,7 @@ import ViewMyPatientBasicInfo from "../components/viewMyPatientBasicInfo";
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import ViewMyPatientPresc from '../components/ViewMyPatientPresc';
+import ViewMyPatientPresc from '../components/viewMyPatientPresc';
 import ViewMyPatientMedHistory from '../components/viewMyPatientMedHistory';
 import ViewMyPatientHealthRec from '../components/viewMyPatientHealthRecords';
 import Box from '@mui/material/Box';

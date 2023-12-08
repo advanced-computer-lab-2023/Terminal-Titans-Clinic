@@ -39,7 +39,7 @@ console.log(params.get('success'))
             }
         };
       
-        fetchData();
+      //  fetchData();
     }, []);
     const allAppointments = async (doctorId) => {
         try {
@@ -122,6 +122,7 @@ console.log(params.get('success'))
         //     (doctor) => doctor.name === event.target.value
         // )._id;
 
+        window.location.href=`/Health-Plus/showAvailableSlots?Id=${doctors[(event.target.selectedIndex)-1]._id}`
         allAppointments(doctors[(event.target.selectedIndex)-1]._id);
     };
     const handleFamilyChange = (event) => {

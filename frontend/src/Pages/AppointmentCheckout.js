@@ -28,7 +28,7 @@ export default function AppointmentCheckout() {
     const params = new URLSearchParams(window.location.search);
     const doctorId = params.get('doctorId');
     const date=params.get('date');
-    const famId=params.get('famId');
+    const famId=params.get('famMemId');
     const [fees,setFees]=React.useState(0)
     const [docName,setDocName]=React.useState('');
     const [userName,setUserName]=React.useState('');
@@ -60,6 +60,7 @@ export default function AppointmentCheckout() {
     }, [])
     const handlePayment = async () => {
       try {
+        console.log(famId);
         const paymentMethod=value;
           const response = await axios.post(
             `http://localhost:8000/Patient/payForAppointment/`,
@@ -90,6 +91,7 @@ export default function AppointmentCheckout() {
               window.location = url;
             }else{
               alert('Successfull payment');
+              window.location.href = `/Health-Plus/appointments`;
   
             }
             
@@ -122,7 +124,7 @@ export default function AppointmentCheckout() {
          With Doctor: {docName}
         </Typography>
         <Typography variant="h6" component="div">
-         On: {date}
+         On: {date.substring(0,10)}
         </Typography>
         <br/>
         <FormControl style={{width:'100%',textAlign:'left'}}>
