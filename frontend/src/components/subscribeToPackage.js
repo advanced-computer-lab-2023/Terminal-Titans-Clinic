@@ -31,6 +31,45 @@ const PackagesTab = () => {
       alert(error.response.data.message)
     }
   };
+  const subscribe=async(id)=>{
+        console.log(famMemId);
+        console.log(id)
+        if(famMemId && famMemId!=='myself'){
+          console.log("fam")
+        try {
+          const response = await axios.get(`http://localhost:8000/patient/checkSub/${famMemId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+          const data = response.data.result;
+
+          if(!data)
+          window.location.href = `/Health-Plus/PackageCheckout?packageId=${id}&famMemId=${famMemId}`;
+          else
+          alert("You are already subscribed to a package");
+          
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          alert(error.response.data.message)
+        }
+      }
+      else{
+        console.log("myself")
+        try {
+          const response = await axios.get(`http://localhost:8000/patient/checkMySub`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+          const data = response.data.result;
+          console.log(data)
+          if(!data)
+          window.location.href = `/Health-Plus/PackageCheckout?packageId=${id}`;
+          else
+          alert("You are already subscribed to a package");
+          
+        } catch (error) {
+          //console.error('Error fetching data:', error);
+          alert(error.response.data.message)
+        }
+      }
+
+   
+
+}
 
   const handleFamilyChange = (event) => {
     setSelectedFam(event.target.value);
@@ -87,8 +126,9 @@ const PackagesTab = () => {
                 <p style={{ textAlign: 'center' }}>Doctor Discount (%): {packageS.doctorDiscountInPercentage}</p>
                 <p style={{ textAlign: 'center' }}>Medicine Discount (%): {packageS.medicinDiscountInPercentage}</p>
                 <p style={{ textAlign: 'center' }}>Family Discount (%): {packageS.familyDiscountInPercentage}</p>
-                <Link to='/Health-Plus/PackageCheckout'>
-                  <Button variant="contained" style={{ backgroundColor: '#004080', color: 'white', margin: 'auto', marginBottom: '20px' }}>
+                <Link >
+                  <Button variant="contained" style={{ backgroundColor: '#004080', color: 'white', margin: 'auto', marginBottom: '20px' }}
+                   onClick={()=>subscribe(packageS._id)}>
                     Subscribe
                   </Button>
                 </Link>

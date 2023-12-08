@@ -54,6 +54,9 @@ useEffect(()=>{
                 {MyTransactions.map((transaction, index) => (
                   <tr>
                     <React.Fragment key={index}>
+                      <td>{transaction.description}</td>
+                      <td className="small-column" style={{width: '100px'}}>{transaction.amount}</td>
+                      
                        </React.Fragment>
                   </tr>
                 ))}

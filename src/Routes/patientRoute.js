@@ -874,7 +874,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         addTransaction(-1 * price, pId, 'Card', 'Book Appointment');
         addTransaction(price / 1.1, dId, 'Card', 'Book Appointment');
         if (dId) {
-            giveDoctorMoney(req, res, doc, fees / 1.1);
+            giveDoctorMoney(req, res, doc, price / 1.1);
         }
         newAppointment.save();
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
@@ -2197,6 +2197,71 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
         return res.status(400).send({ error: e.message });
     }
 };
+router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
+    const exists=await patientModel.findById(req.user._id);
+    if(!exists){
+        return res.status(500).json({
+            success: false,
+            message: "You are not authorised "
+        });
+    }
+    var famId = req.params.userId;
+    var userId=req.user._id;
+    var discount=0;
+    const healthPackageId = req.params.packageId;
+    if(famId){
+        userId=famId;
+        const sub=healthPackageStatus.findOne({patientId:exists._id,status:'Subscribed'});
+        const healthPackageSub = await getHealthPackage(req, res, sub.healthPackageId);
+        
+        if (healthPackageSub) {
+            discount = healthPackageSub.familyDiscountInPercentage;
+        }
+
+    }
+    const healthPackage = await getHealthPackage(req, res, healthPackageId);
+   
+    const user=await patientModel.findById(userId);
+   
+    const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
+    var wallet=user.Wallet
+    let result = {
+        "fees": Math.round(fees * 100) / 100,
+        "user": user.Name,
+        "healthPackage": healthPackage.Name,
+        "wallet": wallet
+    }
+    return res.status(200).json({ result: result, success: true });
+});
+router.get('/checkSub/:userId', protect, async (req, res) => {
+    try{
+    const healthPackage=await healthPackageStatus.findOne({patientId:req.params.userId,status:'Subscribed'});
+    if(healthPackage){
+        return res.status(200).json({ result: true, success: true });
+    }
+    else{
+        return res.status(200).json({ result: false, success: true });
+    }
+}
+catch(e){
+    return res.status(400).json({ result: 'error', success: true });
+}
+});
+router.get('/checkMySub', protect, async (req, res) => {
+    try{
+    const userId=req.user._id;
+    const healthPackage=await healthPackageStatus.findOne({patientId:userId,status:'Subscribed'});
+    if(healthPackage){
+        return res.status(200).json({ result: true, success: true });
+    }
+    else{
+        return res.status(200).json({ result: false, success: true });
+    }
+}
+catch(e){
+    return res.status(400).json({ result: 'error', success: true });
+}
+});
 router.get('/bookAppointmentInfo/:doctorId/:date/:famId', protect, async (req, res) => {
     console.log('line 1938')
     const exists=await patientModel.findById(req.user._id);
@@ -3280,7 +3345,7 @@ router.get('/viewPrescription/:prescriptionId', protect, async (req, res) => {
 const addTransaction = (amount, userId, paymentMethod, description) => {
     console.log('l')
     const newTransaction = new transactionsModel({
-        amount: amount,
+        amount: Math.round(amount * 100) / 100,
         userId: userId,
         paymentMethod: paymentMethod,
         description: description

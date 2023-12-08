@@ -1851,10 +1851,11 @@ router.get('/getTransactionHistory',protect,async(req,res)=>{
         }
         console.log(exists.Wallet)
         const transactions=await transactionsModel.find({userId:req.user._id});
+        
         res.status(200).json({
             success: true,
             transactions:transactions,
-            wallet:exists.Wallet
+            wallet:Math.round(exists.Wallet * 100) / 100
         });
     }
     catch(error){
