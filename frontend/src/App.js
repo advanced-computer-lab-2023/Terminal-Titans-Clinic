@@ -33,6 +33,7 @@ import AddAvailableSlots from "./Pages/AddAvailableSlots";
 import AdminUserPage from "./components/AdminUserPage";
 import AppointmentCheckout from "./Pages/AppointmentCheckout";
 import PatientRecord from "./components/PatientRecord";
+import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
 
@@ -43,6 +44,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import Room from './components/Room';
 import Chat from './components/Chat';
+import MedsPage from "./Pages/MedsPage";
 
 function App() {
 
@@ -50,8 +52,6 @@ function App() {
     sessionStorage.removeItem('token');
     window.location.href = '/Health-Plus';
   }
-
-
 
   return (
     <div className="App">
@@ -66,6 +66,9 @@ function App() {
       <Router basename="/Health-Plus">
 
         <Routes>
+          <Route path="/addPresc" element={<AddPresc />} />
+          <Route path="/medicine" element={<MedsPage />} />
+          <Route path="/medicine/:medicineId" element={<MedsPage />} />
 
           <Route path="/admin" element={<AdminHome />} />
           <Route path="/docApplicationList" element={<ViewDocApplications />} />

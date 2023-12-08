@@ -1,0 +1,36 @@
+.addPresc{
+    max-width: 70%;
+    margin: 1rem auto;
+    justify-self: center;
+}
+.addPresc_title{
+    font-size: 1.5rem;
+    color: #171717;
+    margin-bottom: 1rem;
+    margin-left: 8px;
+
+}
+
+.addPresc_meds{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width : 1232px){
+    .addPresc_meds{
+        grid-template-columns: repeat(3,1fr);
+    }
+
+}
+@media (max-width : 950px){
+    .addPresc_meds{
+        grid-template-columns: repeat(2,1fr);
+    }
+    
+}
+@media (max-width : 630px){
+    .addPresc_meds{
+        grid-template-columns: 1fr;
+    }
+    
+}

@@ -18,12 +18,39 @@ import { exists } from 'fs';
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import prescDoc from '../Models/prescDoc.js';
+import MedicineModel from '../Models/Medicine.js';
+import followupRequest from '../Models/followupRequest.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const router = express.Router()
 
 
+router.get('/getAllMedicines', protect, async (req, res) => {
+    try {
+        console.log('HERE')
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+      const meds = await MedicineModel.find({ Archived: false});
+  
+      // Add a new property 'isOverTheCounter' to each medicine object
+  
+      res.status(200).json({ success: true, meds});
+    } catch (error) {
+      console.error('Error fetching medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 //get all doctors
 // router.get('/', async (req, res) => {
 //    const doctors = await doctorModel.find({})
@@ -41,44 +68,159 @@ router.get('/getMedicine/:id', async (req, res) => {
     }
 });
 
-// I want to make a method of type string that generates a string of all the contents in the prescription in a format thats gonna look nice as a pdf
-const generatePrescriptionString = (prescription) => {
-    let prescriptionString = '';
+router.get('/prescItemCount', protect, async (req, res) => {
+    const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
 
-    // Add prescription details
-    prescriptionString += `Prescription ID: ${prescription.id}\n`;
-    //get patient name from his id
-    const patientName = patientsModel.findOne({ _id: prescription.PatientId });
-    prescriptionString += `${patientName.FirstName} ${patientName.LastName}\n`
-    prescriptionString += `Patient Name: ${patientName.FirstName} ${patientName.LastName}\n`;
-    //get doctor name from his id
-    const doctorName = doctorModel.findOne({ _id: prescription.DoctorId });
-    prescriptionString += `Doctor Name: ${doctorName.Firstname} ${doctorName.Lastname}\n`;
-    prescriptionString += `Date: ${prescription.Date}\n\n`;
-    const medication = prescription.items;
 
-    // Add medication details
-    if (medication && Array.isArray(medication)) {
-        prescriptionString += 'Medications:\n';
-        medication.forEach((medication, index) => {
-            prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
-        });
+    try {
+      // Assuming you have a field named userId in the CartItem model
+      const cartItems = await CartItem.find({ userId: req.user._id });
+  
+      const itemCount = cartItems.length;
+  
+      console.log(itemCount);
+      res.json({ itemCount });
+    } catch (error) {
+      console.error('Error getting cart item count:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
+  });
 
-    // Add additional notes
-    prescriptionString += '\nAdditional Notes:\n';
-    prescriptionString += prescription.notes;
+router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(400).json({ message: "Doctor not found", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+              return  res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+            res.status(200).json({ Result: doctor, success: true })
+        }
+  
+      const medicalUse = req.params.MedicalUse.toLowerCase();
+      console.log(medicalUse);
+  
+      if (!medicalUse) {
+        return res.status(400).send({ message: 'Please fill the input', success: false });
+      }
+  
+      const filteredMedicines = await MedicineModel.find({
+        MedicalUse: medicalUse,
+        OverTheCounter: true,
+        Archived: false,
+      });
+  
+      if (!filteredMedicines.length) {
+        return res.status(400).send({
+          message: 'No medicines found with the specified medical use and conditions.',
+          success: false,
+        });
+      }
+  
+      console.log(filteredMedicines);
+      res.status(200).send({ Result: filteredMedicines, success: true });
+    } catch (error) {
+      console.error('Error filtering medicine data:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 
-    return prescriptionString;
-};
+  router.get('/getAllMedicalUses', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
 
 
+  
+      const medicines = await MedicineModel.find({Archived:false, OverTheCounter: true});
+  
+      // Extract unique medical uses using Set
+      const medicalUsesSet = new Set();
+      medicines.forEach((medicine) => {
+        medicine.MedicalUse.forEach((use) => {
+          medicalUsesSet.add(use);
+        });
+      });
+  
+      const medicalUses = Array.from(medicalUsesSet);
+  
+      res.status(200).json({ success: true, medicalUses });
+    } catch (error) {
+      console.error('Error fetching medical uses:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  router.get('/findAlternatives/:Name', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            return res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+
+
+  
+      const Name = req.params.Name.toLowerCase();
+      console.log(Name);
+  
+      if (!Name) {
+        return res.status(400).send({ message: 'Please fill the input', success: false });
+      }
+  
+      const searchedMedicine = await MedicineModel.findOne({ Name, OverTheCounter: true, Archived: false });
+  
+      if (!searchedMedicine) {
+        // If the searched medicine is not found, check for alternatives based on medical use
+        const alternatives = await MedicineModel.find({ MedicalUse: searchedMedicine.MedicalUse, OverTheCounter: true, Archived: false, Quantity: { $gt: 0 } });
+        console.log(alternatives);
+        if (alternatives.length === 0) {
+          return res.status(400).send({ message: "No alternatives found for this medicine", success: false });
+        }
+  
+        return res.status(200).json({ Alternatives: alternatives, success: true });
+      }
+  
+      if (searchedMedicine.Quantity <= 0) {
+        // If the searched medicine is out of stock, get alternatives based on medical use
+        const alternatives = await MedicineModel.find({ MedicalUse: searchedMedicine.MedicalUse, OverTheCounter: true, Archived: false, Quantity: { $gt: 0 } });
+        console.log(alternatives);
+        if (alternatives.length === 0) {
+          return res.status(400).send({ message: "Medicine is out of stock and no alternatives found", success: false });
+        }
+  
+        return res.status(200).json({ Alternatives: alternatives, success: true });
+      }
+  
+      return res.status(400).send({ message: "This medicine is not eligible for alternatives", success: false });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to find alternatives", success: false });
+    }
+  });
 //for testing (return all appointments)
-
 router.get('/appointments', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         const userId = req.user._id; 
@@ -90,11 +232,10 @@ router.get('/appointments', protect, async (req, res) => {
     }
 });
 
-
 router.get('/notifications', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         const userId = req.user._id; 
@@ -106,12 +247,58 @@ router.get('/notifications', protect, async (req, res) => {
     }
 });
 
+router.get('/getfollowups', protect, async (req, res) => {
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id; 
+        const followups = await followupRequest.find({ userId }).sort({ timestamp: -1 });
+        res.status(200).json({ followups, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving follow-up requests', success: false });
+    }
+});
+
+router.put('/acceptfollowup/:_id', protect, async (req, res) => {
+
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Doctor not found", success: false })
+    }
+    try {
+        
+       const ID = req.params._id;
+        const followup = await followupRequest.findByIdAndUpdate( ID ,{ $set:{Status :'accepted'}},{ new: true });
+        console.log( 'follow-up accepted');
+        
+      
+    } catch (error) {
+        console.error('Error:', error);
+        
+    }
+    
+    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
+        const newAppointment = new appointmentModel({
+            PatientId: followup.PatientId,
+            DoctorId: followuo.DoctorId,
+            Status: "upcoming",
+            Date: followup.Date,
+            Price: 0,
+            FamilyMemId: followup.FamilyMemId,
+        });
+        await newAppointment.save();
+        res.status(200).json({ Result: newAppointment, success: true });
+    
+});
 
 router.put('/readnotification/:_id', protect, async (req, res) => {
 
-    const exists = await patientModel.findOne(req.user);
+    const exists = await doctorModel.findOne(req.user);
     if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
+        return res.status(400).json({ message: "Doctor not found", success: false })
     }
     try {
         
@@ -125,7 +312,6 @@ router.put('/readnotification/:_id', protect, async (req, res) => {
         res.status(500).json({ message: 'Error marking notifications as read', success: false });
     }
 });
-
 
 const mailSender = async (email, title, body) => {
     try {
@@ -279,6 +465,7 @@ router.get('/getPatientInfoAndHealth/:id', protect, async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 });
+
 router.get('/getPatientInfoAndHealth2/:id', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findById(req.user)
@@ -363,6 +550,7 @@ router.get('/getPatientInfoAndHealth2/:id', protect, async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 });
+
 router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findById(req.user)
@@ -476,7 +664,6 @@ router.get('/getPrescriptions',protect,async(req,res)=>{
     }
 }); 
 
-
 // requirement number 33
 router.get('/getPatientsList', protect, async (req, res) => {
     try {
@@ -540,6 +727,7 @@ router.get('/getPatientsList', protect, async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 });
+
 router.get('/getPatientsList2', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
@@ -634,7 +822,6 @@ router.post('/acceptContract', protect, async (req, res) => {
 
 });
 
-
 //requirement number 51
 router.post('/assignfollowUp', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
@@ -671,6 +858,7 @@ router.post('/assignfollowUp', protect, async (req, res) => {
     
     
 })
+
 // requirement number 34
 router.get('/getPatientName/:name', protect, async (req, res) => {
     console.log("doc route 352");
@@ -770,7 +958,6 @@ router.get('/getPatientName/:name', protect, async (req, res) => {
     }
 })
 
-
 router.get('/viewContract', protect, async (req, res) => {
 
     const doctor = await doctorModel.findById(req.user)
@@ -869,7 +1056,6 @@ router.post('/addavailableslots', protect, async (req, res) => {
     }
 });
 
-
 router.get('/getWalletAmount', protect,async (req, res) => {
         
             const exists = await doctorModel.findById(req.user);
@@ -943,8 +1129,6 @@ router.get('/getUpcomingAppointment', protect, async (req, res) => {
 });
 
 //reschedule an appointment req.47
-
-
 router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     const doc = await doctorModel.findById(req.user)
     if (!doc) {
@@ -1294,7 +1478,6 @@ router.post('/addrecord/:PatientId',upload.single('file'),protect,async(req,res)
 
 //requirement 53
 //add/delete medicine to/from the prescription from the pharmacy platform
-
 router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
     try{
         const exists = await doctorModel.findById(req.user);
@@ -1404,36 +1587,6 @@ router.post('/updateDosage',protect,async(req,res)=>{
 
 })
 
- function generatePDF(presc){
-    // Create a new PDF document
-    const doc = new PDFDocument();
-  
-    // Add content to the PDF
-    doc.pipe(fs.createWriteStream('prescription.pdf'));
-    doc.fontSize(25).text('Prescription', 100, 100);
-    doc.fontSize(15).text('Patient name: '+presc.patient.Name, 100, 150);
-    doc.fontSize(15).text('Doctor name: '+presc.doctor.Name, 100, 200);
-    doc.fontSize(15).text('Date: '+presc.prescription.Date, 100, 250);
-    doc.fontSize(15).text('Status: '+presc.prescription.status, 100, 300);
-    doc.fontSize(15).text('Items: ', 100, 350);
-    for(let i=0;i<presc.medicines.length;i++){
-        doc.fontSize(15).text('Medicine name: '+presc.medicines[i].Name, 100, 400+i*50);
-        doc.fontSize(15).text('Dosage: '+presc.prescription.items[i].dosage, 100, 450+i*50);
-    }
-    doc.end();
-  
-    // Save the PDF to a buffer
-    const buffer = new Promise((resolve) => {
-      const chunks = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.end();
-    });
-    const document = { pdfData: buffer };
-    prescription.pdf=document;
-    prescription.save();
-    return;
-  };
 //requirement 59
 //download selected prescription (PDF) 
 router.post('/downloadPrescription', protect, async(req,res)=>{
@@ -1559,15 +1712,40 @@ router.post('/addPrescription',protect,async(req,res)=>{
             PatientId:patientId,
             DoctorId:req.user._id,
             items:[],
-            status:"pending",
+            status:"not filled",
             Date:Date.now()
         });
         await prescription.save();
+        let prescriptionString = '';
+        prescriptionString += `Prescription ID: ${prescription._id}\n`;
+        //get patient name from his id
+        const patientName =await patientsModel.findOne({ _id: prescription.PatientId });
+        console.log(patientName);
+        prescriptionString += `Patient Name: ${patientName.Name}\n`;
+        //get doctor name from his id
+        const doctorName =await doctorModel.findOne({ _id: prescription.DoctorId });
+        console.log(doctorName);
+        prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
+        prescriptionString += `Date: ${prescription.Date}\n\n`;
+        const medication = prescription.items;
+
+        // Add medication details
+        if (medication && Array.isArray(medication)) {
+            prescriptionString += 'Medications:\n';
+            medication.forEach((medication, index) => {
+                prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
+            });
+        }
+
+        // Add additional notes
+        prescriptionString += '\nAdditional Notes:\n';
+        prescriptionString += prescription.notes;
         const doc = new PDFDocument;
         // add your content to the document here, as usual
-        doc.text(generatePrescriptionString (prescription));
+        doc.text(prescriptionString);
         // get a blob when you're done
-        const filePath = "./presc.pdf";
+
+        const filePath = "./"+ prescription._id+".pdf";
         doc.pipe(fs.createWriteStream(filePath));
         doc.end()
 

@@ -1,0 +1,83 @@
+import "../Styles/addPresc.css"
+import React, { useState, useEffect } from 'react';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import axios from 'axios';
+import Meds from "../components/Meds";
+import Dropdown from 'react-bootstrap/Dropdown';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import SplitButton from 'react-bootstrap/SplitButton';
+import { Link } from 'react-router-dom';
+
+const AddPresc = () => {
+  const [allMedicines, setAllMedicines] = useState([]);
+  const [medicalUses, setMedicalUses] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const getMedicines = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/Doctor/getAllMedicines/', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        const jsonData = await response.json();
+
+        if (Array.isArray(jsonData.meds)) {
+          setAllMedicines(jsonData.meds);
+        } else {
+          console.error('Invalid data format. Expected an array.');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    getMedicines();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const medicalUsesResponse = await axios.get('http://localhost:8000/Doctor/getAllMedicalUses', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+        if (medicalUsesResponse.status === 200) {
+          setMedicalUses(medicalUsesResponse.data.medicalUses);
+        } else {
+          console.error('Failed to get medical uses. Unexpected response:', medicalUsesResponse);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    // Fetch initially
+    fetchData();
+
+    // Poll for updates every 5 seconds (adjust the interval as needed)
+    const intervalId = setInterval(fetchData, 5000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Runs once on mount
+
+  return (
+    <div>
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
+      <div className="addPresc">
+        <h2 className="addPresc_title">Meds</h2>
+        <div className="addPresc_meds">
+          {Array.isArray(allMedicines) ? (
+            allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
+          ) : (
+            <p>Error: Medicines data is not in the expected format.</p>
+          )}
+        </div>
+        
+      </div>
+    </div>
+  );
+};
+
+export default AddPresc;
