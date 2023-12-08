@@ -106,7 +106,7 @@ function App() {
           <Route path="/viewDocProfile" element={<ViewDocProfile />} />
           <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat" element={<Chat/>} />
+          <Route path="/chat/:token" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />

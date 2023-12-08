@@ -27,6 +27,27 @@ export default function Chat() {
     const [offlinePeople, setOfflinePeople] = useState({});
     const divUnderMessages = useRef();
     const navigate = useNavigate();
+    const params = new URLSearchParams(window.location.search);
+    const url = window.location.href;
+    const token = url.split('/chat/:')[1];
+   // console.log(chatId)
+    //const token = params.get('token');
+    // const token = new window.URLSearchParams("token");
+    console.log("TOKKKKEEEENNNNNN"+token);
+    sessionStorage.setItem("token",token);
+
+
+    // window.addEventListener("message", (event) => {
+    //     console.log("HIIIIII")
+    //     console.log(event.origin)
+    //     console.log(event.data);
+    //     if (event.origin === "http://localhost:4000") {
+    //         const data = event.data;
+              
+    //         sessionStorage.setItem("token",data)
+    //     }
+
+    // });
 
     useEffect(() => {
         connectToWs()
@@ -211,6 +232,7 @@ export default function Chat() {
             }
         });
     }
+    
 
     return (
         <div className="flex h-screen">
