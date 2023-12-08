@@ -1,123 +1,104 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import "../Styles/LoginForm.css";
-import PaymentPage from '../components/ChoosePaymentMethod';
 import "../Styles/Appointments.css";
 import "../Styles/Packages.css";
 import axios from 'axios';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Button from '@mui/material/Button';
 
 const PackagesTab = () => {
   const [packages, setPackages] = useState([]);
-  const [regFamily,setRegFamily] = useState([]);
-  const [famMemId,setFamMemId] = useState(null);
-  const [selectedFam,setSelectedFam] = useState('');
-  const [selectedPackage,setSelectedPackage] = useState('');
-  const [showPaymentButtons, setShowPaymentButtons] = useState(false);
+  const [regFamily, setRegFamily] = useState([]);
+  const [famMemId, setFamMemId] = useState(null);
+  const [selectedFam, setSelectedFam] = React.useState('');
 
   useEffect(() => {
-    console.log("Hi");
     fetchHealthPackages();
     fetchData();
-
   }, []);
 
   const fetchData = async () => {
-    console.log(sessionStorage.getItem("token") )
     try {
-        const response = await axios.get(`http://localhost:8000/patient/viewFamMem`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-        );
-        const data = response.data;
-          setRegFamily(data.Result.registered)
-             console.log(data.Result)
+      const response = await axios.get(`http://localhost:8000/patient/viewFamMem`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      const data = response.data;
+      setRegFamily(data.Result.registered)
     } catch (error) {
-        console.error('Error fetching data:', error);
-        alert(error.response.data.message)
+      console.error('Error fetching data:', error);
+      alert(error.response.data.message)
     }
-};
+  };
 
-const handleFamilyChange = (event) => {
+  const handleFamilyChange = (event) => {
     setSelectedFam(event.target.value);
-    if(event.target.value !== 'myself')
-        setFamMemId(regFamily[(event.target.selectedIndex)-1]._id);
+    if (event.target.value !== 'myself')
+      setFamMemId(regFamily[(event.target.selectedIndex) - 1]._id);
     else
-        setFamMemId(null);
-};
-
-
-const choosePayment = () => {
-    setShowPaymentButtons(true);
+      setFamMemId(null);
   };
 
   const fetchHealthPackages = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/patient/viewHealthCarePackages',
-    { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      const response = await axios.get('http://localhost:8000/patient/viewHealthCarePackages', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       const data = response.data;
-      console.log(data);
-
-      if (response.status ===200) {
-        setPackages(data.Result);
-      } else {
-      }
+      setPackages(data.Result);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const subscribeToPackage = (packageId) => {
-    setSelectedPackage(packageId);
-    choosePayment();
-  };
-
-
-
   return (
     <div>
-                <div>
-                <label>Patient:</label>
-                <select value={selectedFam} onChange={handleFamilyChange}>
-                    <option value='myself'>myslef</option>
-                    {regFamily.map((famMem) => (
-                        <option key={famMem._id} value={famMem.Name}>
-                            {famMem.Name}
-                        </option>
-                    ))}
-                </select>
-                <div
-                    style={{
-                        width: "700px",
-                        overflow: "scroll",
-                        border: "1px solid #ddd",
-                    }}
-                >
-                </div>
-                
-            </div>
-            {showPaymentButtons && (
-        <PaymentPage
-        selectedDoctor={null}
-        selectedDate={null}
-        famMemId={famMemId}
-        packageId={selectedPackage}
-        />
-        )}
-      <h1>Health Packages</h1>
-      <div id="packageList">
+      <h1 style={{ textAlign: 'center', fontStyle: 'italic', color: '#004080', margin: '20px 0' }}>Discover Our Exclusive Health Packages</h1>
+
+      <p style={{ textAlign: 'center', marginBottom: '10px' }}>Please select the family member for whom you want to subscribe:</p>
+
+      <div style={{ textAlign: 'center' }}>
+        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+          <InputLabel id="demo-select-small-label">Member</InputLabel>
+          <Select
+            value={selectedFam}
+            label="Member"
+            onChange={handleFamilyChange}
+          >
+            <MenuItem value="" disabled>
+              {selectedFam === '' ? 'Member' : ''}
+            </MenuItem>
+            <MenuItem value="myself">Myself</MenuItem>
+            {regFamily.map((famMem) => (
+              <MenuItem key={famMem._id} value={famMem.Name}>
+                {famMem.Name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+
+      <div id="packageList" style={{ display: 'flex', justifyContent: 'space-around' }}>
         {packages.length > 0 ? (
           packages.map((packageS) => (
-            <div key={packageS.packageType} className="package-item">
-              <h2>Package Type: {packageS.packageType}</h2>
-              <p>Subscription Fees (EGP): {packageS.subsriptionFeesInEGP}</p>
-              <p>Doctor Discount (%): {packageS.doctorDiscountInPercentage}</p>
-              <p>Medicine Discount (%): {packageS.medicinDiscountInPercentage}</p>
-              <p>Family Discount (%): {packageS.familyDiscountInPercentage}</p>
-              <button className={`timeslot ${selectedPackage === packageS._id ? 'selected' : ''}`} onClick={() => subscribeToPackage(packageS._id)}>Subscribe</button>
+            <div key={packageS.packageType} className="package-column">
+              <div className="package-item" style={{ marginBottom: '20px', marginTop: '30px', textAlign: 'center', width: '450px', height: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <h2 style={{ color: '#004080', marginBottom: '10px', textAlign: 'center' }}>Package Type: {packageS.packageType}</h2>
+                <p style={{ textAlign: 'center' }}>Subscription Fees (EGP): {packageS.subsriptionFeesInEGP}</p>
+                <p style={{ textAlign: 'center' }}>Doctor Discount (%): {packageS.doctorDiscountInPercentage}</p>
+                <p style={{ textAlign: 'center' }}>Medicine Discount (%): {packageS.medicinDiscountInPercentage}</p>
+                <p style={{ textAlign: 'center' }}>Family Discount (%): {packageS.familyDiscountInPercentage}</p>
+                <Link to='/Health-Plus/PackageCheckout'>
+                  <Button variant="contained" style={{ backgroundColor: '#004080', color: 'white', margin: 'auto', marginBottom: '20px' }}>
+                    Subscribe
+                  </Button>
+                </Link>
+              </div>
             </div>
           ))
         ) : (
-          <p>No health packages available.</p>
+          <p style={{ textAlign: 'center', fontStyle: 'italic', color: '#555' }}>No health packages available.</p>
         )}
       </div>
-      
     </div>
   );
 };

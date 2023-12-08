@@ -1,9 +1,10 @@
 import ViewMyProfile from '../components/ViewMyProfile';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PatientMedicalHistory from '../components/PatientMedicalHistory';
 import PatientRecord from '../components/PatientRecord';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import HealthPackage from "../components/HealthPackages";
+import FamilyMember from '../components/FamMember';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -80,7 +81,7 @@ function ViewMyInfo() {
         position="fixed"
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
       >                                         
-         {show==0? <ViewMyProfile/>:show==1?<PatientRecord/>:show==2?<PatientMedicalHistory/>:show==3?<ChangePasswordForm/>:show==4?<ViewMyProfile/>:<HealthPackage/>}
+         {show==0? <ViewMyProfile/>:show==1?<PatientRecord/>:show==2?<PatientMedicalHistory/>:show==3?<ChangePasswordForm/>:show==4?<FamilyMember/>:<HealthPackage/>}
       </Box>
         <Drawer
           variant="permanent"
