@@ -207,7 +207,7 @@ router.get('/viewFamMem', protect, async (req, res) => {
     var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id });
     var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id });
     var list = []
-    console.log(regFamMemebers)
+   // console.log(regFamMemebers)
 
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].Patient2Id })
@@ -226,7 +226,7 @@ router.get('/viewFamMem', protect, async (req, res) => {
         unregistered: unRegFamMemebers
     }
 
-    console.log(famMembers);
+    //console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
 })
@@ -2158,7 +2158,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
     if (userType == "familyMember") {
         let packageStatus = await healthPackageStatus.find({ patientId: user, status: 'Subscribed' });
         if (packageStatus && packageStatus.length > 0) {
-            return res.status(900).send({ error: "This patient is already subscribed to a health package" });
+            return res.status(900).send({ error: "This patient is already subscribed to a health package, you have to cancel first" });
         }
         const subscribedHealthPackage = await getSubscribedHealthPackage(req, res, userId);
         if (subscribedHealthPackage)

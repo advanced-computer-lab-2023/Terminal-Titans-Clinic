@@ -33,6 +33,8 @@ import AddAvailableSlots from "./Pages/AddAvailableSlots";
 import AdminUserPage from "./components/AdminUserPage";
 import AppointmentCheckout from "./Pages/AppointmentCheckout";
 import PatientRecord from "./components/PatientRecord";
+import PackageCheckout from "./Pages/PackageCheckout";
+import FamilyMember from "./components/FamMember";
 
 
 
@@ -96,6 +98,8 @@ function App() {
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
           <Route path="/patientRecord" element={<PatientRecord />} />
+          <Route path="/PackageCheckout" element={<PackageCheckout />} />
+          <Route path="/FamilyMember" element={<FamilyMember />} />
 
         </Routes>
       </Router>
