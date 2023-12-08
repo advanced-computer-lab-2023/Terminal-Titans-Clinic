@@ -78,29 +78,27 @@ const mailSender = async (email, title, body) => {
 
 
 //req. 64
-router.post('/followup/:pid/:did/:date/:famId', protect, async (req, res) => {
-    const exist = patientModel.findOne(req.user);
+router.post('/followup', protect, async (req, res) => {
+    const exist = await patientModel.findOne(req.user);
    if (!exist) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
-    const pId = req.params.pid;
-    const dId = req.params.did;
-    const date = req.params.date;
-    const famId = req.params.famId;
-    const aptmnt = await docAvailableSlots.findOne({ DoctorId: dId, Date: date });
-    if (!aptmnt) {
-        return (res.status(400).send({ error: "This slot is not available", success: false }));
-    }
+    const pId = req.user._id;
+    const name = req.body.Name;
+    const doc = await doctorModel.findOne({Name : name})
+    const dId = doc._id;
+    const date = req.body.Date;
+    const famId = req.body.famId;
+  
 
-
-    var newfollowup;
+    let newfollowup;
     if (famId) {
         const famMember = await familyMember.find({ PatientId: pId, FamilyMemId: famId });
         if (!famMember) {
             return false;   
         }
         newfollowup = new followupRequest({
-            PatientId: pid,
+            PatientId: pId,
             FamilyMemId: famId,
             DoctorId: dId,
             Status: "pending",
@@ -112,8 +110,8 @@ router.post('/followup/:pid/:did/:date/:famId', protect, async (req, res) => {
     }
     else{
 
-    const newfollowup = new followupRequest({
-        PatientId: pid,
+     newfollowup = new followupRequest({
+        PatientId: pId,
         DoctorId: dId,
         Status: "pending",
         Date: date,
@@ -122,7 +120,7 @@ router.post('/followup/:pid/:did/:date/:famId', protect, async (req, res) => {
     newfollowup.save();
 }
     
-return res.status(200).json({ Result: newfollowup, success: true });
+return res.status(200).json({ newfollowup, success: true });
     
     
     

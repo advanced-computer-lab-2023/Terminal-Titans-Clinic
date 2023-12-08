@@ -254,7 +254,7 @@ router.get('/getfollowups', protect, async (req, res) => {
     }
     try {
         const userId = req.user._id; 
-        const followups = await followupRequest.find({ userId }).sort({ timestamp: -1 });
+        const followups = await followupRequest.find({ DoctorId:userId }).sort({ timestamp: -1 });
         res.status(200).json({ followups, success: true });
     } catch (error) {
         console.error('Error:', error);
@@ -268,9 +268,10 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Doctor not found", success: false })
     }
+    const ID = req.params._id;
     try {
         
-       const ID = req.params._id;
+     //  const ID = req.params._id;
         const followup = await followupRequest.findByIdAndUpdate( ID ,{ $set:{Status :'accepted'}},{ new: true });
         console.log( 'follow-up accepted');
         
@@ -279,11 +280,13 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
         console.error('Error:', error);
         
     }
+    const followup = await followupRequest.findById(ID);
+    const DID= req.user._id;
     
     await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
         const newAppointment = new appointmentModel({
             PatientId: followup.PatientId,
-            DoctorId: followuo.DoctorId,
+            DoctorId: followup.DoctorId,
             Status: "upcoming",
             Date: followup.Date,
             Price: 0,
