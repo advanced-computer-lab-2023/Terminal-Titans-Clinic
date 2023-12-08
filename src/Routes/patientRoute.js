@@ -31,6 +31,7 @@ import multer from 'multer';
 import { pid } from 'process';
 import { TransformStreamDefaultController } from 'node:stream/web';
 import userModel from '../Models/userModel.js';
+import docAvailableSlotsModel from '../Models/docAvailableSlotsModel.js';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -348,7 +349,35 @@ router.post('/getAppointment', protect, async (req, res) => {
     }
     res.status(200).json(final);
 });
+router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
+    console.log("in getAllslots");
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    //const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
+    console.log("357");
+    var slots= await docAvailableSlots.find({DoctorId:req.params.id});
+    console.log("359")
+    var result={};
+    for(var x in slots){
+        var date=slots[x].Date;
+        const day=date.getDate();
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
 
+        if(result[dateKey]){
+            result[dateKey].push(date);
+        }
+        else{
+            result[dateKey]=[date];
+        }
+        }
+
+   console.log("done");
+return res.status(200).json(result);
+});
 // requirement number 54
 router.get('/viewPrescriptions', protect, async (req, res) => {
     const exists = await patientModel.findOne(req.user);
@@ -402,7 +431,7 @@ router.post('/getDoctors', protect, async (req, res) => {
     if (!req.body.Speciality && !req.body.Name) {
         getDoctors = await Doctor.find({});
     }
-    console.log(getDoctors);
+   // console.log(getDoctors);
     if (getDoctors.length == 0) {
         return res.status(400).json({ message: "No doctors found " });
     }
@@ -468,7 +497,7 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
             final.push(result)
 
         }
-        console.log(final)
+        //console.log(final)
         res.status(200).json({ final: final, success: true });
 
     }
@@ -486,7 +515,7 @@ router.get('/getDoctorAvailableSlots/:dId', async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     const dId = req.params.dId;
-    console.log("dId");
+   // console.log("dId");
     const Dr = await Doctor.find({ _id: dId });
     if (Dr.length < 1) {
         return (res.status(400).send({ error: "cant find doctor", success: false }));
@@ -509,13 +538,21 @@ router.get('/getDoctorAvailableSlots/:dId', async (req, res) => {
 //req43
 async function bookApppByWallet(doctor,date,price,patientId,famId){
     const dId=doctor;
-    
+    console.log(famId);
+    console.log("ppp");
 var newAppointment;
     if (famId) {
+        console.log('k')
         const famMember = await familyMember.find({ PatientId: patientId, FamilyMemId: famId });
         if (!famMember) {
             return false;
         }
+        console.log("pio")
+        const availableSlot=await docAvailableSlotsModel.find({DoctorId:dId,Date:date});
+        if(availableSlot.length<1){
+            return false;
+        }
+        console.log("pioppp")
          newAppointment = new appointmentModel({
             PatientId: patientId,
             FamilyMemId: famId,
@@ -532,7 +569,11 @@ var newAppointment;
 //         if (aptmnt.length < 1) {
 // return false;
 //         }
-  
+console.log("571")
+const availableSlot=await docAvailableSlotsModel.find({DoctorId:dId,Date:date});
+if(availableSlot.length<1){
+    return false;
+}
     const newAppointment = new appointmentModel({
         PatientId: patientId,
         DoctorId: dId,
@@ -591,9 +632,9 @@ const doc=await doctorModel.findById(dId);
     });
 
     await newNotification.save();
-    console.log('noticationsent');
+    //console.log('noticationsent');
 
-    return res.status(200).json({ Result: newAppointment, success: true });
+    return true;
 
 
 }
@@ -647,12 +688,12 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     const Did = appointment.DoctorId ;
     const doc = await doctorModel.findById(Did);
     const aptmnt=await appointmentModel.find({DoctorId:Did ,Date:newdate});
-    console.log(aptmnt);
+   // console.log(aptmnt);
        if(aptmnt && aptmnt.length>0){
           return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
      }
         await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
-    console.log(appId);
+ //   console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
         Status :"rescheduled"}},{ new: true });
         const DmailResponse = await mailSender(
@@ -2022,7 +2063,7 @@ const processAppCardPayment = async (req, res, fees, description, doctor, subscr
 
 const processAppWalletPayment = async (req, res, userId, fees, doctor,famId,date) => {
     console.log("docccc")
-    console.log(doctor)
+    console.log(famId)
     const user = await getUserOrFamilyMember(req, res, "patient", true);
     if (!user) return;
 
@@ -2035,6 +2076,10 @@ const processAppWalletPayment = async (req, res, userId, fees, doctor,famId,date
     }
 
     try {
+        const flag=await bookApppByWallet(doctor,date,fees,userId,famId);
+        console.log("lopo")
+        console.log(flag);
+        if(flag){
         await patientModel.findByIdAndUpdate(userId, user);
         if (doctor) {
             giveDoctorMoney(req, res, doctor, fees / 1.1);
@@ -2048,12 +2093,20 @@ const processAppWalletPayment = async (req, res, userId, fees, doctor,famId,date
         }
 
         console.log('Wallet payment processed successfully');
-        bookApppByWallet(doctor,date,fees,userId,famId);
+       
         return res.status(200).json({
             message: 'Payment Successful',
             success: true,
             Result: "Money left in wallet: " + user.Wallet
         });
+    }
+    else{
+        return res.status(400).json({
+            message: 'Payment UnSuccessful',
+            success: false,
+            Result: "Money left in wallet: " + user.Wallet
+        });
+    }
     } catch (e) {
         console.error('Error processing wallet payment', e.message);
         return res.status(400).send({ error: e.message });
@@ -2099,6 +2152,7 @@ const processSubWalletPayment = async (req, res, userId, fees,famId,healthPackag
 
 router.post("/payForAppointment", protect, async (req, res) => {
     console.log(req);
+    console.log("lp")
     const { userType, paymentType } = req.query;
     try {
         return await processAppointmentPayment(req, res, userType, paymentType);
@@ -2130,6 +2184,7 @@ const processAppointmentPayment = async (req, res, userType, paymentType) => {
     if (userType === "familyMember") {
         fam = true
     }
+    console.log(req.body.familyMember._id);
     const fees = calculateFees(doctor.HourlyRate * 1.1, discount);
     try {
         if (paymentType === "wallet") {

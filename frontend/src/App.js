@@ -43,6 +43,7 @@ import { useState } from 'react';
 import Room from './components/Room';
 import Chat from './components/Chat';
 import MedsPage from "./Pages/MedsPage";
+import ShowAvailableSlots from "./Pages/ShowAvailableSlots";
 
 function App() {
 
@@ -99,6 +100,7 @@ function App() {
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
           <Route path="/patientRecord" element={<PatientRecord />} />
+          <Route path="/showAvailableSlots" element={<ShowAvailableSlots />} />
 
         </Routes>
       </Router>
