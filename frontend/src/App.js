@@ -25,6 +25,7 @@ import ViewDocApplications from "./components/ViewDocApplications";
 import AdminPharmPage from "./Pages/AdminPharmPage";
 import PharmacistScreen from "./Pages/pharmacistScreen";
 import PatientList from "./Pages/viewMyPatientsList";
+import DoctorsList from "./Pages/viewDoctors"
 import ViewPatInfo from "./Pages/viewMyPatientInfo";
 import ViewDocProfile from "./Pages/DocProfilePage";
 import ViewMyProfile from "./Pages/viewMyProfile";
@@ -115,6 +116,8 @@ function App() {
           <Route path="/showAvailableSlots" element={<ShowAvailableSlots />} />
           <Route path="/PackageCheckout" element={<PackageCheckout />} />
           <Route path="/FamilyMember" element={<FamilyMember />} />
+          <Route path="/viewDoctors" element={<DoctorsList />} />
+      
 
         </Routes>
       </Router>
