@@ -64,6 +64,14 @@ function getLinkForTier(title) {
 const defaultTheme = createTheme();
 
 export default function Pricing() {
+  const signoutButtonFunc = () => {
+    sessionStorage.removeItem('token');
+    window.location.href = '/Health-Plus';
+  }
+
+  function goToChat() {
+    window.location.href = `chat/${sessionStorage.getItem('token')}`;
+  }
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
@@ -95,20 +103,23 @@ export default function Pricing() {
             >
               Other Informations
             </Link>
-            <Link
+            <Button
               variant="button"
               color="text.primary"
               // hena link el chatting
-              href="#"
+              onClick={() => { goToChat() }}
               sx={{ my: 1, mx: 1.5 }}
             >
               Support
-            </Link>
+            </Button>
           </nav>
           {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
-          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}> 
+          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}>
             Home
           </Button>
+          <div className="signoutButton">
+            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
+          </div>
         </Toolbar>
       </AppBar>
       {/* Hero unit */}
@@ -120,75 +131,75 @@ export default function Pricing() {
           color="text.primary"
           gutterBottom
         >
-              Your Patient Dashboard
+          Your Patient Dashboard
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" component="p">
-        Manage your health effectively with our patient dashboard.
-        Access your prescriptions, health packages, and appointments in one place. 
+          Manage your health effectively with our patient dashboard.
+          Access your prescriptions, health packages, and appointments in one place.
         </Typography>
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
         <Grid container spacing={5} alignItems="flex-end">
-              {tiers.map((tier) => (
-        <Grid
-          item
-          key={tier.title}
-          xs={12}
-          md={4}
-        >
-          <Card>
-            <CardHeader
-              title={tier.title}
-              subheader={tier.subheader}
-              titleTypographyProps={{ align: 'center' }}
-              subheaderTypographyProps={{
-                align: 'center',
-              }}
-              sx={{
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? theme.palette.grey[200]
-                    : theme.palette.grey[700],
-              }}
-            />
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'baseline',
-                  mb: 2,
-                }}
-              />
-              <ul>
-                {tier.description.map((line) => (
-                  <Typography
-                    component="li"
-                    variant="subtitle1"
-                    align="center"
-                    key={line}
+          {tiers.map((tier) => (
+            <Grid
+              item
+              key={tier.title}
+              xs={12}
+              md={4}
+            >
+              <Card>
+                <CardHeader
+                  title={tier.title}
+                  subheader={tier.subheader}
+                  titleTypographyProps={{ align: 'center' }}
+                  subheaderTypographyProps={{
+                    align: 'center',
+                  }}
+                  sx={{
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'light'
+                        ? theme.palette.grey[200]
+                        : theme.palette.grey[700],
+                  }}
+                />
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'baseline',
+                      mb: 2,
+                    }}
+                  />
+                  <ul>
+                    {tier.description.map((line) => (
+                      <Typography
+                        component="li"
+                        variant="subtitle1"
+                        align="center"
+                        key={line}
+                      >
+                        {line}
+                      </Typography>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    fullWidth
+                    variant={tier.buttonVariant}
                   >
-                    {line}
-                  </Typography>
-                ))}
-              </ul>
-            </CardContent>
-            <CardActions>
-              <Button
-                fullWidth
-                variant={tier.buttonVariant}
-              >
-              <Link
-                href={getLinkForTier(tier.title)} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                {tier.buttonText}
-               </Link>
-              </Button>
-            </CardActions>
-           </Card>
-          </Grid>
+                    <Link
+                      href={getLinkForTier(tier.title)}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      {tier.buttonText}
+                    </Link>
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
 
         </Grid>

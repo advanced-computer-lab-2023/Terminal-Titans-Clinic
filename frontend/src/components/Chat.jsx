@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { uniqBy } from "lodash";
+import { set, uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
 import { io } from 'socket.io-client';
@@ -20,6 +20,7 @@ export default function Chat() {
     const [ws, setWs] = useState(null);
     const [onlinePeople, setOnlinePeople] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedUserName, setSelectedUserName] = useState(null);
     const [username, setUsername] = useState(null);
     const [id, setId] = useState(null);
     const [newMessageText, setNewMessageText] = useState('');
@@ -29,25 +30,11 @@ export default function Chat() {
     const navigate = useNavigate();
     const params = new URLSearchParams(window.location.search);
     const url = window.location.href;
-    const token = url.split('/chat/:')[1];
-   // console.log(chatId)
+    const token = url.split('/chat/')[1];
+    // console.log(chatId)
     //const token = params.get('token');
     // const token = new window.URLSearchParams("token");
-    console.log("TOKKKKEEEENNNNNN"+token);
-    sessionStorage.setItem("token",token);
-
-
-    // window.addEventListener("message", (event) => {
-    //     console.log("HIIIIII")
-    //     console.log(event.origin)
-    //     console.log(event.data);
-    //     if (event.origin === "http://localhost:4000") {
-    //         const data = event.data;
-              
-    //         sessionStorage.setItem("token",data)
-    //     }
-
-    // });
+    sessionStorage.setItem("token", token);
 
     useEffect(() => {
         connectToWs()
@@ -117,6 +104,8 @@ export default function Chat() {
                 offlinePeople[p._id] = p;
             });
             setOfflinePeople(offlinePeople);
+            console.log(offlinePeople['656ea6de69f5316efdb75d0e'].Username);
+            console.log(onlinePeople);
             setOnlinePeople(onlinePeople);
         });
     }
@@ -219,7 +208,6 @@ export default function Chat() {
     }
 
     function startVideoCall() {
-        console.log('username', username);
         navigate('/meeting', {
             state: {
                 video: true,
@@ -232,7 +220,7 @@ export default function Chat() {
             }
         });
     }
-    
+
 
     return (
         <div className="flex h-screen">
@@ -245,10 +233,10 @@ export default function Chat() {
                             id={userId}
                             online={true}
                             username={onlinePeople[userId]}
-                            onClick={() => { setSelectedUserId(userId); }}
-                            selected={userId === selectedUserId} 
+                            onClick={() => { setSelectedUserId(userId);setSelectedUserName(onlinePeople[userId]?.Username) }}
+                            selected={userId === selectedUserId}
                             inChat={true}
-                            />
+                        />
                     ))}
                     {Object.keys(offlinePeople).map(userId => (
                         <Contact
@@ -256,7 +244,7 @@ export default function Chat() {
                             id={userId}
                             online={false}
                             username={offlinePeople[userId].Username}
-                            onClick={() => setSelectedUserId(userId)}
+                            onClick={() => { setSelectedUserId(userId);setSelectedUserName(offlinePeople[userId]?.Username) }}
                             selected={userId === selectedUserId}
                             inChat={true} />
                     ))}
@@ -264,13 +252,21 @@ export default function Chat() {
             </div>
             <div className="flex flex-col bg-blue-50 w-2/3 p-2 relative">
                 {!!selectedUserId && (
-                    <div className="callIcons">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                        </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
-                            <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
+                    <div className="callNav">
+                        <Contact
+                            id={selectedUserId}
+                            online={false}
+                            username={selectedUserName}
+                            selected={false}
+                            inChat={false} />
+                        <div className="callIcons">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
+                                <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                        </div>
                     </div>
                 )}
                 <div className="flex-grow">
@@ -311,8 +307,8 @@ export default function Chat() {
                             value={newMessageText}
                             onChange={ev => setNewMessageText(ev.target.value)}
                             placeholder="Type your message here"
-                            className="bg-white flex-grow border rounded-sm p-2" />
-                        <button type="submit" className="bg-blue-500 p-2 text-white rounded-sm">
+                            className="bg-white flex-grow border rounded-sm p-2 z-1" />
+                        <button type="submit" className="bg-blue-500 p-2 text-white rounded-sm z-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                             </svg>

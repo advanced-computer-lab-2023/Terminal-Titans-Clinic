@@ -88,6 +88,7 @@ io.on("connection", async (socket) => {
 		})
 
 		socket.on("callUser", (data) => {
+			console.log('callUser', userSocketMap);
 			// loop through all the sockets and find the one with the id
 			userSocketMap.forEach((value, key) => {
 				console.log('value', value);
