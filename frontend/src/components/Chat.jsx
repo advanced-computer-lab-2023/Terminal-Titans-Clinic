@@ -31,7 +31,8 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [offlinePeople, setOfflinePeople] = useState({});
     const [socket, setSocket] = useState(null);
-    const [video, setVideo] = useState(false)
+    const [video, setVideo] = useState(false);
+    const [type, setType] = useState('');
     const divUnderMessages = useRef();
     const navigate = useNavigate();
     const location = useLocation();
@@ -42,7 +43,7 @@ export default function Chat() {
     //const token = params.get('token');
     // const token = new window.URLSearchParams("token");
     sessionStorage.setItem("token", token);
-    
+
 
     useEffect(() => {
         connectToWs()
@@ -101,6 +102,7 @@ export default function Chat() {
                 'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             }
         }).then(response => {
+            setType(response.data.myUser.__t)
             setId(response.data.myUser._id);
             setUsername(response.data.myUser.Username);
             let onlinePeople = {};
@@ -193,7 +195,7 @@ export default function Chat() {
         });
     }
 
-    function rejectCall(){
+    function rejectCall() {
         setReceivingCall(false)
         socket.emit("rejected", { to: caller })
     }
@@ -232,6 +234,17 @@ export default function Chat() {
         });
     }
 
+    function goToHome() {
+        if(type == 'Pharmacist'){
+            window.location.href = 'http://localhost:4000/Health-Plus/pharmacistScreen';
+        }
+        else if(type == 'patient'){
+            window.location.href = 'http://localhost:3000/Health-Plus/patientHome';
+        }
+        else if(type == 'Doctor'){
+            window.location.href = 'http://localhost:3000/Health-Plus/doctorHome';
+        }
+    }
 
     return (
         <div className="flex h-screen">
@@ -257,7 +270,9 @@ export default function Chat() {
             </div>
             <div className="bg-white w-1/3 flex flex-col">
                 <div className="flex-grow">
-                    <Logo />
+                    <div onClick={goToHome} className="logo">
+                        <Logo />
+                    </div>
                     {Object.keys(onlinePeople).map(userId => (
                         <Contact
                             key={userId}

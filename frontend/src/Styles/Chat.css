@@ -56,4 +56,9 @@
 .optionsCall i{
     border-radius: 100%;
     padding: 10px;
+    cursor: pointer;
+}
+
+.logo{
+    cursor: pointer;
 }
