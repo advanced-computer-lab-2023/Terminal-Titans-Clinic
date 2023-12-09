@@ -1,0 +1,101 @@
+.Medcines{
+    width: 300px;
+    padding: 1rem;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    margin: 8px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.medicine > img{
+    height: 170px;
+    border-radius: 8px;
+}
+
+.meds_info > p{
+    margin-bottom: 8px;
+
+}
+
+.price{
+    font-weight: bold;
+}
+
+.info_name{
+    font-size: 1rem;
+    overflow: hidden;
+
+}
+
+.infooo{
+    font-size: 0.8rem;
+}
+
+.info_buttom{
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    text-align: center;
+    color: #171717;
+    background: #f4f4f4;
+    padding: 8px 16px;
+    border: 1px solid #171717;
+    font-size: 1rem;
+
+}
+.info_buttom:hover{
+    background: #171717;
+    color: #f4f4f4;
+}
+
+@media (max-width : 1232px){
+    .Medcines{
+        width: 360px;
+    }
+}
+
+@media (max-width : 1115px){
+    .Medcines{
+        width: 330px;
+    }
+}
+
+@media (max-width : 1028px){
+    .Medcines{
+        width: 300px;
+    }
+}
+@media (max-width : 950px){
+    .Medcines{
+        width: 400px;
+    }
+}
+@media (max-width : 830px){
+    .Medcines{
+        width: 330px;
+    }
+}
+
+@media (max-width : 700px){
+    .Medcines{
+        width: 290px;
+    }
+}
+@media (max-width : 630px){
+    .Medcines{
+        width: 450px;
+    }
+}
+@media (max-width : 500px){
+    .Medcines{
+        width: 350px;
+    }
+}
+@media (max-width : 400px){
+    .Medcines{
+        width: 300px;
+    }
+}

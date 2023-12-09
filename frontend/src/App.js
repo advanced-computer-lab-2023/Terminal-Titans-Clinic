@@ -46,23 +46,15 @@ import Room from './components/Room';
 import Chat from './components/Chat';
 import MedsPage from "./Pages/MedsPage";
 import ShowAvailableSlots from "./Pages/ShowAvailableSlots";
+import NewMed from "./Pages/newmedPage";
+import AvailableMeds from './Pages/AvailableMeds';
+import MedPharm from './Pages/MedPagePharm.js'
 
 function App() {
 
-  const signoutButtonFunc = () => {
-    sessionStorage.removeItem('token');
-    window.location.href = '/Health-Plus';
-  }
-
   return (
     <div className="App">
-      {
-        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
-          <></>
-          : <div className="signoutButton">
-            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
-          </div>
-      }
+      
 
       <Router basename="/Health-Plus">
 
@@ -79,7 +71,14 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
+
+          {/* PHARMACIST ROUTES */}
           <Route path="/pharmacistHome" element={<PharmacistScreen/>}/>
+          <Route path="/NewMed" element={<NewMed/>}/>
+          <Route path="/AvailableMeds" element={<AvailableMeds/>}/>
+          <Route path="/medicinepharm" element={<MedPharm/>}/>
+
+          
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
           <Route path="/docViewAppointments" element={<DocViewAppointments />} />
@@ -96,7 +95,7 @@ function App() {
           <Route path="/viewDocProfile" element={<ViewDocProfile />} />
           <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat" element={<Chat/>} />
+          <Route path="/chat/:token" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />

@@ -1,0 +1,36 @@
+.homescreen{
+    max-width: 70%;
+    margin: 1rem auto;
+    justify-self: center;
+}
+.homescreen_title{
+    font-size: 1.5rem;
+    color: #171717;
+    margin-bottom: 1rem;
+    margin-left: 8px;
+
+}
+
+.homescreen_meds{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width : 1232px){
+    .homescreen_meds{
+        grid-template-columns: repeat(3,1fr);
+    }
+
+}
+@media (max-width : 950px){
+    .homescreen_meds{
+        grid-template-columns: repeat(2,1fr);
+    }
+    
+}
+@media (max-width : 630px){
+    .homescreen_meds{
+        grid-template-columns: 1fr;
+    }
+    
+}
