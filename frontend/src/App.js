@@ -53,20 +53,9 @@ import MedPharm from './Pages/MedPagePharm.js'
 
 function App() {
 
-  const signoutButtonFunc = () => {
-    sessionStorage.removeItem('token');
-    window.location.href = '/Health-Plus';
-  }
-
   return (
     <div className="App">
-      {
-        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
-          <></>
-          : <div className="signoutButton">
-            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
-          </div>
-      }
+      
 
       <Router basename="/Health-Plus">
 

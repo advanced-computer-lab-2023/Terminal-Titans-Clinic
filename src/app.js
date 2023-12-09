@@ -88,6 +88,7 @@ io.on("connection", async (socket) => {
 		})
 
 		socket.on("callUser", (data) => {
+			console.log('callUser', userSocketMap);
 			// loop through all the sockets and find the one with the id
 			userSocketMap.forEach((value, key) => {
 				console.log('value', value);
@@ -96,25 +97,32 @@ io.on("connection", async (socket) => {
 				console.log('data.name', data.name);
 				if (key == data.userToCall) {
 					// to room id w from socket id
-					io.to(key).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+					io.to(key).emit("callUser", { signal: data.signalData, from: data.from, name: data.name, video: data.video })
 				}
 			})
 		})
 
-		socket.on("answerCall", (data) => {
-			console.log('answerCall1', data);
+		socket.on('rejectCall', ({ from }) => {
+			console.log('rejectCall', from);
 			userSocketMap.forEach((value, key) => {
 				console.log('value', value);
 				console.log('key', key);
-				console.log('data.to', data.to);
+				console.log('from', from);
+				if (value == from) {
+					console.log('rejectCall2', from);
+					io.to(key).emit("callRejected")
+				}
+			})
+			// io.to(from).emit("callRejected");
+		});
+
+		socket.on("answerCall", (data) => {
+			console.log('answerCall1', data);
+			userSocketMap.forEach((value, key) => {
 				if (value == data.to) {
 					console.log('answerCall2', data.to, data.signal);
-					if(io.to(key).emit("callAccepted", data.signal))
-						console.log('sent');
-					else
-						console.log('not sent');
+					io.to(key).emit("callAccepted", data.signal)
 				}
-				// io.to(data.to).emit("callAccepted", data.signal)
 			})
 		})
 
@@ -129,7 +137,6 @@ io.on("connection", async (socket) => {
 					io.to(key).emit("callEnded")
 				}
 			})
-			// io.to(to).emit("callEnded");
 		});
 	} catch (error) {
 	}
@@ -229,14 +236,18 @@ app.get('/messages/:userId', protect, async (req, res) => {
 
 app.get('/people', protect, async (req, res) => {
 	// console.log(req.user.Username,'people');
-	const myUser = await userModel.findById(req.user._id).select('-ID -License -Degree -HealthHistory');
+	const myUser = req.user;
 	if (!myUser) return res.status(404).json({ message: 'User not found' });
 	if (myUser.__t == 'patient') {
 		let appointments = await appointmentModel.find({ PatientId: req.user._id });
 		let people = [];
 		for (let i = 0; i < appointments.length; i++) {
-			let doctor = await userModel.findById(appointments[i].DoctorId).select('-ID -License -Degree');
+			let doctor = await userModel.findById(appointments[i].DoctorId).select('-ID -License -Degree -HealthHistory -password');
 			people.push(doctor);
+		}
+		let pharmacists = await userModel.find({ __t: 'Pharmacist' }).select('-ID -License -Degree -HealthHistory -password');
+		for (let i = 0; i < pharmacists.length; i++) {
+			people.push(pharmacists[i]);
 		}
 		let mySet = new Set(people);
 		people = [...mySet];
@@ -246,12 +257,21 @@ app.get('/people', protect, async (req, res) => {
 		let appointments = await appointmentModel.find({ DoctorId: req.user._id });
 		let people = [];
 		for (let i = 0; i < appointments.length; i++) {
-			let patient = await userModel.findById(appointments[i].PatientId).select('-HealthHistory');
+			let patient = await userModel.findById(appointments[i].PatientId).select('-ID -License -Degree -HealthHistory -password');
 			people.push(patient);
+		}
+		let pharmacists = await userModel.find({ __t: 'Pharmacist' }).select('-ID -License -Degree -HealthHistory -password');
+		for (let i = 0; i < pharmacists.length; i++) {
+			people.push(pharmacists[i]);
 		}
 		let mySet = new Set(people);
 		people = [...mySet];
 
+		res.status(200).json({ myUser: myUser, Result: people });
+	}
+	else if (myUser.__t == 'Pharmacist') {
+		let people = await userModel.find({ __t: { $in: ['patient', 'Doctor'] } }).select('-ID -License -Degree -HealthHistory -password');
+		
 		res.status(200).json({ myUser: myUser, Result: people });
 	}
 });
