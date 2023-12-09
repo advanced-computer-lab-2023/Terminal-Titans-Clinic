@@ -16,44 +16,16 @@ const DoctorsList = () => {
   const navigate = useNavigate();
 
   const [doctors, setDoctors] = useState([]);
-  const [name, setName] = useState("");
-  const [speciality, setSpeciality] = useState("");
+  const [Name, setName] = useState("");
+  const [Speciality, setSpeciality] = useState("");
   //const [checked, setChecked] = useState(false);
-
-  // const getDoctors = async () => {
-  //   // Add your logic to fetch doctors based on the filters
-    
-  
-  //   // Check if name and speciality are empty, and set them to null if true
-  //   const requestData = {
-  //     name: name.trim() === '' ? null : name,
-  //     speciality: speciality.trim() === '' ? null : speciality,
-      
-  //   };
-  //   const response = await axios.post(
-  //     `http://localhost:8000/patient/getDoctors`,
-  //     requestData, 
-  //     {
-  //       headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") }
-  //     }
-    
-  //   );
-
-  //   if (response.status === 200) {
-  //     console.log("here**************************************");
-  //     const doctorList = response.data.Result;
-  //     setDoctors(doctorList);
-  //   }else{
-  //     console.log("here2**************************************");
-  //   }
-  // } ;
 
   const getDoctors = async () => {
     try{
     console.log("hanA********************************");
     const response = await axios.post(
       `http://localhost:8000/patient/getDoctors`,
-      { name, speciality },
+      { Name, Speciality },
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
     console.log("ouuutttt");
@@ -90,7 +62,7 @@ console.log(error);
         variant="outlined"
         size="small"
         sx={{ paddingRight: 1 }}
-        value={name}
+        value={Name}
         onChange={(e) => setName(e.target.value)}
       />
 
@@ -100,7 +72,7 @@ console.log(error);
         variant="outlined"
         size="small"
         sx={{ paddingRight: 1 }}
-        value={speciality}
+        value={Speciality}
         onChange={(e) => setSpeciality(e.target.value)}
       />
 
