@@ -8,6 +8,9 @@ import { useNavigate, createSearchParams } from "react-router-dom";
 import Peer from "simple-peer"
 import chat from '../Styles/Chat.css';
 import { useLocation } from 'react-router-dom';
+import CallIcon from '@mui/icons-material/Call';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import Button from '@mui/material/Button';
 
 
 export default function Chat() {
@@ -27,6 +30,8 @@ export default function Chat() {
     const [newMessageText, setNewMessageText] = useState('');
     const [messages, setMessages] = useState([]);
     const [offlinePeople, setOfflinePeople] = useState({});
+    const [socket, setSocket] = useState(null);
+    const [video, setVideo] = useState(false)
     const divUnderMessages = useRef();
     const navigate = useNavigate();
     const location = useLocation();
@@ -37,14 +42,16 @@ export default function Chat() {
     //const token = params.get('token');
     // const token = new window.URLSearchParams("token");
     sessionStorage.setItem("token", token);
+    
 
     useEffect(() => {
         connectToWs()
-        const socket = io('http://localhost:8000', {
+        let socket = io('http://localhost:8000', {
             auth: {
                 Authorization: "Bearer " + sessionStorage.getItem('token')
             }
         });
+        setSocket(socket);
         socket.on("me", (id) => {
             console.log('me', id);
             setMe(id)
@@ -55,8 +62,15 @@ export default function Chat() {
             setReceivingCall(true)
             setCaller(data.from)
             setName(data.name)
+            setVideo(data.video)
             setCallerSignal(data.signal)
         })
+        socket.on("rejected", (data) => {
+            console.log(`Call rejected by user ${data.from}`);
+            socket.emit("rejectCall", { to: data.from })
+            // Handle the rejection as needed
+            // For example, update the UI or show a notification
+        });
     }, []);
 
     function connectToWs() {
@@ -106,7 +120,7 @@ export default function Chat() {
                 offlinePeople[p._id] = p;
             });
             setOfflinePeople(offlinePeople);
-            console.log(offlinePeople['656ea6de69f5316efdb75d0e'].Username);
+            console.log(offlinePeople);
             console.log(onlinePeople);
             setOnlinePeople(onlinePeople);
         });
@@ -170,23 +184,18 @@ export default function Chat() {
     const answerCall = () => {
         navigate('/meeting', {
             state: {
-                video: true,
+                video: video,
                 recipient: selectedUserId,
                 answerCall: true,
                 callerUser: caller,
                 callerUserSignal: callerSignal,
             }
         });
-        // navigate({
-        //     pathname: "/meeting",
-        //     search: createSearchParams({
-        //         video: true,
-        //         recipient: selectedUserId,
-        //         answerCall: true,
-        //         callerUser: caller,
-        //         callerUserSignal: callerSignal,
-        //     }).toString()
-        // });
+    }
+
+    function rejectCall(){
+        setReceivingCall(false)
+        socket.emit("rejected", { to: caller })
     }
 
     function startCall() {
@@ -226,6 +235,26 @@ export default function Chat() {
 
     return (
         <div className="flex h-screen">
+            <div>
+                {receivingCall ? (
+                    <>
+                        <div className="callingUser">
+                            <div>
+                                <h1 className="text-center">{name}</h1>
+                                <p className="text-center">...is Calling</p>
+                            </div>
+                            <div className="optionsCall">
+                                <i onClick={answerCall} style={{ background: 'green' }}>
+                                    {<CallIcon />}
+                                </i>
+                                <i onClick={rejectCall} style={{ background: 'red' }}>
+                                    {<CallEndIcon />}
+                                </i>
+                            </div>
+                        </div>
+                    </>
+                ) : null}
+            </div>
             <div className="bg-white w-1/3 flex flex-col">
                 <div className="flex-grow">
                     <Logo />
@@ -235,7 +264,7 @@ export default function Chat() {
                             id={userId}
                             online={true}
                             username={onlinePeople[userId]}
-                            onClick={() => { setSelectedUserId(userId);setSelectedUserName(onlinePeople[userId]?.Username) }}
+                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(onlinePeople[userId]) }}
                             selected={userId === selectedUserId}
                             inChat={true}
                         />
@@ -246,7 +275,7 @@ export default function Chat() {
                             id={userId}
                             online={false}
                             username={offlinePeople[userId].Username}
-                            onClick={() => { setSelectedUserId(userId);setSelectedUserName(offlinePeople[userId]?.Username) }}
+                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(offlinePeople[userId]?.Username) }}
                             selected={userId === selectedUserId}
                             inChat={true} />
                     ))}
@@ -262,11 +291,11 @@ export default function Chat() {
                             selected={false}
                             inChat={false} />
                         <div className="callIcons">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                             </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
-                                <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
+                                <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
                             </svg>
                         </div>
                     </div>
@@ -303,6 +332,7 @@ export default function Chat() {
                         </div>
                     )}
                 </div>
+                <div className="spaceTop"></div>
                 {!!selectedUserId && (
                     <form className="flex gap-2" onSubmit={sendMessage}>
                         <input type="text"
@@ -317,17 +347,6 @@ export default function Chat() {
                         </button>
                     </form>
                 )}
-
-                <div>
-                    {receivingCall ? (
-                        <div className="caller">
-                            {/* <h1 >{name} is calling...</h1> */}
-                            <button variant="contained" color="primary" onClick={answerCall}>
-                                Answer
-                            </button>
-                        </div>
-                    ) : null}
-                </div>
             </div>
         </div>
     );

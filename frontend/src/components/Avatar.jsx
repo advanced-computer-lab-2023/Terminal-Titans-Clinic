@@ -6,7 +6,6 @@ export default function Avatar({ userId, username, online, inChat }) {
     const userIdBase10 = parseInt(userId.substring(10), 16);
     const colorIndex = userIdBase10 % colors.length;
     const color = colors[colorIndex];
-    console.log(username);
     return (
         <div className={"w-8 h-8 relative rounded-full flex items-center " + color}>
             <div className="text-center w-full opacity-70">{username[0]}</div>

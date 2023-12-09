@@ -97,25 +97,32 @@ io.on("connection", async (socket) => {
 				console.log('data.name', data.name);
 				if (key == data.userToCall) {
 					// to room id w from socket id
-					io.to(key).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+					io.to(key).emit("callUser", { signal: data.signalData, from: data.from, name: data.name, video: data.video })
 				}
 			})
 		})
 
-		socket.on("answerCall", (data) => {
-			console.log('answerCall1', data);
+		socket.on('rejectCall', ({ from }) => {
+			console.log('rejectCall', from);
 			userSocketMap.forEach((value, key) => {
 				console.log('value', value);
 				console.log('key', key);
-				console.log('data.to', data.to);
+				console.log('from', from);
+				if (value == from) {
+					console.log('rejectCall2', from);
+					io.to(key).emit("callRejected")
+				}
+			})
+			// io.to(from).emit("callRejected");
+		});
+
+		socket.on("answerCall", (data) => {
+			console.log('answerCall1', data);
+			userSocketMap.forEach((value, key) => {
 				if (value == data.to) {
 					console.log('answerCall2', data.to, data.signal);
-					if(io.to(key).emit("callAccepted", data.signal))
-						console.log('sent');
-					else
-						console.log('not sent');
+					io.to(key).emit("callAccepted", data.signal)
 				}
-				// io.to(data.to).emit("callAccepted", data.signal)
 			})
 		})
 
@@ -130,7 +137,6 @@ io.on("connection", async (socket) => {
 					io.to(key).emit("callEnded")
 				}
 			})
-			// io.to(to).emit("callEnded");
 		});
 	} catch (error) {
 	}
