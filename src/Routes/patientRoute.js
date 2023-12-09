@@ -463,7 +463,7 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
 
         }
         let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-        const packId = myHealthStatus.packageId;
+        const packId = myHealthStatus.healthPackageId;
         var discountP = 0;
         if (packId) {
             const allPackages = await healthPackageModel.find({ _id: packId });
@@ -1208,7 +1208,7 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
 
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-    const packId = myHealthStatus.packageId;
+    const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
 
     if (packId) {
@@ -2770,7 +2770,7 @@ router.get('/cartinCheckOut', protect, async (req, res) => {
         list.push(med);
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-    const packId = myHealthStatus.packageId;
+    const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
     if (packId) {
         const allPackages = await healthPackageModel.find({ _id: packId });
@@ -2966,7 +2966,7 @@ router.get('/checkout/:id/:address/:paymentMethod', async (req, res) => {
         console.log('Total after setting:', total);
         if (total > 0) {
             let myHealthStatus = await healthPackageStatus.findOne({ patientId: patientId.id, status: 'Subscribed' });
-            const packId = myHealthStatus.packageId;
+            const packId = myHealthStatus.healthPackageId;
             var discountP = 0;
             if (packId) {
                 const allPackages = await healthPackageModel.find({ _id: packId });
@@ -3187,7 +3187,7 @@ router.put('/cancelOrder/:orderId', protect, async (req, res) => {
 async function getOrderDetails(pid) {
     try {
         let myHealthStatus = await healthPackageStatus.findOne({ patientId: pid, status: 'Subscribed' });
-        const packId = myHealthStatus.packageId;
+        const packId = myHealthStatus.healthPackageId;
         var discountP = 0;
         if (packId) {
             const allPackages = await healthPackageModel.find({ _id: packId });
