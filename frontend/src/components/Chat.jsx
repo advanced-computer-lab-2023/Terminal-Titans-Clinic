@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import { useNavigate, createSearchParams } from "react-router-dom";
 import Peer from "simple-peer"
 import chat from '../Styles/Chat.css';
+import { useLocation } from 'react-router-dom';
 
 
 export default function Chat() {
@@ -28,6 +29,7 @@ export default function Chat() {
     const [offlinePeople, setOfflinePeople] = useState({});
     const divUnderMessages = useRef();
     const navigate = useNavigate();
+    const location = useLocation();
     const params = new URLSearchParams(window.location.search);
     const url = window.location.href;
     const token = url.split('/chat/')[1];
