@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Card from '@mui/material/Card';
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
@@ -20,7 +18,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
-import FamMember from "../Styles/FamMember.css"
 
 function FamilyMember() {
   const [regFamily, setRegFamily] = useState([]);
@@ -38,10 +35,15 @@ function FamilyMember() {
   const [errName, setErrName] = useState(false);
   const [errAge, setErrAge] = useState(false);
   const [errNid, setErrNid] = useState(false);
-  const [errGender, setErrGender] = useState(false);
-  const [errRelation, setErrRelation] = useState(false);
+  const [errGender, setErrGender] = useState("");
+  const [errRelation, setErrRelation] = useState("");
 
-
+  // Link Account State
+  const [linkAccountOpen, setLinkAccountOpen] = useState(false);
+  const [linkedAccountSuccessMessage, setLinkedAccountSuccessMessage] = useState("");
+  const [linkedAccountErrorMessage, setLinkedAccountErrorMessage] = useState("");
+  const [linkedAccountEmailOrPhone, setLinkedAccountEmailOrPhone] = useState("");
+  const [linkedAccountRelation, setLinkedAccountRelation] = useState("");
 
   useEffect(() => {
     fetchFamilyMembers();
@@ -61,32 +63,27 @@ function FamilyMember() {
   };
 
   const handleAddFamilyMember = async () => {
-    console.log("Request Body:", { name, age, nId, gender, relation });
     try {
-      // Check if the relation is valid (wife, husband, or child)
-      // if (!["wife", "husband", "child"].includes(relation.toLowerCase())) {
-
-      // }
       let flag = true;
-      if (name == "") {
+      if (name === "") {
         setErrName(true);
-        flag = false
+        flag = false;
       }
-      if (age == "") {
+      if (age === "") {
         setErrAge(true);
-        flag = false
+        flag = false;
       }
-      if (nId == "") {
+      if (nId === "") {
         setErrNid(true);
-        flag = false
+        flag = false;
       }
-      if (gender == "") {
+      if (gender === "") {
         setErrGender(true);
-        flag = false
+        flag = false;
       }
-      if (errRelation == "") {
+      if (relation === "") {
         setErrRelation(true);
-        flag = false
+        flag = false;
       }
       if (flag) {
         const response = await axios.post(
@@ -105,7 +102,7 @@ function FamilyMember() {
         setShow(true);
         fetchFamilyMembers();
       } else {
-        setErrorMessage("Please fill all the fields")
+        setErrorMessage("Please fill all the fields");
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -125,6 +122,48 @@ function FamilyMember() {
     setOpen(false);
   };
 
+  const handleLinkAccount = async () => {
+    try {
+      if (linkedAccountEmailOrPhone !== "" && linkedAccountRelation !== "") {
+        let linkAccountEndpoint = 'addRegFamilyMembyNum'; // default to phone number
+
+        // if email is entered, switch to the email endpoint
+        if (linkedAccountEmailOrPhone.includes('@')) {
+          linkAccountEndpoint = 'addRegFamilyMembyMail';
+        }
+
+        const response = await axios.post(
+          `http://localhost:8000/patient/${linkAccountEndpoint}`,
+          {
+            email: linkAccountEndpoint === 'addRegFamilyMembyMail' ? linkedAccountEmailOrPhone : null,
+            phoneNum: linkAccountEndpoint === 'addRegFamilyMembyNum' ? linkedAccountEmailOrPhone : null,
+            relation: linkedAccountRelation,
+          },
+          { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+        );
+
+        setLinkedAccountSuccessMessage(response.data.message);
+        setLinkAccountOpen(false);
+        setShow(true);
+        fetchFamilyMembers();
+      } else {
+        setLinkedAccountErrorMessage("Please fill all the fields");
+      }
+    } catch (error) {
+      setLinkedAccountErrorMessage(error.response.data.message);
+    }
+  };
+  
+  const handleLinkAccountClickOpen = () => {
+    setLinkedAccountSuccessMessage("");
+    setLinkedAccountErrorMessage("");
+    setLinkAccountOpen(true);
+  };
+
+  const handleLinkAccountClose = () => {
+    setLinkAccountOpen(false);
+  };
+
   return (
     <div>
       <ToastContainer
@@ -134,52 +173,63 @@ function FamilyMember() {
       >
         <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
           <Toast.Header closeButton={false}>
-            <strong className="me-auto">Successfull</strong>
+            <strong className="me-auto">Successful</strong>
           </Toast.Header>
-          <Toast.Body>Added Family Member Successfuly</Toast.Body>
+          <Toast.Body>Added Family Member Successfully</Toast.Body>
         </Toast>
       </ToastContainer>
+
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <h2 style={{ fontSize: '20px', marginBottom: '20px' }}>Family Members List</h2>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Relation</TableCell>
-                <TableCell>Type</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {regFamily.map((member) => (
-                <TableRow key={member._id}>
-                  <TableCell>{member.Name}</TableCell>
-                  <TableCell>{member.Relation}</TableCell>
-                  <TableCell>Registered</TableCell>
+        
+        {regFamily.length === 0 && unregFamily.length === 0 ? (
+          <p>No family members found.</p>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Relation</TableCell>
+                  <TableCell>Type</TableCell>
                 </TableRow>
-              ))}
-              {unregFamily.map((member) => (
-                <TableRow key={member._id}>
-                  <TableCell>{member.Name}</TableCell>
-                  <TableCell>{member.Relation}</TableCell>
-                  <TableCell>Unregistered</TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={3} style={{ textAlign: 'right', borderBottom: 'unset' }}>
-                  <Button variant="contained" color="primary" onClick={handleClickOpen}>
-                    Add Family Member
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {regFamily.map((member) => (
+                  <TableRow key={member._id}>
+                    <TableCell>{member.Name}</TableCell>
+                    <TableCell>{member.Relation}</TableCell>
+
+                    <TableCell>Registered</TableCell>
+                  </TableRow>
+                ))}
+                {unregFamily.map((member) => (
+                  <TableRow key={member._id}>
+                    <TableCell>{member.Name}</TableCell>
+                    <TableCell>{member.Relation}</TableCell>
+                    <TableCell>Unregistered</TableCell>
+                  </TableRow>
+                ))}
+                
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+        <TableRow>
+                  <TableCell colSpan={3} style={{ textAlign: 'right', borderBottom: 'unset' }}>
+                    <Button variant="contained" color="primary" onClick={handleClickOpen} style={{ marginRight: '10px' }}>
+                      Add Family Member
+                    </Button>
+                    <Button variant="contained" color="primary" onClick={handleLinkAccountClickOpen}>
+                      Link Account
+                    </Button>
+                  </TableCell>
+      </TableRow>
       </div>
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add Family Member</DialogTitle>
         <DialogContent>
-          {/* <Card style={{ maxWidth: '600px', margin: 'auto', borderRadius: '10px'}} > */}
           <form>
             <TextField
               error={errName}
@@ -237,19 +287,57 @@ function FamilyMember() {
                 <MenuItem value="child">Child</MenuItem>
               </Select>
             </FormControl>
-            <div className="flex justify-content-between">
-
-            </div>
           </form>
           {successMessage && <div style={{ marginTop: '10px', color: 'green' }}>{successMessage}</div>}
           {errorMessage && <div style={{ marginTop: '10px', color: 'red' }}>{errorMessage}</div>}
-          {/* </Card> */}
         </DialogContent>
         <DialogActions>
           <Button variant="contained" color="primary" onClick={handleAddFamilyMember}>
             Add Family Member
           </Button>
           <Button variant="contained" color="error" onClick={handleClose}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog open={linkAccountOpen} onClose={handleLinkAccountClose}>
+        <DialogTitle>Link Patient Account as a Family Member</DialogTitle>
+        <DialogContent>
+          <form>
+            <TextField
+              label="Email or Phone"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={linkedAccountEmailOrPhone}
+              onChange={(e) => setLinkedAccountEmailOrPhone(e.target.value)}
+            />
+
+            <FormControl fullWidth margin="normal" variant="outlined" error={errRelation}>
+              <InputLabel id="relation-label">Relation</InputLabel>
+              <Select
+                labelId="relation-label"
+                id="relation"
+                value={linkedAccountRelation}
+                onChange={(e) => setLinkedAccountRelation(e.target.value)}
+                label="Relation"
+              >
+                <MenuItem value="wife">Wife</MenuItem>
+                <MenuItem value="husband">Husband</MenuItem>
+                <MenuItem value="child">Child</MenuItem>
+              </Select>
+            </FormControl>
+          </form>
+          {linkedAccountSuccessMessage && <div style={{ marginTop: '10px', color: 'green' }}>{linkedAccountSuccessMessage}</div>}
+          {linkedAccountErrorMessage && <div style={{ marginTop: '10px', color: 'red' }}>{linkedAccountErrorMessage}</div>}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="primary" onClick={handleLinkAccount}>
+            Link Account
+          </Button>
+          <Button variant="contained" color="error" onClick={handleLinkAccountClose}>
             Cancel
           </Button>
         </DialogActions>

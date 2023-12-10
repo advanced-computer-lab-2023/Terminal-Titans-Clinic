@@ -1,9 +1,10 @@
-import ViewMyProfile from '../components/ViewMyProfile';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import ViewMyProfile from '../components/ViewMyProfile';
 import PatientMedicalHistory from '../components/PatientMedicalHistory';
 import PatientRecord from '../components/PatientRecord';
 import ChangePasswordForm from '../components/ChangePasswordForm';
-import HealthPackage from "../components/HealthPackages";
+import HealthPackage from '../components/HealthPackages';
 import FamilyMember from '../components/FamMember';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -14,8 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { PatientNavBar } from './../components/PatientNavBar';
-
+import { PatientNavBar } from './../components/PatientNavBar';import Button from '@mui/material/Button';
 
 const drawerWidth = 260;
 
