@@ -14,17 +14,34 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
+import FamMember from "../Styles/FamMember.css"
 
 function FamilyMember() {
   const [regFamily, setRegFamily] = useState([]);
   const [unregFamily, setUnregFamily] = useState([]);
   const [name, setName] = useState("");
-  const [age, setAge] = useState(null);
-  const [nId, setNationalID] = useState(null);
+  const [age, setAge] = useState("");
+  const [nId, setNationalID] = useState("");
   const [gender, setGender] = useState("");
   const [relation, setRelation] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [open, setOpen] = useState(false);
+  const [show, setShow] = useState(false);
+
+  const [errName, setErrName] = useState(false);
+  const [errAge, setErrAge] = useState(false);
+  const [errNid, setErrNid] = useState(false);
+  const [errGender, setErrGender] = useState(false);
+  const [errRelation, setErrRelation] = useState(false);
+
+
 
   useEffect(() => {
     fetchFamilyMembers();
@@ -47,7 +64,31 @@ function FamilyMember() {
     console.log("Request Body:", { name, age, nId, gender, relation });
     try {
       // Check if the relation is valid (wife, husband, or child)
-      if (["wife", "husband", "child"].includes(relation.toLowerCase())) {
+      // if (!["wife", "husband", "child"].includes(relation.toLowerCase())) {
+
+      // }
+      let flag = true;
+      if (name == "") {
+        setErrName(true);
+        flag = false
+      }
+      if (age == "") {
+        setErrAge(true);
+        flag = false
+      }
+      if (nId == "") {
+        setErrNid(true);
+        flag = false
+      }
+      if (gender == "") {
+        setErrGender(true);
+        flag = false
+      }
+      if (errRelation == "") {
+        setErrRelation(true);
+        flag = false
+      }
+      if (flag) {
         const response = await axios.post(
           'http://localhost:8000/patient/addFamilyMem',
           {
@@ -60,80 +101,44 @@ function FamilyMember() {
           { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
         );
         setSuccessMessage(response.data.message);
+        setOpen(false);
+        setShow(true);
         fetchFamilyMembers();
       } else {
-        setErrorMessage("Invalid relation. Please choose wife, husband, or child.");
+        setErrorMessage("Please fill all the fields")
       }
     } catch (error) {
-      console.error('Error adding family member:', error);
       setErrorMessage(error.response.data.message);
     }
   };
 
+  const handleClickOpen = () => {
+    setErrAge(false);
+    setErrGender(false);
+    setErrName(false);
+    setErrNid(false);
+    setErrRelation(false);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div>
-      <Card style={{ maxWidth: '600px', margin: 'auto', marginTop: '20px', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        <h2 style={{ marginBottom: '20px', fontSize: '20px', textAlign: 'center' }}>Add Family Member</h2>
-        <form>
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <TextField
-            label="Age"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-          />
-
-          <TextField
-            label="National ID"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={nId}
-            onChange={(e) => setNationalID(e.target.value)}
-          />
-
-          <TextField
-            label="Gender"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-          />
-
-          <FormControl fullWidth margin="normal" variant="outlined">
-            <InputLabel id="relation-label">Relation</InputLabel>
-            <Select
-              labelId="relation-label"
-              id="relation"
-              value={relation}
-              onChange={(e) => setRelation(e.target.value)}
-              label="Relation"
-            >
-              <MenuItem value="wife">Wife</MenuItem>
-              <MenuItem value="husband">Husband</MenuItem>
-              <MenuItem value="child">Child</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button variant="contained" color="primary" onClick={handleAddFamilyMember}>
-            Add Family Member
-          </Button>
-        </form>
-        {successMessage && <div style={{ marginTop: '10px', color: 'green' }}>{successMessage}</div>}
-        {errorMessage && <div style={{ marginTop: '10px', color: 'red' }}>{errorMessage}</div>}
-      </Card>
-
+      <ToastContainer
+        className="p-3"
+        position='top-end'
+        style={{ zIndex: 1 }}
+      >
+        <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
+          <Toast.Header closeButton={false}>
+            <strong className="me-auto">Successfull</strong>
+          </Toast.Header>
+          <Toast.Body>Added Family Member Successfuly</Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <h2 style={{ fontSize: '20px', marginBottom: '20px' }}>Family Members List</h2>
         <TableContainer>
@@ -160,10 +165,95 @@ function FamilyMember() {
                   <TableCell>Unregistered</TableCell>
                 </TableRow>
               ))}
+              <TableRow>
+                <TableCell colSpan={3} style={{ textAlign: 'right', borderBottom: 'unset' }}>
+                  <Button variant="contained" color="primary" onClick={handleClickOpen}>
+                    Add Family Member
+                  </Button>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
       </div>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Add Family Member</DialogTitle>
+        <DialogContent>
+          {/* <Card style={{ maxWidth: '600px', margin: 'auto', borderRadius: '10px'}} > */}
+          <form>
+            <TextField
+              error={errName}
+              label="Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+
+            <TextField
+              error={errAge}
+              label="Age"
+              variant="outlined"
+              type="number"
+              fullWidth
+              margin="normal"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+            />
+
+            <TextField
+              error={errNid}
+              label="National ID"
+              type="number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={nId}
+              onChange={(e) => setNationalID(e.target.value)}
+            />
+
+            <TextField
+              error={errGender}
+              label="Gender"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+            />
+
+            <FormControl fullWidth margin="normal" variant="outlined" error={errRelation}>
+              <InputLabel id="relation-label">Relation</InputLabel>
+              <Select
+                labelId="relation-label"
+                id="relation"
+                value={relation}
+                onChange={(e) => setRelation(e.target.value)}
+                label="Relation"
+              >
+                <MenuItem value="wife">Wife</MenuItem>
+                <MenuItem value="husband">Husband</MenuItem>
+                <MenuItem value="child">Child</MenuItem>
+              </Select>
+            </FormControl>
+            <div className="flex justify-content-between">
+
+            </div>
+          </form>
+          {successMessage && <div style={{ marginTop: '10px', color: 'green' }}>{successMessage}</div>}
+          {errorMessage && <div style={{ marginTop: '10px', color: 'red' }}>{errorMessage}</div>}
+          {/* </Card> */}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="primary" onClick={handleAddFamilyMember}>
+            Add Family Member
+          </Button>
+          <Button variant="contained" color="error" onClick={handleClose}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
