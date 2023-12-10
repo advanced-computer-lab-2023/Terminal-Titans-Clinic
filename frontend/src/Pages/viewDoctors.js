@@ -18,6 +18,7 @@ const DoctorsList = () => {
   const [doctors, setDoctors] = useState([]);
   const [Name, setName] = useState("");
   const [Speciality, setSpeciality] = useState("");
+  const [date, setDate] = useState("");
   //const [checked, setChecked] = useState(false);
 
   const getDoctors = async () => {
@@ -41,10 +42,35 @@ const DoctorsList = () => {
 console.log(error);
     }
   }
+
+
+  const filterDoctors = async () => {
+    const response = await axios.post(
+      `http://localhost:8000/patient/filterDoctors`,
+      { Speciality : "" , date },
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    console.log("ouuutttt");
+    if (response.status === 200) {
+      console.log("no errrrooorrrrr");
+      const doctors = response.data.Result;
+      console.log("doc"+doctors);
+      setDoctors(doctors);
+    }else{
+      console.log("errrrooorrrrr");
+    }
+  }
+
   const handleSearch = () => {
     // Handle the search logic here
     getDoctors();
   };
+
+  const handleFilter = () => {
+    // Handle the search logic here
+    filterDoctors();
+  };
+
 
  
 
@@ -76,8 +102,22 @@ console.log(error);
         onChange={(e) => setSpeciality(e.target.value)}
       />
 
-      <Button variant="dark" onClick={handleSearch} size="sm">
+<Button variant="dark" onClick={handleSearch} size="sm">
         Search
+      </Button>
+
+
+      <input
+        type="Date"
+        value={date}
+         onChange={(e) => setDate(e.target.value)}
+         style={{ marginLeft: '200px' }}
+       />
+
+      
+
+      <Button variant="dark" onClick={handleFilter} size="sm">
+        Filter
       </Button>
 
    
@@ -89,6 +129,7 @@ console.log(error);
           <tr>
             <th>Name</th>
             <th>Speciality</th>
+            <th>Session Price</th>
           
           </tr>
         </thead>
@@ -98,11 +139,14 @@ console.log(error);
               {/* Render doctor details here */}
               <td>{doctor.Name}</td>
               <td>{doctor.Speciality}</td>
+              <td>{doctor.sessionPrice}</td>
+             
+
               <td>
                 <Button
                   variant="dark"
                   style={{ width: '45%' }}
-                  onClick={() => navigate(`/Health-Plus/viewMyPatientInfo?Id=${doctor.id}`)}
+                  onClick={() => navigate(`/Health-Plus/viewDoctorInfo?Id=${doctor.id}`)}
                 >
                   View
                 </Button>

@@ -408,6 +408,8 @@ router.get('/viewPrescriptions', protect, async (req, res) => {
 })
 
 // requirement number 38
+
+  
 router.post('/getDoctors', protect, async (req, res) => {
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
@@ -415,10 +417,6 @@ router.post('/getDoctors', protect, async (req, res) => {
     }
 
     let getDoctors;
-    if (!req.body.Speciality && !req.body.Name) {
-        getDoctors = await Doctor.find({});
-    }
-    else{
     if (req.body.Name && req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name, Speciality: req.body.Speciality });
     }
@@ -428,13 +426,52 @@ router.post('/getDoctors', protect, async (req, res) => {
     if (!req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name });
     }
-}
+    if (!req.body.Speciality && !req.body.Name) {
+        getDoctors = await Doctor.find({});
+    }
    // console.log(getDoctors);
     if (getDoctors.length == 0) {
         return res.status(400).json({ message: "No doctors found " });
     }
-console.log(getDoctors);
-    return res.status(200).json({ Result: getDoctors, success: true });
+    let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
+    const packId = myHealthStatus.healthPackageId;
+    var discountP = 0;
+    if (packId) {
+        const allPackages = await healthPackageModel.find({ _id: packId });
+        if (allPackages.length > 0)
+            discountP = allPackages[0].doctorDiscountInPercentage;
+        else
+            return (res.status(400).send({ error: "cant find package", success: false }));
+
+    }
+    else {
+        discountP = 0;
+    }
+    let discount = 100 - discountP;
+
+    console.log(discount)
+    var final = []
+    let allDoctors=getDoctors;
+    for (let x in allDoctors) {
+        var result = {};
+        console.log("here")
+        var cur = allDoctors[x];
+        var price = (allDoctors[x].HourlyRate * 1.1) * discount / 100;
+        result.sessionPrice = price;
+        result.Name = allDoctors[x].Name;
+        result.Email = allDoctors[x].Email;
+        result.Affiliation = allDoctors[x].Affiliation;
+        result.Education = allDoctors[x].Education;
+        result.Speciality = allDoctors[x].Speciality;
+        result.id = allDoctors[x].id;
+        final.push(result)
+
+    }
+    //console.log(final)
+   return res.status(200).json({ Result: final, success: true });
+
+
+ 
 });
 
 // router.post('/pres',async(req,res)=>{
@@ -449,20 +486,17 @@ console.log(getDoctors);
 // })
 
 //requirement number 37 //get all doctors
-router.get('/getDoctorsInfo', protect, async (req, res) => {
+router.get('/getDoctorsInfo/:id', protect, async (req, res) => {
 
     try {
         let exists = await patientModel.findOne(req.user);
         if (!exists) {
             return res.status(400).json({ message: "Patient not found", success: false })
         }
-
+      
+        const Did= req.params.id
         const allDoctors = await Doctor.find({});
-        const currPat = await patient.find({ _id: req.user._id })
-        if (currPat.length < 1) {
-            return (res.status(400).send({ error: "cant find patient", success: false }));
-
-        }
+      
         let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
         const packId = myHealthStatus.healthPackageId;
         var discountP = 0;
@@ -1099,8 +1133,24 @@ router.post('/filterDoctors', async (req, res) => {
         spcltyDocs = await Doctor.find({});
     }
     const aptmnts = await appointmentModel.find({})
+    let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
+    const packId = myHealthStatus.packageId;
+    var discountP = 0;
 
-    const result = spcltyDocs.filter((Dr) => {
+    if (packId) {
+        const allPackages = await healthPackageModel.find({ _id: packId });
+        if (allPackages.length > 0)
+            discountP = allPackages[0].doctorDiscountInPercentage;
+        else
+            return (res.status(400).send({ error: "cant find package", success: false }));
+
+    }
+    else {
+        discountP = 0;
+    }
+    let discount = 100 - discountP;
+    
+    const Dr = spcltyDocs.filter((Dr) => {
         for (let y in aptmnts) {
             if (aptmnts[y].DoctorId == Dr._id) {
                 let start = aptmnts[y].Date;
@@ -1112,7 +1162,26 @@ router.post('/filterDoctors', async (req, res) => {
         }
         return true
     });
-    res.status(200).json(result);
+    var final = []
+    for (let x in Dr) {
+        var result = {};
+        console.log("here")
+        var cur = Dr[x];
+        var price = (Dr[x].HourlyRate * 1.1) * discount / 100;
+        result.sessionPrice = price;
+        result.Name = Dr[x].Name;
+        result.Email = Dr[x].Email;
+        result.Affiliation = Dr[x].Affiliation;
+        result.Education = Dr[x].Education;
+        result.Speciality = Dr[x].Speciality;
+        result.HourlyRate = Dr[x].HourlyRate;
+        result.DateOfBirth = Dr[x].DateOfBirth;
+        result.id = Dr[x]._id;
+        final.push(result)
+
+    }
+
+    res.status(200).json({ Result: final, success: true });
 })
 
 router.post('/filterPrescriptions', async (req, res) => {
@@ -1240,14 +1309,14 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
         result.Speciality = Dr[x].Speciality;
         result.HourlyRate = Dr[x].HourlyRate;
         result.DateOfBirth = Dr[x].DateOfBirth;
-        result.id = Dr[x].id;
+        result.id = Dr[x]._id;
         final.push(result)
 
     }
 
     console.log("kkk")
     console.log(Dr)
-    res.status(200).json({ Dr: final, success: true });
+    res.status(200).json({ Result: final, success: true });
 })
 
 // requirement 56
