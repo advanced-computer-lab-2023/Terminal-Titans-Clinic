@@ -234,7 +234,7 @@ router.post('/addRegFamilyMembyMail', protect, async (req, res) => {
     var availFamMem = await familyMember.findOne({ $or: [{ PatientId: req.user._id, Patient2Id: famMember._id }, { PatientId: famMember._id, Patient2Id: req.user._id }] });
 
     if (availFamMem)
-        return (res.status(400).send({ message: "This patient is alreadt registered as a family member" }));
+        return (res.status(400).send({ message: "This patient is already registered as a family member" }));
     try {
         const newFamilyMember = new RegFamMem({
             PatientId: req.user._id,
