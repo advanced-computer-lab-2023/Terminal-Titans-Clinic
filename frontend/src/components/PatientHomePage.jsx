@@ -69,55 +69,6 @@ export default function Pricing() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <PatientNavBar />
-      <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
-      <CssBaseline />
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-      >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Health Plus+
-          </Typography>
-          <nav>
-            <Button
-              variant="button"
-              color="text.primary"
-              //onClick={() => { window.location.href = '/Health-Plus/viewMyProfile' }}
-              sx={{ my: 1, mx: 1 }}
-            >
-              Visit pharmacy
-            </Button>
-              <Button
-              variant="button"
-              color="text.primary"
-              // hena link el profile
-              onClick={() => { window.location.href = '/Health-Plus/viewMyProfile' }}
-              sx={{ my: 1, mx: 1 }}
-            >
-              Other Informations
-            </Button>
-            <Button
-              variant="button"
-              color="text.primary"
-              // hena link el chatting
-              onClick={() => { goToChat() }}
-              sx={{ my: 1, mx: 1 }}
-            >
-              Support
-            </Button>
-          </nav>
-          {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
-          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}>
-            Home
-          </Button >
-          <div className="signoutButton">
-            <Button variant="contained" onClick={signoutButtonFunc}style={{ backgroundColor: 'red' }}>Sign Out</Button>
-          </div>
-        </Toolbar>
-      </AppBar>
       {/* Hero unit */}
       <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography
