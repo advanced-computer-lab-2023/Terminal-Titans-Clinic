@@ -87,28 +87,29 @@ export default function Pricing() {
             Health Plus+
           </Typography>
           <nav>
-            <Link
+            <Button
               variant="button"
               color="text.primary"
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
+              //onClick={() => { window.location.href = '/Health-Plus/viewMyProfile' }}
+              sx={{ my: 1, mx: 1 }}
             >
               Visit pharmacy
-            </Link>
-            <Link
+            </Button>
+              <Button
               variant="button"
               color="text.primary"
-              href="/Health-Plus/viewMyProfile"
-              sx={{ my: 1, mx: 1.5 }}
+              // hena link el profile
+              onClick={() => { window.location.href = '/Health-Plus/viewMyProfile' }}
+              sx={{ my: 1, mx: 1 }}
             >
               Other Informations
-            </Link>
+            </Button>
             <Button
               variant="button"
               color="text.primary"
               // hena link el chatting
               onClick={() => { goToChat() }}
-              sx={{ my: 1, mx: 1.5 }}
+              sx={{ my: 1, mx: 1 }}
             >
               Support
             </Button>
@@ -116,9 +117,9 @@ export default function Pricing() {
           {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
           <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}>
             Home
-          </Button>
+          </Button >
           <div className="signoutButton">
-            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
+            <Button variant="contained" onClick={signoutButtonFunc}style={{ backgroundColor: 'red' }}>Sign Out</Button>
           </div>
         </Toolbar>
       </AppBar>
