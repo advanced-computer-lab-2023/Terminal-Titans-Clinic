@@ -282,13 +282,11 @@ router.get('/viewFamMem', protect, async (req, res) => {
 
 })
 router.get('/ViewMyProfile', protect, async (req, res) => {
-    const patient = await patientModel.findById(req.user);
-    console.log(patient);
+    const patient = req.user;
     if (!patient) {
         res.status(400).json({ message: "Patient not found", success: false })
     }
     else
-
         res.status(200).json({ Result: patient, success: true })
 })
 
@@ -417,6 +415,10 @@ router.post('/getDoctors', protect, async (req, res) => {
     }
 
     let getDoctors;
+    if (!req.body.Speciality && !req.body.Name) {
+        getDoctors = await Doctor.find({});
+    }
+    else{
     if (req.body.Name && req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name, Speciality: req.body.Speciality });
     }
@@ -426,14 +428,13 @@ router.post('/getDoctors', protect, async (req, res) => {
     if (!req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name });
     }
-    if (!req.body.Speciality && !req.body.Name) {
-        getDoctors = await Doctor.find({});
-    }
+}
    // console.log(getDoctors);
     if (getDoctors.length == 0) {
         return res.status(400).json({ message: "No doctors found " });
     }
-    return res.status(200).json({ Doctors: getDoctors, success: true });
+console.log(getDoctors);
+    return res.status(200).json({ Result: getDoctors, success: true });
 });
 
 // router.post('/pres',async(req,res)=>{
@@ -463,7 +464,7 @@ router.get('/getDoctorsInfo', protect, async (req, res) => {
 
         }
         let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-        const packId = myHealthStatus.packageId;
+        const packId = myHealthStatus.healthPackageId;
         var discountP = 0;
         if (packId) {
             const allPackages = await healthPackageModel.find({ _id: packId });
@@ -1208,7 +1209,7 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
 
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-    const packId = myHealthStatus.packageId;
+    const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
 
     if (packId) {
@@ -1553,47 +1554,46 @@ async function subscribeHealthPackageFamilyWallet(userId,familyMemberId,healthPa
 }
 //test done here (req 30)
 router.get('/viewSubscriptions', protect, async (req, res) => {
-    const userId = req.user._id;//bagib el id after authentication  
     try {
         // get the patient package
-        const user = await patientModel.findById(userId);
+        const user = req.user;//bagib el id after authentication  
 
-        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: userId, status: 'Subscribed' });
+        let userHealthPackageStatus = await healthPackageStatus.findOne({ patientId: user._id, status: 'Subscribed' });
         // console.log(userHealthPackageStatus)
         let userHealthPackage = userHealthPackageStatus?.healthPackageId;
-        let userHealth = new Object()
+        let userHealth = {
+            PatientId: user._id,
+            Name: user.Name,
+            Email: user.Email,
+            Username: user.Username
+        }
 
         if (userHealthPackageStatus?.status == 'Subscribed')
-            userHealth = await healthPackageModel.findById(userHealthPackage) ?? {};
-
-        userHealth["PatientId"] = user?._id;
-        userHealth["Name"] = user?.Name;
-        userHealth["Email"] = user?.Email;
-        userHealth["Username"] = user?.Username;
+            userHealth.healthPackage = await healthPackageModel.findById(userHealthPackage) ?? {};
 
         let result = { 'myUser': userHealth, 'familyMembers': [] };
 
         //Get the health package details for registered family members
         var registeredFamilyMembers = await RegFamMem.find({
             $or: [
-                { Patient2Id: userId },
-                { PatientId: userId }
+                { Patient2Id: user._id },
+                { PatientId: user._id }
             ]
         });
 
         for (let member of registeredFamilyMembers) {
             let famMemberUser = {};
-            if (member.PatientId.equals(userId))
+            if (member.PatientId.equals(user._id))
                 famMemberUser = await patientModel.findById(member.Patient2Id);
 
-            if (member.Patient2Id.equals(userId))
+            if (member.Patient2Id.equals(user._id))
                 famMemberUser = await patientModel.findById(member.PatientId);
 
             let famMemberUserHealthPackageStatus = await healthPackageStatus.findOne({ patientId: famMemberUser._id, status: 'Subscribed' });
             let famMemberUserHealthPackage = famMemberUserHealthPackageStatus?.healthPackageId;
 
-            console.log(famMemberUserHealthPackage);
-            console.log(famMemberUserHealthPackageStatus);
+            // console.log(famMemberUserHealthPackage);
+            // console.log(famMemberUserHealthPackageStatus);
 
             let famMemberUserHealth = {};
             if (famMemberUserHealthPackageStatus?.status == 'Subscribed')
@@ -1619,27 +1619,24 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
 
 //req 31 done
 router.get('/viewSubscriptionStatus', protect, async (req, res) => {
-    const userId = req.user._id;//bagib el id after authentication 
-
-
     try {
         // get the patient package
-        const user = await patientModel.findById(userId);
+        const user = req.user;
 
         if (!user) {
             return res.status(500).json({ message: 'Patient not found' });
         }
 
         //patient
-        let userHealthPackageStatus = await healthPackageStatus.find({ patientId: userId });
+        let userHealthPackageStatus = await healthPackageStatus.find({ patientId: user });
         //fam members
 
         // console.log('userHealthPackageStatus',userHealthPackageStatus);
 
         let registeredFamilyMembers = await RegFamMem.find({
             $or: [
-                { Patient2Id: userId },
-                { PatientId: userId }
+                { Patient2Id: user },
+                { PatientId: user }
             ]
         });
 
@@ -1650,10 +1647,10 @@ router.get('/viewSubscriptionStatus', protect, async (req, res) => {
 
         for (let member of registeredFamilyMembers) {
             let famMemberUser = {};
-            if (member.PatientId.equals(userId))
+            if (member.PatientId.equals(user))
                 famMemberUser = await patientModel.findById(member.Patient2Id);
 
-            if (member.Patient2Id.equals(userId))
+            if (member.Patient2Id.equals(user))
                 famMemberUser = await patientModel.findById(member.PatientId);
 
             let healthPackage = await healthPackageStatus.find({
@@ -1735,7 +1732,8 @@ router.put('/cancelMySub', protect, async (req, res) => {
     const patientId = new mongoose.Types.ObjectId(req.body.patientId);
     console.log(patientId);
     console.log(req.user._id);
-    if (patientId == req.user._id) {
+    console.log();
+    if (patientId.equals(req.user._id)) {
         try {
             // get the patient package
             const user = await patientModel.findById(req.user._id);
@@ -2770,7 +2768,7 @@ router.get('/cartinCheckOut', protect, async (req, res) => {
         list.push(med);
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
-    const packId = myHealthStatus.packageId;
+    const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
     if (packId) {
         const allPackages = await healthPackageModel.find({ _id: packId });
@@ -2966,7 +2964,7 @@ router.get('/checkout/:id/:address/:paymentMethod', async (req, res) => {
         console.log('Total after setting:', total);
         if (total > 0) {
             let myHealthStatus = await healthPackageStatus.findOne({ patientId: patientId.id, status: 'Subscribed' });
-            const packId = myHealthStatus.packageId;
+            const packId = myHealthStatus.healthPackageId;
             var discountP = 0;
             if (packId) {
                 const allPackages = await healthPackageModel.find({ _id: packId });
@@ -3187,7 +3185,7 @@ router.put('/cancelOrder/:orderId', protect, async (req, res) => {
 async function getOrderDetails(pid) {
     try {
         let myHealthStatus = await healthPackageStatus.findOne({ patientId: pid, status: 'Subscribed' });
-        const packId = myHealthStatus.packageId;
+        const packId = myHealthStatus.healthPackageId;
         var discountP = 0;
         if (packId) {
             const allPackages = await healthPackageModel.find({ _id: packId });

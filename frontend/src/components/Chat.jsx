@@ -1,12 +1,16 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { uniqBy } from "lodash";
+import { set, uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
 import { io } from 'socket.io-client';
 import { useNavigate, createSearchParams } from "react-router-dom";
 import Peer from "simple-peer"
 import chat from '../Styles/Chat.css';
+import { useLocation } from 'react-router-dom';
+import CallIcon from '@mui/icons-material/Call';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import Button from '@mui/material/Button';
 
 
 export default function Chat() {
@@ -20,21 +24,35 @@ export default function Chat() {
     const [ws, setWs] = useState(null);
     const [onlinePeople, setOnlinePeople] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedUserName, setSelectedUserName] = useState(null);
     const [username, setUsername] = useState(null);
     const [id, setId] = useState(null);
     const [newMessageText, setNewMessageText] = useState('');
     const [messages, setMessages] = useState([]);
     const [offlinePeople, setOfflinePeople] = useState({});
+    const [socket, setSocket] = useState(null);
+    const [video, setVideo] = useState(false);
+    const [type, setType] = useState('');
     const divUnderMessages = useRef();
     const navigate = useNavigate();
+    const location = useLocation();
+    const params = new URLSearchParams(window.location.search);
+    const url = window.location.href;
+    const token = url.split('/chat/')[1];
+    // console.log(chatId)
+    //const token = params.get('token');
+    // const token = new window.URLSearchParams("token");
+    sessionStorage.setItem("token", token);
+
 
     useEffect(() => {
         connectToWs()
-        const socket = io('http://localhost:8000', {
+        let socket = io('http://localhost:8000', {
             auth: {
                 Authorization: "Bearer " + sessionStorage.getItem('token')
             }
         });
+        setSocket(socket);
         socket.on("me", (id) => {
             console.log('me', id);
             setMe(id)
@@ -45,8 +63,15 @@ export default function Chat() {
             setReceivingCall(true)
             setCaller(data.from)
             setName(data.name)
+            setVideo(data.video)
             setCallerSignal(data.signal)
         })
+        socket.on("rejected", (data) => {
+            console.log(`Call rejected by user ${data.from}`);
+            socket.emit("rejectCall", { to: data.from })
+            // Handle the rejection as needed
+            // For example, update the UI or show a notification
+        });
     }, []);
 
     function connectToWs() {
@@ -77,6 +102,7 @@ export default function Chat() {
                 'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             }
         }).then(response => {
+            setType(response.data.myUser.__t)
             setId(response.data.myUser._id);
             setUsername(response.data.myUser.Username);
             let onlinePeople = {};
@@ -96,6 +122,8 @@ export default function Chat() {
                 offlinePeople[p._id] = p;
             });
             setOfflinePeople(offlinePeople);
+            console.log(offlinePeople);
+            console.log(onlinePeople);
             setOnlinePeople(onlinePeople);
         });
     }
@@ -158,23 +186,18 @@ export default function Chat() {
     const answerCall = () => {
         navigate('/meeting', {
             state: {
-                video: true,
+                video: video,
                 recipient: selectedUserId,
                 answerCall: true,
                 callerUser: caller,
                 callerUserSignal: callerSignal,
             }
         });
-        // navigate({
-        //     pathname: "/meeting",
-        //     search: createSearchParams({
-        //         video: true,
-        //         recipient: selectedUserId,
-        //         answerCall: true,
-        //         callerUser: caller,
-        //         callerUserSignal: callerSignal,
-        //     }).toString()
-        // });
+    }
+
+    function rejectCall() {
+        setReceivingCall(false)
+        socket.emit("rejected", { to: caller })
     }
 
     function startCall() {
@@ -198,7 +221,6 @@ export default function Chat() {
     }
 
     function startVideoCall() {
-        console.log('username', username);
         navigate('/meeting', {
             state: {
                 video: true,
@@ -212,21 +234,55 @@ export default function Chat() {
         });
     }
 
+    function goToHome() {
+        if(type == 'Pharmacist'){
+            window.location.href = 'http://localhost:4000/Health-Plus/pharmacistScreen';
+        }
+        else if(type == 'patient'){
+            window.location.href = 'http://localhost:3000/Health-Plus/patientHome';
+        }
+        else if(type == 'Doctor'){
+            window.location.href = 'http://localhost:3000/Health-Plus/doctorHome';
+        }
+    }
+
     return (
         <div className="flex h-screen">
+            <div>
+                {receivingCall ? (
+                    <>
+                        <div className="callingUser">
+                            <div>
+                                <h1 className="text-center">{name}</h1>
+                                <p className="text-center">...is Calling</p>
+                            </div>
+                            <div className="optionsCall">
+                                <i onClick={answerCall} style={{ background: 'green' }}>
+                                    {<CallIcon />}
+                                </i>
+                                <i onClick={rejectCall} style={{ background: 'red' }}>
+                                    {<CallEndIcon />}
+                                </i>
+                            </div>
+                        </div>
+                    </>
+                ) : null}
+            </div>
             <div className="bg-white w-1/3 flex flex-col">
                 <div className="flex-grow">
-                    <Logo />
+                    <div onClick={goToHome} className="logo">
+                        <Logo />
+                    </div>
                     {Object.keys(onlinePeople).map(userId => (
                         <Contact
                             key={userId}
                             id={userId}
                             online={true}
                             username={onlinePeople[userId]}
-                            onClick={() => { setSelectedUserId(userId); }}
-                            selected={userId === selectedUserId} 
+                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(onlinePeople[userId]) }}
+                            selected={userId === selectedUserId}
                             inChat={true}
-                            />
+                        />
                     ))}
                     {Object.keys(offlinePeople).map(userId => (
                         <Contact
@@ -234,7 +290,7 @@ export default function Chat() {
                             id={userId}
                             online={false}
                             username={offlinePeople[userId].Username}
-                            onClick={() => setSelectedUserId(userId)}
+                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(offlinePeople[userId]?.Username) }}
                             selected={userId === selectedUserId}
                             inChat={true} />
                     ))}
@@ -242,13 +298,21 @@ export default function Chat() {
             </div>
             <div className="flex flex-col bg-blue-50 w-2/3 p-2 relative">
                 {!!selectedUserId && (
-                    <div className="callIcons">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                        </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
-                            <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
+                    <div className="callNav">
+                        <Contact
+                            id={selectedUserId}
+                            online={false}
+                            username={selectedUserName}
+                            selected={false}
+                            inChat={false} />
+                        <div className="callIcons">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" onClick={startCall}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" onClick={startVideoCall}>
+                                <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                        </div>
                     </div>
                 )}
                 <div className="flex-grow">
@@ -283,31 +347,21 @@ export default function Chat() {
                         </div>
                     )}
                 </div>
+                <div className="spaceTop"></div>
                 {!!selectedUserId && (
                     <form className="flex gap-2" onSubmit={sendMessage}>
                         <input type="text"
                             value={newMessageText}
                             onChange={ev => setNewMessageText(ev.target.value)}
                             placeholder="Type your message here"
-                            className="bg-white flex-grow border rounded-sm p-2" />
-                        <button type="submit" className="bg-blue-500 p-2 text-white rounded-sm">
+                            className="bg-white flex-grow border rounded-sm p-2 z-1" />
+                        <button type="submit" className="bg-blue-500 p-2 text-white rounded-sm z-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                             </svg>
                         </button>
                     </form>
                 )}
-
-                <div>
-                    {receivingCall ? (
-                        <div className="caller">
-                            {/* <h1 >{name} is calling...</h1> */}
-                            <button variant="contained" color="primary" onClick={answerCall}>
-                                Answer
-                            </button>
-                        </div>
-                    ) : null}
-                </div>
             </div>
         </div>
     );
