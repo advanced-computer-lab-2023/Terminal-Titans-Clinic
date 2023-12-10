@@ -415,6 +415,10 @@ router.post('/getDoctors', protect, async (req, res) => {
     }
 
     let getDoctors;
+    if (!req.body.Speciality && !req.body.Name) {
+        getDoctors = await Doctor.find({});
+    }
+    else{
     if (req.body.Name && req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name, Speciality: req.body.Speciality });
     }
@@ -424,14 +428,13 @@ router.post('/getDoctors', protect, async (req, res) => {
     if (!req.body.Speciality) {
         getDoctors = await Doctor.find({ Name: req.body.Name });
     }
-    if (!req.body.Speciality && !req.body.Name) {
-        getDoctors = await Doctor.find({});
-    }
+}
    // console.log(getDoctors);
     if (getDoctors.length == 0) {
         return res.status(400).json({ message: "No doctors found " });
     }
-    return res.status(200).json({ Doctors: getDoctors, success: true });
+console.log(getDoctors);
+    return res.status(200).json({ Result: getDoctors, success: true });
 });
 
 // router.post('/pres',async(req,res)=>{
