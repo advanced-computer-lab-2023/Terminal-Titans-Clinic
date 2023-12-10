@@ -115,7 +115,7 @@ const AddPresc = () => {
           ) : (
             <p>Error: Medicines data is not in the expected format.</p>
           )}
-          <button type="button" onClick={handleAddToprescription(medicine,)} >
+          <button type="button" onClick={handleAddToprescription()} >
                             Add to prescription
                         </button>
         </div>

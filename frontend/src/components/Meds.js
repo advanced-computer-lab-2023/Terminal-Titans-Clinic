@@ -46,6 +46,7 @@ const Meds = ({ medicines }) => {
                     placeholder="Enter Dosage…"
                     value={value}
                     onChange={(event, val) => setValue(val)}
+                    min={1} max={99}
                 />
 
                 <Button variant="primary" onClick={handleClose}>
