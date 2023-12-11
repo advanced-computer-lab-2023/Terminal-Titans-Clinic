@@ -263,32 +263,39 @@ router.get('/viewFamMem', protect, async (req, res) => {
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].Patient2Id })
         if (patientFam)
-            list.push(patientFam)
+            {
+                let temp={
+                    "Name":patientFam.Name,
+                    "_id":patientFam._id,
+                    "Relation":regFamMemebers[x].Relation,
+                    "Gender":patientFam.Gender,
+                    "Mobile":patientFam.Mobile,
+                    "Email":patientFam.Email,
+                }
+                list.push(temp)
+            }
     }
     regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id });
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].PatientId })
+        
         if (patientFam){
-       
         let temp={
-            Name:patientFam.Name,
-            Age:patientFam.Age,
-            _id:patientFam._id,
-            Relation:regFamMemebers[x].Relation,
-            Gender:patientFam.Gender,
-            Mobile:patientFam.Mobile,
-            Email:patientFam.Email,
+            "Name":patientFam.Name,
+            "_id":patientFam._id,
+            "Relation":regFamMemebers[x].Relation,
+            "Gender":patientFam.Gender,
+            "Mobile":patientFam.Mobile,
+            "Email":patientFam.Email,
         }
-       
+       //console.log(temp)
             list.push(temp)
     }
     }
-
     let famMembers = {
         registered: list,
         unregistered: unRegFamMemebers
     }
-
     //console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
