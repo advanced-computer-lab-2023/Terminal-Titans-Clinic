@@ -30,7 +30,8 @@ const AddPresc = () => {
 
         if (Array.isArray(jsonData.meds)) {
           setAllMedicines(jsonData.meds);
-        } else {
+        } 
+        else {
           console.error('Invalid data format. Expected an array.');
         }
       } catch (error) {
@@ -41,40 +42,7 @@ const AddPresc = () => {
     getMedicines();
   }, []);
 
-  // adds the specified medicine from the button to the prescription in the params and updates the dosage to the specified dosage that he chose
-  const handleAddToprescription = async (medicine, dosage) => {
-    try {
-      const response = await axios.post('http://localhost:8000/doctor/addOrDeleteMedFromPresc', {
-        medicineId: medicine._id,
-        action: 'add',
-        prescriptionId:prescId
-      }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
-      console.log('Here');
-      if (response.status === 200) {
-        console.log('Successfully added medicine to prescription.');
-      } else {
-        console.error('Failed to add medicine to prescription. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-    //update dosage of the specified medicine in the dosage specified
-    try {
-      const response = await axios.post('http://localhost:8000/doctor/updateDosage', {
-        medicineId: medicine._id,
-        dosage: dosage,
-        prescriptionId:prescId
-      }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
 
-      if (response.status === 200) {
-        console.log('Successfully updated dosage of medicine.');
-      } else {
-        console.error('Failed to update dosage of medicine. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
 
 
   useEffect(() => {
@@ -94,10 +62,10 @@ const AddPresc = () => {
     // Fetch initially
     fetchData();
     // Poll for updates every 5 seconds (adjust the interval as needed)
-    const intervalId = setInterval(fetchData, 5000);
+    //const intervalId = setInterval(fetchData, 5000);
 
     // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
+    //return () => clearInterval(intervalId);
   }, []); // Runs once on mount
 
   return (
@@ -115,9 +83,9 @@ const AddPresc = () => {
           ) : (
             <p>Error: Medicines data is not in the expected format.</p>
           )}
-          <button type="button" onClick={handleAddToprescription()} >
+          {/* <button type="button" onClick={handleAddToprescription(medicine,)} >
                             Add to prescription
-                        </button>
+                        </button> */}
         </div>
         
       </div>
