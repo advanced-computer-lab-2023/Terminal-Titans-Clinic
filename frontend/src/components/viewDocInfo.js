@@ -3,19 +3,10 @@ import "../Styles/LoginForm.css";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function viewDocInfo() {
+function ViewDocInfo() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('Id');
-    const [doctor, setdoctor] = useState({
-        Name: '',
-        DateOfBirth: '',
-        Email: '',
-        Affiliation: '',
-        HourlyRate: '',
-        Education: '',
-        Speciality: '',
-        SessionPrice: ''
-    });
+    const [doctor, setdoctor] = useState({});
 
 const getDocInfo=async()=>{
     await axios.get(`http://localhost:8000/patient/selectDoctors/${userId}`, {
@@ -31,7 +22,9 @@ const getDocInfo=async()=>{
   
         }
       );
+
 }
+console.log(doctor.Name);
 useEffect(()=>{
     getDocInfo();
     },[]
@@ -79,4 +72,4 @@ useEffect(()=>{
     );
 }
 
-export default viewDocInfo;
+export default ViewDocInfo;

@@ -37,6 +37,7 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
+import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
 
 
 
@@ -106,6 +107,7 @@ function App() {
           <Route path="/PackageCheckout" element={<PackageCheckout />} />
           <Route path="/FamilyMember" element={<FamilyMember />} />
           <Route path="/viewDoctors" element={<DoctorsList />} />
+          <Route path="/ViewDoctorInfo" element={<ViewDoctorInfo />} />
       
 
         </Routes>

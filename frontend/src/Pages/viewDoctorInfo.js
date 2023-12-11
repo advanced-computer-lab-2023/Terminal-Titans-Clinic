@@ -13,20 +13,20 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import viewDocInfo from '../components/viewDocInfo';
+import ViewDocInfo from '../components/ViewDocInfo';
 
 
 const drawerWidth = 260;
 
 
-function viewDoctorInfo() {
+function ViewDoctorInfo() {
 
  
-return <viewDocInfo/>;
+return <ViewDocInfo/>;
 
 return (
         <Box sx={{ display: 'flex'}}>
-             <Box
+             <Box 
         position="fixed"
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
       >                                         
@@ -38,4 +38,4 @@ return (
     );
 
         }
-    export default viewDoctorInfo;
+    export default ViewDoctorInfo;
