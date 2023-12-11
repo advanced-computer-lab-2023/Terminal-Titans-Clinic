@@ -1,0 +1,33 @@
+.btn-check:checked+.btn,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check)+.btn:active {
+    color: unset;
+    border-color: unset;
+    background-color: rgb(154, 154, 154) !important;
+}
+
+#dropdown-autoclose-true {
+    color: black;
+    border: 0;
+    background-color: unset !important;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.navButton {
+    background-color: rgb(220, 220, 220) !important;
+}
+
+.dropdown-menu {
+    inset: unset !important;
+    transform: unset !important;
+    right: -50% !important;
+}
+
+.homePage{
+    cursor: pointer;
+}

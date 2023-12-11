@@ -141,7 +141,7 @@ function Row(props) {
                 History
               </Typography>
               {
-                row.history.length !== 0 ? (
+                row.history?.length !== 0 ? (
                   <Table size="small" aria-label="purchases">
                     <TableHead>
                       <TableRow>
@@ -215,8 +215,13 @@ export default function CollapsibleTable() {
         result.myUser?.healthPackage?.medicinDiscountInPercentage,
         result.myUser?.healthPackage?.familyDiscountInPercentage,
         result.myUser?.healthPackage?.doctorDiscountInPercentage, resultStatus.myUser));
+
+      console.log(resultStatus?.familyMembers);
       for (let i = 0; i < result.familyMembers.length; i++) {
-        temp.push(createData(result.familyMembers[i].PatientId, result.familyMembers[i].Name, result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP, result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage, result.familyMembers[i].doctorDiscountInPercentage, resultStatus.familyMembers[i]));
+        temp.push(createData(result.familyMembers[i].PatientId, result.familyMembers[i].Name,
+          result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP,
+          result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage,
+          result.familyMembers[i].doctorDiscountInPercentage, resultStatus?.familyMembers));
       }
       setRows(temp);
       // setPatientHealthPackageData(result.myUser);

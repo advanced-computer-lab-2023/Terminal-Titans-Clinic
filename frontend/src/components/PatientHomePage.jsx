@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import Container from '@mui/material/Container';
+import {PatientNavBar} from './PatientNavBar.jsx';
 
 
 const tiers = [
@@ -64,64 +65,10 @@ function getLinkForTier(title) {
 const defaultTheme = createTheme();
 
 export default function Pricing() {
-  const signoutButtonFunc = () => {
-    sessionStorage.removeItem('token');
-    window.location.href = '/Health-Plus';
-  }
-
-  function goToChat() {
-    window.location.href = `chat/${sessionStorage.getItem('token')}`;
-  }
+  
   return (
     <ThemeProvider theme={defaultTheme}>
-      <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
-      <CssBaseline />
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-      >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Health Plus+
-          </Typography>
-          <nav>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Visit pharmacy
-            </Link>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="/Health-Plus/viewMyProfile"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Other Informations
-            </Link>
-            <Button
-              variant="button"
-              color="text.primary"
-              // hena link el chatting
-              onClick={() => { goToChat() }}
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Support
-            </Button>
-          </nav>
-          {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
-          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}>
-            Home
-          </Button>
-          <div className="signoutButton">
-            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
-          </div>
-        </Toolbar>
-      </AppBar>
+      <PatientNavBar />
       {/* Hero unit */}
       <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography

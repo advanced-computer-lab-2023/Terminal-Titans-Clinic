@@ -15,7 +15,7 @@ import MailIcon from '@mui/icons-material/Mail';
 
 const defaultTheme = createTheme();
 
-export function DoctorNavBar() {
+export function PatientNavBar() {
 
   const signoutButtonFunc = () => {
     sessionStorage.removeItem('token');
@@ -23,7 +23,7 @@ export function DoctorNavBar() {
   }
 
   function goToChat() {
-    window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
+    window.location.href = `chat/${sessionStorage.getItem('token')}`;
   }
 
   return (
@@ -39,7 +39,7 @@ export function DoctorNavBar() {
       >
         <Toolbar sx={{ flexWrap: 'wrap' }}>
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
+            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/patientHome' }}>Health Plus+</span>
           </Typography>
           <nav>
             <Button
@@ -89,11 +89,17 @@ export function DoctorNavBar() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/0">Doctor Profile</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/0">Patient Profile</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/1">Password</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/1">Health Records</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/2">Payment</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/2">Medical History</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/3">Change Password</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/4">Family Members Info</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/5">My Health Packages</Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={signoutButtonFunc}>Sign Out</Dropdown.Item>
               </Dropdown.Menu>

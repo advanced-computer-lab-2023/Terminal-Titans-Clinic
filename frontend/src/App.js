@@ -37,6 +37,7 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
+import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
 
 
 
@@ -93,12 +94,12 @@ function App() {
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/viewMyPatientsList" element={<PatientList />} />
           <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />
-          <Route path="/viewDocProfile" element={<ViewDocProfile />} />
+          <Route path="/viewDocProfile/:id" element={<ViewDocProfile />} />
           <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat/:token" element={<Chat/>} />
           <Route path="/" element={<SignIn />} />
-          <Route path="/viewMyProfile" element={<ViewMyProfile />} />
+          <Route path="/viewMyProfile/:id" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
           <Route path="/patientRecord" element={<PatientRecord />} />
@@ -106,6 +107,7 @@ function App() {
           <Route path="/PackageCheckout" element={<PackageCheckout />} />
           <Route path="/FamilyMember" element={<FamilyMember />} />
           <Route path="/viewDoctors" element={<DoctorsList />} />
+          <Route path="/ViewDoctorInfo" element={<ViewDoctorInfo />} />
       
 
         </Routes>
