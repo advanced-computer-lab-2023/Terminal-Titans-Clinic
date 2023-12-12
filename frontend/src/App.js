@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Register from "./Pages/Register";
@@ -37,6 +37,7 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
+import Notification from "./components/Notification";
 
 
 
@@ -55,7 +56,7 @@ function App() {
 
   return (
     <div className="App">
-      
+
 
       <Router basename="/Health-Plus">
 
@@ -72,14 +73,15 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/notifications" element={<Notification />} />
 
           {/* PHARMACIST ROUTES */}
-          <Route path="/pharmacistHome" element={<PharmacistScreen/>}/>
-          <Route path="/NewMed" element={<NewMed/>}/>
-          <Route path="/AvailableMeds" element={<AvailableMeds/>}/>
-          <Route path="/medicinepharm" element={<MedPharm/>}/>
+          <Route path="/pharmacistHome" element={<PharmacistScreen />} />
+          <Route path="/NewMed" element={<NewMed />} />
+          <Route path="/AvailableMeds" element={<AvailableMeds />} />
+          <Route path="/medicinepharm" element={<MedPharm />} />
 
-          
+
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
           <Route path="/docViewAppointments" element={<DocViewAppointments />} />
@@ -96,7 +98,7 @@ function App() {
           <Route path="/viewDocProfile/:id" element={<ViewDocProfile />} />
           <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat/:token" element={<Chat/>} />
+          <Route path="/chat/:token" element={<Chat />} />
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile/:id" element={<ViewMyProfile />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
@@ -106,7 +108,7 @@ function App() {
           <Route path="/PackageCheckout" element={<PackageCheckout />} />
           <Route path="/FamilyMember" element={<FamilyMember />} />
           <Route path="/viewDoctors" element={<DoctorsList />} />
-      
+
 
         </Routes>
       </Router>
