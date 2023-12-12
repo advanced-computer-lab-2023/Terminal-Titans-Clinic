@@ -38,7 +38,8 @@ import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
 import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
-
+import ReschduleDoc from "./Pages/rescheduleDoc.js";
+import FollowUpDoc from "./Pages/followUpDoc.js";
 
 
 import Form from 'react-bootstrap/Form';
@@ -52,6 +53,7 @@ import NewMed from "./Pages/newmedPage";
 import AvailableMeds from './Pages/AvailableMeds';
 import MedPharm from './Pages/MedPagePharm.js'
 import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
+
 
 function App() {
 
@@ -111,6 +113,9 @@ function App() {
           <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
           <Route path="/acceptRejectFollowUp" element={<AcceptRejectFollowUp />} />
+          <Route path="/reschduleDoc" element={<ReschduleDoc />} />
+          <Route path="/followUpDoc" element={<FollowUpDoc />} />
+
         </Routes>
       </Router>
     </div>
