@@ -275,8 +275,31 @@ router.get('/getfollowups', protect, async (req, res) => {
     }
     try {
         const userId = req.user._id; 
-        const followups = await followupRequest.find({ DoctorId:userId }).sort({ timestamp: -1 });
-        res.status(200).json({ followups, success: true });
+        const followups = await followupRequest.find({ DoctorId:userId, Status:'pending' }).sort({ timestamp: -1 });
+        var list=[];
+        for( var x in followups){
+            const patiet=await patientsModel.findById(followups[x].PatientId);
+            if(followups[x].FamilyMemId){
+                const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+            let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "familyMemberName":fam.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+            else{
+                let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+        }
+       
+        res.status(200).json({ list, success: true });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ message: 'Error retrieving follow-up requests', success: false });
@@ -304,7 +327,7 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
     const followup = await followupRequest.findById(ID);
     const DID= req.user._id;
     
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
+   // await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
         const newAppointment = new appointmentModel({
             PatientId: followup.PatientId,
             DoctorId: followup.DoctorId,
@@ -314,8 +337,84 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
             FamilyMemId: followup.FamilyMemId,
         });
         await newAppointment.save();
-        res.status(200).json({ Result: newAppointment, success: true });
+        
+        const followups = await followupRequest.find({ DoctorId:exists._id, Status:'pending' }).sort({ timestamp: -1 });
+        var list=[];
+        for( var x in followups){
+            const patiet=await patientsModel.findById(followups[x].PatientId);
+            if(followups[x].FamilyMemId){
+                const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+            let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "familyMemberName":fam.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+            else{
+                let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+        }
+       
+        res.status(200).json({ list, success: true });
     
+});
+router.put('/rejectfollowup/:_id', protect, async (req, res) => {
+
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Doctor not found", success: false })
+    }
+    const ID = req.params._id;
+    try {
+        
+     //  const ID = req.params._id;
+        const followup = await followupRequest.findByIdAndUpdate( ID ,{ $set:{Status :'rejected'}},{ new: true });
+        console.log( 'follow-up accepted');
+        const availableSlots = new docAvailableSlots({
+            DoctorId: req.user._id,
+            Date: followup.Date,
+        });
+   
+   
+    
+    const followups=await followupRequest.find({ DoctorId:exists._id, Status:'pending' }).sort({ timestamp: -1 });
+    var list=[];
+    for( var x in followups){
+        const patiet=await patientsModel.findById(followups[x].PatientId);
+        if(followups[x].FamilyMemId){
+            const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+        let  temp={
+                "_id":followups[x]._id,
+                "patientName":patiet.Name,
+                "familyMemberName":fam.Name,
+                "Date":followups[x].Date,
+        }
+        list.push(temp);
+        }
+        else{
+            let  temp={
+                "_id":followups[x]._id,
+                "patientName":patiet.Name,
+                "Date":followups[x].Date,
+        }
+        list.push(temp);
+        }
+    }
+   
+    res.status(200).json({ list, success: true });
+       
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({ message: 'Error rejecting follow-up request', success: false });
+        
+    }
 });
 
 router.put('/readnotification/:_id', protect, async (req, res) => {
@@ -898,7 +997,7 @@ router.post('/acceptContract', protect, async (req, res) => {
 });
 
 //requirement number 51
-router.post('/assignfollowUp', protect, async (req, res) => {
+router.post('/assignfollowUp/:appId', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "You are not a doctor", success: false })
@@ -908,11 +1007,12 @@ router.post('/assignfollowUp', protect, async (req, res) => {
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
-    const PID = req.body.patientId;
-    console.log(req.body);
+    const appointment=await appointmentModel.findById(req.params.appId);
+    const PID = appointment.PatientId;
+   
     const date = req.body.date;
     let newDate = new Date(date);
-    newDate.setHours(newDate.getHours() + 2)
+    //newDate.setHours(newDate.getHours() + 2)
     const DID= req.user._id;
    const aptmnt=await appointmentModel.find({DoctorId:DID,Date:newDate});
     //const slots= await docAvailableSlots.findOne({DoctorId:DID});
@@ -1210,7 +1310,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     }
 
     const appId = req.params._id;
-    const newdate= req.body.Date ;
+    const newdate= req.body.date ;
     const appointment= await appointmentModel.findById(appId);
     if (!appointment) {
         return res.status(404).json({ message: "Appointment not found", success: false });
@@ -1226,10 +1326,18 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
      }
         await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
     console.log(appId);
-    const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{ Date : newdate ,
+    const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{
         Status :"rescheduled"}},{ new: true });
+        const newAppointment = new appointmentModel({
+            PatientId: Pid,
+            DoctorId: DID,
+            Status: "upcoming",
+            Date: newdate,
+            Price: 0,
+            FamilyMemId: appointment.FamilyMemId,
+        });
 
-
+        await newAppointment.save();
         const DmailResponse = await mailSender(
                 doc.Email,
                 "rescheduled:appointment",
@@ -1284,7 +1392,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     if (!doc) {
         return res.status(500).json({ message: "You are not a doctor", success: false })
     }
-    
+    console.log(req.params._id);
     const appId = req.params._id;
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{Status :"cancelled"}},{ new: true });
     if (!result) {
@@ -1351,7 +1459,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
         await doctorModel.findByIdAndUpdate(DID,doc);
         console.log('Money transferred to Doctor successfully');
     } catch (e) {
-        console.error('Error transferring money to Doctor:', e.message);
+        console.log('Error transferring money to Doctor:', e.message);
         return res.status(400).send({ error: e.message });
     }
 //const pre = patient.Wallet
@@ -1361,7 +1469,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
             await patientsModel.findByIdAndUpdate(Pid,patient);
             console.log('Money transferred to patient successfully');
         } catch (e) {
-            console.error('Error transferring money to patient:', e.message);
+            console.log('Error transferring money to patient:', e.message);
             return res.status(400).send({ error: e.message });
         }   
        // const aft = patient.Wallet
@@ -1662,15 +1770,37 @@ router.post('/updateDosage',protect,async(req,res)=>{
             }
             return item;
         });
+        await prescription.save();
         const doc = new PDFDocument;
         // add your content to the document here, as usual
-        doc.text(generatePrescriptionString (prescription));
+        let prescriptionString = '';
+        prescriptionString += `Prescription ID: ${prescription._id}\n`;
+        //get patient name from his id
+        const patientName =await patientsModel.findOne({ _id: prescription.PatientId });
+        prescriptionString += `Patient Name: ${patientName.Name}\n`;
+        //get doctor name from his id
+        const doctorName =await doctorModel.findOne({ _id: prescription.DoctorId });
+        prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
+        prescriptionString += `Date: ${prescription.Date}\n\n`;
+        const medication = prescription.items;
+
+        // Add medication details
+        if (medication && Array.isArray(medication)) {
+            prescriptionString += 'Medications:\n';
+            medication.forEach((medication, index) => {
+                prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
+            });
+        }
+
+        // Add additional notes
+        prescriptionString += '\nAdditional Notes:\n';
+        prescriptionString += prescription.notes;
         // get a blob when you're done
-        doc.pipe(fs.createWriteStream('presc.pdf'));
+        doc.text(prescriptionString);
+        const filePath = "./presc.pdf";
+        doc.pipe(fs.createWriteStream(filePath));
         doc.end();
         prescription.Pdf=doc;
-        await prescription.save();
-        await prescription.save();
         res.status(200).json({
             success: true,
             message: "Prescription updated successfully"
@@ -1918,7 +2048,7 @@ router.post('updatePrescription',protect,async(req,res)=>{
                 message: "Prescription not found"
             });
         }
-        prescription.status="pending";
+        prescription.status="not filled";
         await prescription.save();
         res.status(200).json({
             success: true,
@@ -2024,7 +2154,7 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     var result={};
     for(var x in slots){
         var date=slots[x].Date;
-        const day=date.getDate();
+        const day=date.getDate()+1;
         const month=date.getMonth()+1;
         const year=date.getFullYear();
         const dateKey=year+"-"+month+"-"+day;
@@ -2039,7 +2169,44 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
 
     for(var x in appointments){
         var date=appointments[x].Date;
-        const day=date.getDate();
+        const day=date.getDate()+1;
+        const month=date.getMonth()+1;
+        const year=date.getFullYear();
+        const dateKey=year+"-"+month+"-"+day;
+
+        if(result[dateKey]){
+            result[dateKey].push(date);
+        }
+        else{
+            result[dateKey]=[date];
+        }
+    }
+    console.log(result);
+return res.status(200).json(result);
+});
+
+
+router.get('/getAllFreeSlotsinviewApp', protect, async (req, res) => {
+    var exists=await doctorModel.findById(req.user);
+    if (!exists) {
+        return res.status(500).json({
+            success: false,
+            message: "You are not a doctor"
+        });
+    }
+    else{
+        if(exists.employmentContract!="Accepted"){
+            return res.status(400).json({ message: "Contract not accepted", success: false })
+        }
+    }
+    const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
+   
+    var result={};
+   
+
+    for(var x in appointments){
+        var date=appointments[x].Date;
+        const day=date.getDate()+1;
         const month=date.getMonth()+1;
         const year=date.getFullYear();
         const dateKey=year+"-"+month+"-"+day;

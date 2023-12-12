@@ -5,9 +5,13 @@ import { Link } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
+import axios from 'axios';
+
 
 
 const Meds = ({ medicines }) => {
+    const params = new URLSearchParams(window.location.search);
+    const prescId = params.get('Id');
     const [show, setShow] = useState(false);
     const [value, setValue] = useState(0);
     const handleClose = () => setShow(false);
@@ -16,6 +20,41 @@ const Meds = ({ medicines }) => {
 
     if (!medicines || !Array.isArray(medicines)) {
         return null; // or handle this case in a way that makes sense for your application
+      }
+
+      const handleAddToprescription = async (medicine, dosage) => {
+        console.log(medicine);
+        console.log(dosage);
+        try {
+          const response = await axios.post('http://localhost:8000/doctor/addOrDeleteMedFromPresc', {
+            medicineId: medicine._id,
+            action: 'add',
+            prescriptionId:prescId
+          }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+          if (response.status === 200) {
+            console.log('Successfully added medicine to prescription.');
+          } else {
+            console.error('Failed to add medicine to prescription. Unexpected response:', response);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+        //update dosage of the specified medicine in the dosage specified
+        try {
+          const response = await axios.post('http://localhost:8000/doctor/updateDosage', {
+            medicineId: medicine._id,
+            dosage: dosage,
+            prescriptionId:prescId
+          }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+    
+          if (response.status === 200) {
+            console.log('Successfully updated dosage of medicine.');
+          } else {
+            console.error('Failed to update dosage of medicine. Unexpected response:', response);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
       }
   return (
     <div className="Medcines">
@@ -48,8 +87,7 @@ const Meds = ({ medicines }) => {
                     onChange={(event, val) => setValue(val)}
                     min={1} max={99}
                 />
-
-                <Button variant="primary" onClick={handleClose}>
+                <Button variant="primary" onClick={()=>{handleAddToprescription(medicine,value)}}>
                     Add to Prescription
                 </Button>
                 </Modal.Footer>

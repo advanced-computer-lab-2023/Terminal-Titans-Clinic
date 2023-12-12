@@ -27,7 +27,7 @@
     "node": "^21.1.0",
     "node-mailer": "^0.1.1",
     "nodemailer": "^6.9.7",
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.0.2",
     "pdfkit": "^0.14.0",
     "routes": "^2.1.0",
     "socket.io": "^4.7.2",

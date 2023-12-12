@@ -84,8 +84,8 @@ router.post('/followup', protect, async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     const pId = req.user._id;
-    const name = req.body.Name;
-    const doc = await doctorModel.findOne({ Name: name })
+    // const name = req.body.Name;
+    const doc = await doctorModel.findOne({ _id: req.body.docId })
     const dId = doc._id;
     const date = req.body.Date;
     const famId = req.body.famId;
@@ -106,6 +106,7 @@ router.post('/followup', protect, async (req, res) => {
         });
 
         newfollowup.save();
+        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
 
     }
     else {
@@ -118,6 +119,8 @@ router.post('/followup', protect, async (req, res) => {
 
         });
         newfollowup.save();
+        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+
     }
 
     return res.status(200).json({ newfollowup, success: true });
@@ -258,25 +261,44 @@ router.get('/viewFamMem', protect, async (req, res) => {
     var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id });
     var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id });
     var list = []
-    // console.log(regFamMemebers)
+   // console.log(regFamMemebers)
 
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].Patient2Id })
         if (patientFam)
-            list.push(patientFam)
+            {
+                let temp={
+                    "Name":patientFam.Name,
+                    "_id":patientFam._id,
+                    "Relation":regFamMemebers[x].Relation,
+                    "Gender":patientFam.Gender,
+                    "Mobile":patientFam.Mobile,
+                    "Email":patientFam.Email,
+                }
+                list.push(temp)
+            }
     }
     regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id });
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].PatientId })
-        if (patientFam)
-            list.push(patientFam)
+        
+        if (patientFam){
+        let temp={
+            "Name":patientFam.Name,
+            "_id":patientFam._id,
+            "Relation":regFamMemebers[x].Relation,
+            "Gender":patientFam.Gender,
+            "Mobile":patientFam.Mobile,
+            "Email":patientFam.Email,
+        }
+       //console.log(temp)
+            list.push(temp)
     }
-
+    }
     let famMembers = {
         registered: list,
         unregistered: unRegFamMemebers
     }
-
     //console.log(famMembers);
     res.status(200).json({ Result: famMembers, success: true });
 
