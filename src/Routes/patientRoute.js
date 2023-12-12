@@ -84,8 +84,8 @@ router.post('/followup', protect, async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     const pId = req.user._id;
-    const name = req.body.Name;
-    const doc = await doctorModel.findOne({ Name: name })
+    // const name = req.body.Name;
+    const doc = await doctorModel.findOne({ _id: req.body.docId })
     const dId = doc._id;
     const date = req.body.Date;
     const famId = req.body.famId;
@@ -106,6 +106,7 @@ router.post('/followup', protect, async (req, res) => {
         });
 
         newfollowup.save();
+        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
 
     }
     else {
@@ -118,6 +119,8 @@ router.post('/followup', protect, async (req, res) => {
 
         });
         newfollowup.save();
+        await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
+
     }
 
     return res.status(200).json({ newfollowup, success: true });

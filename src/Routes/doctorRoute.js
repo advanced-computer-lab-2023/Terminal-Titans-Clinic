@@ -275,8 +275,31 @@ router.get('/getfollowups', protect, async (req, res) => {
     }
     try {
         const userId = req.user._id; 
-        const followups = await followupRequest.find({ DoctorId:userId }).sort({ timestamp: -1 });
-        res.status(200).json({ followups, success: true });
+        const followups = await followupRequest.find({ DoctorId:userId, Status:'pending' }).sort({ timestamp: -1 });
+        var list=[];
+        for( var x in followups){
+            const patiet=await patientsModel.findById(followups[x].PatientId);
+            if(followups[x].FamilyMemId){
+                const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+            let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "familyMemberName":fam.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+            else{
+                let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+        }
+       
+        res.status(200).json({ list, success: true });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ message: 'Error retrieving follow-up requests', success: false });
@@ -304,7 +327,7 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
     const followup = await followupRequest.findById(ID);
     const DID= req.user._id;
     
-    await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
+   // await docAvailableSlots.deleteMany({ DoctorId: DID, Date: followup.Date });
         const newAppointment = new appointmentModel({
             PatientId: followup.PatientId,
             DoctorId: followup.DoctorId,
@@ -314,8 +337,84 @@ router.put('/acceptfollowup/:_id', protect, async (req, res) => {
             FamilyMemId: followup.FamilyMemId,
         });
         await newAppointment.save();
-        res.status(200).json({ Result: newAppointment, success: true });
+        
+        const followups = await followupRequest.find({ DoctorId:exists._id, Status:'pending' }).sort({ timestamp: -1 });
+        var list=[];
+        for( var x in followups){
+            const patiet=await patientsModel.findById(followups[x].PatientId);
+            if(followups[x].FamilyMemId){
+                const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+            let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "familyMemberName":fam.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+            else{
+                let  temp={
+                    "_id":followups[x]._id,
+                    "patientName":patiet.Name,
+                    "Date":followups[x].Date,
+            }
+            list.push(temp);
+            }
+        }
+       
+        res.status(200).json({ list, success: true });
     
+});
+router.put('/rejectfollowup/:_id', protect, async (req, res) => {
+
+    const exists = await doctorModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Doctor not found", success: false })
+    }
+    const ID = req.params._id;
+    try {
+        
+     //  const ID = req.params._id;
+        const followup = await followupRequest.findByIdAndUpdate( ID ,{ $set:{Status :'rejected'}},{ new: true });
+        console.log( 'follow-up accepted');
+        const availableSlots = new docAvailableSlots({
+            DoctorId: req.user._id,
+            Date: followup.Date,
+        });
+   
+   
+    
+    const followups=await followupRequest.find({ DoctorId:exists._id, Status:'pending' }).sort({ timestamp: -1 });
+    var list=[];
+    for( var x in followups){
+        const patiet=await patientsModel.findById(followups[x].PatientId);
+        if(followups[x].FamilyMemId){
+            const fam=await unRegFamMem.findById(followups[x].FamilyMemId);
+        let  temp={
+                "_id":followups[x]._id,
+                "patientName":patiet.Name,
+                "familyMemberName":fam.Name,
+                "Date":followups[x].Date,
+        }
+        list.push(temp);
+        }
+        else{
+            let  temp={
+                "_id":followups[x]._id,
+                "patientName":patiet.Name,
+                "Date":followups[x].Date,
+        }
+        list.push(temp);
+        }
+    }
+   
+    res.status(200).json({ list, success: true });
+       
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({ message: 'Error rejecting follow-up request', success: false });
+        
+    }
 });
 
 router.put('/readnotification/:_id', protect, async (req, res) => {
