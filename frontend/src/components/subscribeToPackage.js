@@ -9,7 +9,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
-import { useNavigate } from 'react-router-dom';
 
 const PackagesTab = () => {
   const [packages, setPackages] = useState([]);
@@ -22,7 +21,6 @@ const PackagesTab = () => {
     fetchHealthPackages();
     fetchData();
   }, []);
-  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -45,7 +43,7 @@ const PackagesTab = () => {
           const data = response.data.result;
 
           if(!data)
-          navigate( 'usePackageCheckout?packageId=${id}&famMemId=${famMemId}');
+          window.location.href = `/Health-Plus/PackageCheckout?packageId=${id}&famMemId=${famMemId}`;
           else
           alert("You are already subscribed to a package");
           

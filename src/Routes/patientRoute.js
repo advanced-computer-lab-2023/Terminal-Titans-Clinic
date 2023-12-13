@@ -1719,9 +1719,7 @@ router.get('/subscribeHealthPackageCard/:pid/:packageId/:fees', async (req, res)
 // });
 async function subscribeHealthPackageFamilyWallet(userId, familyMemberId, healthPackageId) {
     try {
-        if (req.user.__t != "patient") {
-            return res.status(500).json({ message: 'Not authorized' });
-        }
+        
         const user = await patientModel.findById(familyMemberId);
         if (!user) {
             return false;
@@ -1749,6 +1747,7 @@ async function subscribeHealthPackageFamilyWallet(userId, familyMemberId, health
         return true;
 
     } catch (error) {
+
         console.error('Error subscribing to health package:', error.message);
         return false;
     }
@@ -2329,7 +2328,8 @@ const processAppWalletPayment = async (req, res, userId, fees, doctor, famId, da
 const processSubWalletPayment = async (req, res, userId, fees, famId, healthPackageId) => {
     const user = await getUserOrFamilyMember(req, res, "patient", true);
     if (!user) return;
-
+    console.log(famId);
+    console.log("fammm")
     user.Wallet = user.Wallet - fees;
     if (user.Wallet < 0) {
         console.error('Insufficient funds in wallet');
@@ -2419,30 +2419,36 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
             message: "You are not authorised "
         });
     }
-    var famId = req.params.userId;
+    var famId = req.params.famId;
     var userId = req.user._id;
     var discount = 0;
     const healthPackageId = req.params.packageId;
     if (famId) {
+        console.log("discount here")
         userId = famId;
-        const sub = healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
-        const healthPackageSub = await getHealthPackage(req, res, sub.healthPackageId);
-
+        const sub = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
+       // const healthPackageSub = await getHealthPackage(req, res, sub.healthPackageId);
+       console.log("sub"+sub);
+       if(sub){
+        const healthPackageSub=await healthPackageModel.findById(sub.healthPackageId);
+        console.log("pack"+healthPackageSub);
         if (healthPackageSub) {
             discount = healthPackageSub.familyDiscountInPercentage;
         }
+    }
 
     }
     const healthPackage = await getHealthPackage(req, res, healthPackageId);
+    console.log(healthPackage);
 
     const user = await patientModel.findById(userId);
-
+console.log("discount  "+discount)
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
     var wallet = user.Wallet
     let result = {
         "fees": Math.round(fees * 100) / 100,
         "user": user.Name,
-        "healthPackage": healthPackage.Name,
+        "healthPackage": healthPackage.packageType,
         "wallet": wallet
     }
     return res.status(200).json({ result: result, success: true });
