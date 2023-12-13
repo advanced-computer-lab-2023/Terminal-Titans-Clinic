@@ -30,7 +30,7 @@ const AddPresc = () => {
 
         if (Array.isArray(jsonData.meds)) {
           setAllMedicines(jsonData.meds);
-        } 
+        }
         else {
           console.error('Invalid data format. Expected an array.');
         }
@@ -75,7 +75,7 @@ const AddPresc = () => {
           {errorMessage}
         </div>
       )}
-      <div className="addPresc" style={{marginLeft:'7%'}}>
+      <div className="addPresc" style={{ marginLeft: '7%' }}>
         <h2 className="addPresc_title">Meds</h2>
         <div className="addPresc_meds">
           {Array.isArray(allMedicines) ? (
@@ -87,13 +87,13 @@ const AddPresc = () => {
                             Add to prescription
                         </button> */}
         </div>
-        
+
       </div>
       {/* <Button variant="primary" onClick={window.location.href=`/Health-Plus/prescInfo?Id=${prescId}`}>
                 Cart <Badge bg="secondary">{cartItemCount}</Badge>
               </Button> */}
     </div>
-    
+
   );
 };
 
