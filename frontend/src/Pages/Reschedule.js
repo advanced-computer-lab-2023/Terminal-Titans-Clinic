@@ -19,6 +19,7 @@ import { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
 import { get } from 'mongoose';
 import {PatientNavBar} from '../components/PatientNavBar.jsx';
+import { useNavigate } from 'react-router-dom';
 
 //not finished yet
 export default function Reschdule() {
@@ -28,6 +29,8 @@ export default function Reschdule() {
     const [freeSlots, setFreeSlots] = React.useState([]);
     const [isHovered, setIsHovered] = useState([]);
   
+    const navigate = useNavigate();
+
     const getSlots = async () => {
   
         await axios.get(`http://localhost:8000/patient/getAllFreeSlots2/${appId}`, {
@@ -54,7 +57,7 @@ export default function Reschdule() {
           if (response.status === 200) {
            alert("Reschduled  successfully");
            window.location.href = '/Health-Plus/viewAppointments';
-           
+          //  navigate('/viewAppointments')
 
           }
       

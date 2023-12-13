@@ -708,6 +708,7 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
     const DnewNotification = new notificationModel({
         userId: dId,
         Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
+        type: "Appointment",
 
     });
 
@@ -716,7 +717,7 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
     const newNotification = new notificationModel({
         userId: pat._id,
         Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
-
+        type: "Appointment",
     });
 
     await newNotification.save();
@@ -800,7 +801,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     const DnewNotification = new notificationModel({
         userId: Did,
         Message: `Patient:  ${exists.Name} rescheduled his appointment to be on the following date: ${newdate}`,
-
+        type: "Appointment",
     });
 
     await DnewNotification.save();
@@ -808,7 +809,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     const newNotification = new notificationModel({
         userId: req.user._id,
         Message: `You rescheduled your appointment with doctor: ${doc.Name} to be on the following date: ${newdate}`,
-
+        type: "Appointment",
     });
 
     await newNotification.save();
@@ -886,7 +887,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const DnewNotification = new notificationModel({
         userId: Did,
         Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${temp}`,
-
+        type: "Appointment",
     });
 
     await DnewNotification.save();
@@ -894,7 +895,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const newNotification = new notificationModel({
         userId: Pid,
         Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${temp}`,
-
+        type: "Appointment",
     });
 
     await newNotification.save();
@@ -1040,7 +1041,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         const DnewNotification = new notificationModel({
             userId: dId,
             Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
-
+            type: "Appointment",
         });
 
         await DnewNotification.save();
@@ -1048,7 +1049,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         const newNotification = new notificationModel({
             userId: pId,
             Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
-
+            type: "Appointment",
         });
 
         await newNotification.save();
@@ -1117,7 +1118,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         const DnewNotification = new notificationModel({
             userId: doc._id,
             Message: `Patient:  ${pat.Name} booked an appointment on the following date: ${date}`,
-
+            type: "Appointment",
         });
 
         await DnewNotification.save();
@@ -1125,7 +1126,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
         const newNotification = new notificationModel({
             userId: pat._id,
             Message: `It is confirmed. You booked an appointment with doctor: ${doc.Name} on the following date: ${date}`,
-
+            type: "Appointment",
         });
 
         await newNotification.save();
