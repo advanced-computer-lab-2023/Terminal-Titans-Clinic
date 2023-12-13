@@ -75,13 +75,40 @@ const PackagesTab = () => {
 
 }
 
+  // const handleFamilyChange = (event) => {
+  //   setSelectedFam(event.target.value);
+  //   console.log(regFamily[(event.target.selectedIndex) - 1]._id);
+  //   if (event.target.value !== 'myself')
+  //     setFamMemId(regFamily[(event.target.selectedIndex) - 1]._id);
+  //   else
+  //     setFamMemId(null);
+  // };
+
   const handleFamilyChange = (event) => {
     setSelectedFam(event.target.value);
-    if (event.target.value !== 'myself')
-      setFamMemId(regFamily[(event.target.selectedIndex) - 1]._id);
-    else
+  
+    if (event.target.value !== 'myself') {
+      const selectedRegFamilyMember = regFamily.find((famMem) => famMem.Name === event.target.value);
+      if (selectedRegFamilyMember) {
+        console.log(selectedRegFamilyMember._id);
+        setFamMemId(selectedRegFamilyMember._id);
+      } else {
+        const selectedUnregFamilyMember = unregFamily.find((famMem) => famMem.Name === event.target.value);
+  
+        if (selectedUnregFamilyMember) {
+          console.log(selectedUnregFamilyMember._id);
+          setFamMemId(selectedUnregFamilyMember._id);
+        } else {
+          //law mal2etosh fe both arrays
+          setFamMemId(null);
+        }
+      }
+    } else {
+      // be null law myself
       setFamMemId(null);
+    }
   };
+  
 
   const fetchHealthPackages = async () => {
     try {
@@ -116,11 +143,12 @@ const PackagesTab = () => {
                 {famMem.Name}
               </MenuItem>
             ))}
-           {unregFamily.map((famMem) => (
+            
+           {/* {unregFamily.map((famMem) => (
               <MenuItem key={famMem._id} value={famMem.Name}>
                 {famMem.Name}
               </MenuItem>
-            ))}
+            ))} */}
 
           </Select>
         </FormControl>
