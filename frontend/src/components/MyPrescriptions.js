@@ -90,6 +90,17 @@ const [allNames,setAllNames]=useState([]);
         }
       );
     }
+    const buyPres = async (id) => {
+      const response = await axios.post(
+        `http://localhost:8000/patient/buyPrescription/${id}`,
+        { },
+        { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+      );
+      if (response.status === 200) {
+       
+             
+      }
+    }
     function arrayBufferToBase64(buffer) {
       let binary = '';
       const bytes = new Uint8Array(buffer);

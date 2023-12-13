@@ -141,6 +141,29 @@ router.post('/followup/:_id', protect, async (req, res) => {
 
 
 })
+router.get('/getTransactionHistory',protect,async(req,res)=>{
+    try{
+        const exists = await patientModel.findOne(req.user);
+        if (!exists) {
+            return res.status(400).json({ message: "Patient not found", success: false })
+        }
+        console.log(exists.Wallet)
+        const transactions=await transactionsModel.find({userId:req.user._id});
+        
+        res.status(200).json({
+            success: true,
+            transactions:transactions,
+            wallet:Math.round(exists.Wallet * 100) / 100
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+});
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', protect, async (req, res) => {
@@ -1099,7 +1122,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
             giveDoctorMoney(req, res, doc, fees / 1.1);
         }
         let price = req.params.fees;
-        addTransaction(price, pId, 'Card', 'Book Appointment');
+        addTransaction(-1* price, pId, 'Card', 'Book Appointment');
         console.log('money to pat');
         addTransaction(price / 1.1, dId, 'Card', 'Book Appointment');
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
@@ -2424,6 +2447,8 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
     var userId = req.user._id;
     var discount = 0;
     const healthPackageId = req.params.packageId;
+    const cur=await patientModel.findById(userId);
+    var wallet = cur.Wallet
     console.log(famId)
     if (famId!='null') {
         console.log("discount here")
@@ -2446,7 +2471,7 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
     const user = await patientModel.findById(userId);
 console.log("discount  "+discount)
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
-    var wallet = user.Wallet
+    
     let result = {
         "fees": Math.round(fees * 100) / 100,
         "user": user.Name,
@@ -3666,6 +3691,8 @@ router.post('buyPrescription/id', protect, async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     try {
+        await CartItem.deleteMany({ userId: patientId });
+
         const prescription = await prescriptionsModel.findById(req.params.id);
         if (!prescription) {
             return res.status(400).json({ message: "Prescription not found", success: false })
