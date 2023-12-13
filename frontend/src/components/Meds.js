@@ -15,7 +15,7 @@ const Meds = ({ medicines }) => {
   const prescId = params.get('Id');
   const [show, setShow] = useState(false);
   const [value, setValue] = useState(0);
-  const [prescItems, updatePrescItems] = [];
+  const [prescItems, updatePrescItems] = useState([]);
   // const [ selectedDosage, setSelectedDosage ] = useState(null);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -23,8 +23,7 @@ const Meds = ({ medicines }) => {
   const [patientId, setPatientId] = useState(null);
 
   useEffect(() => {
-    // fetchData();
-    getPrescription();
+    fetchData();
   }, []);
 
 
@@ -36,7 +35,7 @@ const Meds = ({ medicines }) => {
   const getPrescription = async () => {
     try {
       console.log('res');
-      const response = await axios.get(`/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched patient.');
         console.log(response.data.Result.result);
@@ -53,7 +52,7 @@ const Meds = ({ medicines }) => {
 
   const getPatient = async () => {
     try {
-      const response = await axios.get(`/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched patient.');
         console.log(response.data.Result.result);
