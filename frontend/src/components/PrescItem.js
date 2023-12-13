@@ -1,5 +1,5 @@
 
-import "../style/CartItem.css"
+import "../Styles/PrescItem.css"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -16,20 +16,18 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-const CartItem = ({ item }) => {
+const PrescItem = ({ item }) => {
   const [quantity, setQuantity] = useState(item.quantity);
   const [medicine, setMedicine] = useState(null);
-
-  const location = useLocation();
-  const { medicineId } = useParams();
+  const presc = new URLSearchParams(window.location.search);
 
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/Patient/getAllMedicine/',{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        const response = await axios.get('http://localhost:8000/doctor/getAllMedicine/',{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
         const medicines = response.data.meds;
 
-        const matchedMedicine = medicines.find((med) => med._id === item.medicineId);
+        const matchedMedicine = item.med;
 
         if (matchedMedicine) {
           setMedicine(matchedMedicine);
@@ -40,22 +38,28 @@ const CartItem = ({ item }) => {
     };
 
     fetchMedicines();
-  }, [item.medicineId]);
+  }, [item.med._id]);
 
   const handleQuantityChange = async (newQuantity) => {
     try {
-      await axios.put(`http://localhost:8000/Patient/updateCartItem/${item._id}`, { quantity: newQuantity },{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+      if (newQuantity==0){
+        await axios.delete(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:presc,medicineId:item.med._id,action:"add"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        window.location.reload();
+      }
+      else{
+        await axios.put(`http://localhost:8000/doctor/updateDosage`, { prescriptionId:presc,medicineId:item.med._id,dosage:newQuantity},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
       setQuantity(newQuantity);
+      }
     } catch (error) {
       console.error('Error updating quantity:', error);
     }
   };
 
-  const handleDeleteCartItem = async () => {
+  const handleDeletePrescItem = async () => {
     try {
-      await axios.delete(`http://localhost:8000/Patient/deleteCartItem/${item._id}`,{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+      await axios.delete(`http://localhost:8000/Patient/addOrDeleteMedFromPresc`, { prescriptionId:presc,medicineId:item.med._id,action:"delete"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
     } catch (error) {
-      console.error('Error deleting cart item:', error);
+      console.error('Error deleting presc item:', error);
     }
   };
 
@@ -64,8 +68,8 @@ const CartItem = ({ item }) => {
   }
 
   return (
-    <div className="cartitem">
-      <div className="cart_image">
+    <div className="prescitem">
+      <div className="presc_image">
       {medicine.Picture && medicine.Picture.data && medicine.Picture.contentType && (
                         <img
                             src={`data:${medicine.Picture.contentType};base64,${arrayBufferToBase64(medicine.Picture.data.data)}`}
@@ -73,12 +77,12 @@ const CartItem = ({ item }) => {
                         />
                     )}
       </div>
-      <Link to={`/medicine/${item.medicineId}`} className="cart_name">
+      <Link to={`/medicine/${item.med._id}`} className="presc_name">
         <p>{medicine.Name}</p>
       </Link>
-      <p className="Cart_price">${medicine.Price}</p>
+      <p className="Presc_dosage">${item.dosage}</p>
       <select
-  className="cart_select"
+  className="presc_select"
   value={quantity}
   onChange={(e) => handleQuantityChange(e.target.value)}
 >
@@ -88,11 +92,11 @@ const CartItem = ({ item }) => {
     </option>
   ))}
 </select>
-      <button className="cart_del" onClick={handleDeleteCartItem}>
-        <i className="fas fa-trash"></i>
+      <button className="presc_del" onClick={handleDeletePrescItem}>
+        <i className="fas fa-delete"></i>
       </button>
     </div>
   );
 };
 
-export default CartItem;
+export default PrescItem;

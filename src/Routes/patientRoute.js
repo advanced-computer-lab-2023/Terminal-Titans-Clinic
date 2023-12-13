@@ -3574,6 +3574,84 @@ const addTransaction = (amount, userId, paymentMethod, description) => {
     console.log('l')
 }
 
+router.post('/generatePdf', protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const prescription=await prescriptionsModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        const doctor=await patientModel.findById(prescription.PatientId);
+        if(!doctor){
+            return res.status(400).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+        const doc = new PDFDocument;
+        // add your content to the document here, as usual
+        let prescriptionString = '';
+        prescriptionString += `Prescription ID: ${prescription._id}\n`;
+        //get patient name from his id
+        const patientName =await patientsModel.findOne({ _id: prescription.PatientId });
+        prescriptionString += `Patient Name: ${patientName.Name}\n`;
+        //get doctor name from his id
+        const doctorName =await doctorModel.findOne({ _id: prescription.DoctorId });
+        prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
+        prescriptionString += `Date: ${prescription.Date}\n\n`;
+        const medication = prescription.items;
+        for (let i = 0; i < medication.length; i++) {
+            const medicine = await MedicineModel.findById(medication[i].medicineId);
+            prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
+        }
+
+        // Add medication details
+        if (medication && Array.isArray(medication)) {
+            prescriptionString += 'Medications:\n';
+            const medicine = await MedicineModel.findById(medication[i].medicineId);
+            medication.forEach((medication, index) => {
+                prescriptionString += `${index + 1}. ${medicine.Name} - ${medication.dosage}\n`;
+            });
+        }
+
+        // Add additional notes
+        prescriptionString += '\nAdditional Notes:\n';
+        prescriptionString += prescription.notes;
+        // get a blob when you're done
+        doc.text(prescriptionString);
+        const filePath = "./presc.pdf";
+        doc.pipe(fs.createWriteStream(filePath));
+        doc.end();
+        prescription.Pdf=doc;
+        res.status(200).json({
+            success: true,
+            message: "Prescription updated successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+})
+
 router.post('buyPrescription/id', protect, async (req, res) => {
     const patient = await patientModel.findOne(req.user);
     if (!patient) {
