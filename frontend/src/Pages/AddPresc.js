@@ -14,13 +14,22 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import SplitButton from 'react-bootstrap/SplitButton';
 import { Link } from 'react-router-dom';
+import PrescItem from '../components/PrescItem';
 
 const AddPresc = () => {
   const params = new URLSearchParams(window.location.search);
   const prescId = params.get('Id');
   const [allMedicines, setAllMedicines] = useState([]);
   const [medicalUses, setMedicalUses] = useState([]);
+  const [show, setShow] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [prescItems, updatePrescItems] = useState([]);
+  const [selectedDosage, setSelectedDosage] = useState(1);
+  const [patientId, setPatientId] = useState(null);
+  const [medicines, setMedicines] = useState([]);
+  
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   useEffect(() => {
     const getMedicines = async () => {
@@ -42,6 +51,79 @@ const AddPresc = () => {
     getMedicines();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+
+  // if (!medicines || !Array.isArray(medicines)) {
+  //   return null; // or handle this case in a way that makes sense for your application
+  // }
+
+  // get the prescription of the id
+  const getPrescription = async () => {
+    try {
+      console.log('res');
+      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      if (response.status === 200) {
+        console.log('Successfully fetched patient.');
+        console.log(response.data.Result.result);
+        setPatientId(response.data.Result.result._id);
+        console.log(patientId);
+      } else {
+        console.error('Failed to fetch patient. Unexpected response:', response);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+
+  const getPatient = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      if (response.status === 200) {
+        console.log('Successfully fetched patient.');
+        console.log(response.data.Result.result);
+        setPatientId(response.data.Result.result._id);
+      } else {
+        console.error('Failed to fetch patient. Unexpected response:', response);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+
+  const handlePrescItems = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/doctor/getPrescMeds/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      if (response.status === 200) {
+        console.log('Successfully fetched prescription items.');
+        console.log(response.data.Result.result);
+        updatePrescItems(response.data.Result.result);
+
+      } else {
+        console.error('Failed to fetch prescription items. Unexpected response:', response);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  const fetchData = async () => {
+    await getPrescription();
+    await getPatient();
+    await handlePrescItems();
+  };
+
+
+
+
+  const handleDosageChange = (event) => {
+    const newDosage = parseInt(event.target.value);
+    setSelectedDosage(newDosage);
+  };
 
 
 
@@ -78,23 +160,50 @@ const AddPresc = () => {
       <div className="addPresc" style={{ marginLeft: '7%' }}>
         <h2 className="addPresc_title">Meds</h2>
         <div className="addPresc_meds">
-          {Array.isArray(allMedicines) ? (
-            allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
-          ) : (
-            <p>Error: Medicines data is not in the expected format.</p>
-          )}
-          {/* <button type="button" onClick={handleAddToprescription(medicine,)} >
-                            Add to prescription
-                        </button> */}
+          <div style={{ display: "flex" }}>
+            <div style={{ width: " 20%" }}>
+              <div className="cartscreen">
+              {prescItems && prescItems.map((item) => (
+                <PrescItem key={item.med._id} item={item} />
+              ))}
+              <h2>Prescription Medicines</h2>
+              {prescItems.map((item) => (
+                <PrescItem key={item.med._id} item={item} />
+              ))}
+              <div>
+                <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile\/${patientId}`}>Back to Patient Profile</button>
+              </div>
+          </div>
+            </div>
+            <div style={{ width: "80%" }}>
+              <div style={{}}>
+              <div className="cartscreen">
+                {Array.isArray(allMedicines) ? (
+                  allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
+                ) : (
+                  <p>Error: Medicines data is not in the expected format.</p>
+                )}
+              </div>
+              </div> 
+            </div>
+          </div>         
         </div>
-
       </div>
-      {/* <Button variant="primary" onClick={window.location.href=`/Health-Plus/prescInfo?Id=${prescId}`}>
-                Cart <Badge bg="secondary">{cartItemCount}</Badge>
-              </Button> */}
     </div>
 
   );
 };
 
 export default AddPresc;
+
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return btoa(binary);
+}

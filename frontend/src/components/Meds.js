@@ -135,23 +135,6 @@ const Meds = ({ medicines }) => {
   }
   return (
     <div>
-      <div style={{ display: "flex" }}>
-        <div style={{ width: " 20%" }}>
-          <div className="cartscreen">
-            {prescItems && prescItems.map((item) => (
-              <PrescItem key={item.med._id} item={item} />
-            ))}
-            <h2>Prescription Medicines</h2>
-            {prescItems.map((item) => (
-              <PrescItem key={item.med._id} item={item} />
-            ))}
-            <div>
-              <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile\/${patientId}`}>Back to Patient Profile</button>
-            </div>
-          </div>
-        </div>
-        <div style={{ width: "80%" }}>
-          <div style={{}}>
             <div className="Medcines">
               {medicines.map((medicine) => (
                 <div key={medicine.id} className="medicine">
@@ -193,9 +176,6 @@ const Meds = ({ medicines }) => {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
     </div>
 
   );
