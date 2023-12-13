@@ -69,8 +69,8 @@ router.get('/getMedicine/:id', async (req, res) => {
 });
 
 //get all medicines in a prescription
-router.get('/getPrescMeds', async (req, res) => {
-    const prescription = await prescriptionModel.findById(req.body.id)
+router.get('/getPrescMeds/:id', async (req, res) => {
+    const prescription = await prescriptionModel.findById(req.params.id)
     if (!prescription) {
         res.status(400).json({ message: "Prescription not found", success: false })
     }
@@ -79,15 +79,15 @@ router.get('/getPrescMeds', async (req, res) => {
         let result= [];
         for(var x in items){
             const medicine = await MedicineModel.findById(items[x].medicineId);
-            const medName = medicine.name
             const dosage = items[x].dosage;
             const med={
-                "medName":medName,
+                "med":medicine,
                 "dosage":dosage
             }
             result.push(med);
         }
-        res.status(200).json({ Result: result, success: true })
+        let Result={};
+        res.status(200).json({ Result:result, success: true })
     }
 });
 
@@ -758,7 +758,7 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
 
 //requirement 26
 //get all prescriptions of the logged in doctor with the patient whose id is given in the body array
-router.get('/getPrescriptions/:id', protect, async (req, res) => {
+router.get('/getPrescription/:id', protect, async (req, res) => {
     try {
         console.log('a');
         const doctor = await doctorModel.findById(req.user)
@@ -1687,12 +1687,64 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
             });
         }
         if(action=="add"){
+            //checking whether this drug is already in the list or not
+            const exists=prescription.items.find((item)=>item.medicineId==medicineId);
+            if(exists){
+                return res.status(400).json({
+                    success: false,
+                    message: "This medicine is already in the prescription"
+                });
+            }
             prescription.items.push({medicineId:medicineId,dosage:1});
         }
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
         await prescription.save();
+        cres.status(200).json({
+            success: true,
+            message: "Prescription updated successfully"
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+
+})
+//gemerate pdf
+router.post('/generatePdf', protect,async(req,res)=>{
+    try{
+        const exists = await doctorModel.findById(req.user);
+        if (!exists) {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+        else{
+            if(exists.employmentContract!="Accepted"){
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        const prescriptionId=req.body.prescriptionId;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        const doctor=await doctorModel.findById(prescription.DoctorId);
+        if(!doctor){
+            return res.status(400).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
         const doc = new PDFDocument;
         // add your content to the document here, as usual
         let prescriptionString = '';
@@ -1705,12 +1757,17 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
         prescriptionString += `Date: ${prescription.Date}\n\n`;
         const medication = prescription.items;
+        for (let i = 0; i < medication.length; i++) {
+            const medicine = await MedicineModel.findById(medication[i].medicineId);
+            prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
+        }
 
         // Add medication details
         if (medication && Array.isArray(medication)) {
             prescriptionString += 'Medications:\n';
+            const medicine = await MedicineModel.findById(medication[i].medicineId);
             medication.forEach((medication, index) => {
-                prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
+                prescriptionString += `${index + 1}. ${medicine.Name} - ${medication.dosage}\n`;
             });
         }
 
@@ -1735,7 +1792,6 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
             message: "Internal error mate2refnash"
         });
     }
-
 })
 
 //requirement 54
@@ -1771,36 +1827,6 @@ router.post('/updateDosage',protect,async(req,res)=>{
             return item;
         });
         await prescription.save();
-        const doc = new PDFDocument;
-        // add your content to the document here, as usual
-        let prescriptionString = '';
-        prescriptionString += `Prescription ID: ${prescription._id}\n`;
-        //get patient name from his id
-        const patientName =await patientsModel.findOne({ _id: prescription.PatientId });
-        prescriptionString += `Patient Name: ${patientName.Name}\n`;
-        //get doctor name from his id
-        const doctorName =await doctorModel.findOne({ _id: prescription.DoctorId });
-        prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
-        prescriptionString += `Date: ${prescription.Date}\n\n`;
-        const medication = prescription.items;
-
-        // Add medication details
-        if (medication && Array.isArray(medication)) {
-            prescriptionString += 'Medications:\n';
-            medication.forEach((medication, index) => {
-                prescriptionString += `${index + 1}. ${medication.medicineId} - ${medication.dosage}\n`;
-            });
-        }
-
-        // Add additional notes
-        prescriptionString += '\nAdditional Notes:\n';
-        prescriptionString += prescription.notes;
-        // get a blob when you're done
-        doc.text(prescriptionString);
-        const filePath = "./presc.pdf";
-        doc.pipe(fs.createWriteStream(filePath));
-        doc.end();
-        prescription.Pdf=doc;
         res.status(200).json({
             success: true,
             message: "Prescription updated successfully"
@@ -1918,6 +1944,39 @@ router.post('/downloadPrescription', protect, async(req,res)=>{
         });
     }
 })
+
+//get the patient of a prescription by it's id
+router.get('/getPatientOfPrescription/:prescriptionId',protect,async(req,res)=>{
+    try{
+        const prescriptionId=req.params.prescriptionId;
+        const prescription=await prescriptionModel.findById(prescriptionId);
+        if(!prescription){
+            return res.status(400).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+        const patient=await patientsModel.findById(prescription.PatientId);
+        if(!patient){
+            return res.status(400).json({
+                success: false,
+                message: "Patient not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            patient:patient
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+}
+);
 
 //requirement 63
 //add a patient's prescription

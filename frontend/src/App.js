@@ -40,8 +40,6 @@ import FamilyMember from "./components/FamMember";
 import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
 import ReschduleDoc from "./Pages/rescheduleDoc.js";
 import FollowUpDoc from "./Pages/followUpDoc.js";
-
-
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { useState } from 'react';
@@ -53,7 +51,6 @@ import NewMed from "./Pages/newmedPage";
 import AvailableMeds from './Pages/AvailableMeds';
 import MedPharm from './Pages/MedPagePharm.js'
 import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
-
 
 function App() {
 
