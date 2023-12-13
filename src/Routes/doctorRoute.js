@@ -402,7 +402,6 @@ router.put('/rejectfollowup/:_id', protect, async (req, res) => {
     }
 });
 
-
 const mailSender = async (email, title, body) => {
     try {
         let transporter = nodemailer.createTransport({
@@ -805,7 +804,6 @@ router.get('/getAllPrescriptions',protect,async(req,res)=>{
 }); 
 
 //requirement number 33
-
 router.get('/getPatientsList', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
