@@ -52,6 +52,7 @@ export default function PackageCheckout() {
                 
               const InfoData = res.data.result;
               console.log(InfoData);
+              
               setFees(InfoData.fees);
               setpackageName(InfoData.healthPackage);
                 setUserName(InfoData.user);
@@ -94,7 +95,7 @@ export default function PackageCheckout() {
               window.location = url;
             }else{
               alert('Successfull payment');
-              window.location.href = `/Health-Plus/packages`;
+              window.location.href = `/Health-Plus/patientHome`;
   
             }
           } else {

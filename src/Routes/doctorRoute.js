@@ -253,21 +253,6 @@ router.get('/appointments', protect, async (req, res) => {
     }
 });
 
-router.get('/notifications', protect, async (req, res) => {
-    const exists = await doctorModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Doctor not found", success: false })
-    }
-    try {
-        const userId = req.user._id; 
-        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
-        res.status(200).json({ notifications, success: true });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error retrieving notifications', success: false });
-    }
-});
-
 router.get('/getfollowups', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
@@ -381,7 +366,7 @@ router.put('/rejectfollowup/:_id', protect, async (req, res) => {
             DoctorId: req.user._id,
             Date: followup.Date,
         });
-   
+        availableSlots.save();
    
     
     const followups=await followupRequest.find({ DoctorId:exists._id, Status:'pending' }).sort({ timestamp: -1 });
@@ -417,24 +402,6 @@ router.put('/rejectfollowup/:_id', protect, async (req, res) => {
     }
 });
 
-router.put('/readnotification/:_id', protect, async (req, res) => {
-
-    const exists = await doctorModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Doctor not found", success: false })
-    }
-    try {
-        
-       const ID = req.params._id;
-        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
-        console.log( 'Notification marked as read');
-        res.status(200).json({ notification, success: true });
-      
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error marking notifications as read', success: false });
-    }
-});
 
 const mailSender = async (email, title, body) => {
     try {
@@ -1326,6 +1293,12 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
      }
         await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
     console.log(appId);
+    const availableSlots = new docAvailableSlots({
+        DoctorId: req.user._id,
+        Date: aptmnt.Date,
+    });
+    availableSlots.save();
+
     const result = await appointmentModel.findByIdAndUpdate( appId ,  { $set:{
         Status :"rescheduled"}},{ new: true });
         const newAppointment = new appointmentModel({
@@ -1369,7 +1342,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
             const DnewNotification = new notificationModel({
                 userId: DID, 
                 Message: `You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}`,
-
+                type: "Appointment",
             });
             await DnewNotification.save();
 
@@ -1402,12 +1375,17 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const DID= req.user._id;
     const patient = await patientsModel.findById(Pid);
     const date = result.Date;
+    const availableSlots = new docAvailableSlots({
+        DoctorId: req.user._id,
+        Date: result.Date,
+    });
+    availableSlots.save();
 
 
     const DmailResponse = await mailSender(
         doc.Email,
         "cancelled:appointment",
-        `<p>It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date}<p>`
+        `<p>It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date.toISOString()}<p>`
         
     );
     if (DmailResponse) {
@@ -1422,7 +1400,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const mailResponse = await mailSender(
         patient.Email,
         "cancelled:appointment",
-        `<p>Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date} <p>`
+        `<p>Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date.toISOString()} <p>`
         
     );
     if (mailResponse) {
@@ -1435,7 +1413,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const DnewNotification = new notificationModel({
         userId: DID, 
-        Message: `It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date}`,
+        Message: `It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date.toISOString()}`,
 
     });
     
@@ -1443,7 +1421,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const newNotification = new notificationModel({
         userId: Pid, 
-        Message: `Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date}`,
+        Message: `Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date.toISOString()}`,
 
     });
     
@@ -1473,10 +1451,27 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
             return res.status(400).send({ error: e.message });
         }   
        // const aft = patient.Wallet
-       //console.log(aft);
-         
-      return res.status(200).json({result, message: "appointment is cancelled successfully ", success: true });
-            
+       //console.log(aft)
+       const temp= await appointmentModel.find({ DoctorId: req.user._id });
+         let final = [];
+       for (let x in temp) {///if you need the patient's name in front end
+        let result = {}
+        result.id=temp[x]._id;
+        const patient = await patientsModel.find({ _id: temp[x].PatientId })
+        if (patient.length > 0)
+            result.Name = patient[0].Name;
+        result.PatientId = temp[x].PatientId;
+        result.DoctorId = temp[x].DoctorId;
+        result.Date = temp[x].Date;
+        result.Status = temp[x].Status;
+        if(temp[x].FamilyMemId){
+        let familyMember = await unRegFamMem.findOne({ _id: temp[x].FamilyMemId })
+        result.familyMember = familyMember.Name;
+        }
+        final.push(result);
+
+    }
+    res.status(200).json(final);     
         }
 )
 

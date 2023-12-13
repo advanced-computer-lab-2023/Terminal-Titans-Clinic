@@ -16,6 +16,10 @@ import userModel from './Models/userModel.js'
 import Message from './Models/messageModel.js'
 import protect from './middleware/authMiddleware.js'
 import appointmentModel from './Models/appointmentModel.js'
+import notificationModel from './Models/notificationModel.js'
+import notificationModule from './Routes/notificationRoute.js'
+import { notificationChangeStream } from './Models/notificationModel.js'
+import mongoose from 'mongoose'
 
 
 const dotenv = dotenvModule.config();
@@ -41,6 +45,7 @@ app.use('/doctor', DoctorModule)
 app.use('/patient', PatientModule)
 app.use('/admin', AdminModule)
 app.use('/Pharma', PharmacistModule)
+app.use('/notification', notificationModule)
 
 app.set('view engine', 'ejs');
 
@@ -141,11 +146,10 @@ io.on("connection", async (socket) => {
 	} catch (error) {
 	}
 })
-
+const lastSentNotifications = {};
 //chat
 const wss = new WebSocketServer({ server });
 wss.on('connection', async (connection, req) => {
-	console.log('wsss');
 	function notifyAboutOnlinePeople() {
 		console.log('notify');
 		[...wss.clients].forEach(client => {
@@ -204,6 +208,25 @@ wss.on('connection', async (connection, req) => {
 				text,
 				file: file ? filename : null,
 			});
+			const notification = await notificationModel.create({
+				userId: recipient,
+				Message: 'You have a new message from ' + connection.username,
+				Status: 'unread',
+				type: 'Chat',
+			});
+
+			notificationChangeStream.on('change', (change) => {
+				console.log('in change', change);
+				console.log();
+				[...wss.clients]
+					.filter(c => c.userId == recipient.toString())
+					.forEach(c => c.send(JSON.stringify({
+						myNotification: notification,
+						type: 'notification'
+					})));
+				// io.emit('notification', 'New notification!');
+			});
+
 			[...wss.clients]
 				.filter(c => c.userId == recipient.toString())
 				.forEach(c => c.send(JSON.stringify({
@@ -214,7 +237,39 @@ wss.on('connection', async (connection, req) => {
 					_id: messageDoc._id,
 				})));
 		}
+		else {
+			// if (recipient) {
+			notificationChangeStream.on('change', (change) => {
+				console.log('in change2', change);
+				console.log();
+				const userId = change?.fullDocument?.userId.toString();
+				if (shouldSendNotification({ type: 'notification', _id: change?.fullDocument?._id }, userId)) {
+					[...wss.clients]
+						.filter(c => c.userId == change?.fullDocument?.userId?.toString())
+						.forEach(c => c.send(JSON.stringify({
+							type: 'notification',
+							_id: change?.fullDocument?._id,
+						})));
+					// io.emit('notification', 'New notification!');
+				}
+			});
+			// }
+		}
 	});
+
+	function shouldSendNotification(newNotification, userId) {
+		const lastSentNotification = lastSentNotifications[userId];
+
+		// If no last sent notification or it's different from the new one, return true
+		if (!lastSentNotification || lastSentNotification !== newNotification?._id) {
+			// Update the last sent notification for the user
+			lastSentNotifications[userId] = newNotification?._id;
+			return true;
+		}
+
+		// If it's the same as the last sent one, return false
+		return false;
+	}
 
 	// notify everyone about online people (when someone connects)
 	notifyAboutOnlinePeople();
@@ -271,7 +326,7 @@ app.get('/people', protect, async (req, res) => {
 	}
 	else if (myUser.__t == 'Pharmacist') {
 		let people = await userModel.find({ __t: { $in: ['patient', 'Doctor'] } }).select('-ID -License -Degree -HealthHistory -password');
-		
+
 		res.status(200).json({ myUser: myUser, Result: people });
 	}
 });

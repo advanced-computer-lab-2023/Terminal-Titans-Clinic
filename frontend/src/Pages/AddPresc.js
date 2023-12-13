@@ -75,7 +75,7 @@ const AddPresc = () => {
           {errorMessage}
         </div>
       )}
-      <div className="addPresc">
+      <div className="addPresc" style={{marginLeft:'7%'}}>
         <h2 className="addPresc_title">Meds</h2>
         <div className="addPresc_meds">
           {Array.isArray(allMedicines) ? (

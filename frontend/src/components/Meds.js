@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
 import axios from 'axios';
+import FormLabel from '@mui/material/FormLabel';
 import PrescItem from './PrescItem';
 
 
@@ -98,6 +99,7 @@ const Meds = ({ medicines }) => {
 
 
   const handleAddToprescription = async (medicine, dosage) => {
+        handleClose();
     console.log(medicine);
     console.log(dosage);
     try {

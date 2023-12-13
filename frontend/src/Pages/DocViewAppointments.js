@@ -29,6 +29,7 @@ import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
 import { styled as styled2 } from '@mui/material/styles';
 import { styled as styled3 } from '@mui/material/styles';
+import {DoctorNavBar} from '../components/doctorNavBar';
 
 
 
@@ -94,7 +95,13 @@ const cancelfunc=async()=>{
         { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
       );
       if (response.status === 200) {
-        window.location.reload(false);
+        const aptmnts = response.data;
+        setAptmnts(aptmnts);
+        setisCancel(false);
+        setModalShow(false);
+        setEndDate('');
+        setStartDate('');
+        setStatus('');
 
       }
   
@@ -228,6 +235,7 @@ No</Button>
 
     return (
         <div>
+          <DoctorNavBar/>
     <div   style={{ width: "100% ",backgroundColor:'black' }}>
            
            <h1 style={{color:'white', textAlign:'center'}}>Appointments List </h1>
