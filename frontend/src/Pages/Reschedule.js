@@ -17,11 +17,11 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
-import {DoctorNavBar} from '../components/doctorNavBar';
 import { get } from 'mongoose';
+import {PatientNavBar} from '../components/PatientNavBar.jsx';
 
-
-export default function FollowUpDoc() {
+//not finished yet
+export default function Reschdule() {
     const params = new URLSearchParams(window.location.search);
     const appId = params.get('Id');
     const [value, setValue] = React.useState(dayjs());
@@ -30,7 +30,7 @@ export default function FollowUpDoc() {
   
     const getSlots = async () => {
   
-        await axios.get(`http://localhost:8000/doctor/getAllFreeSlotsinviewApp`, {
+        await axios.get(`http://localhost:8000/patient/getAllFreeSlots2/${appId}`, {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
         }
@@ -44,17 +44,16 @@ export default function FollowUpDoc() {
 
       };
 
-      const addAvailableSlot=async(date)=>{
+      const reschedule=async(date)=>{
     
-        const response = await axios.post(
-            `http://localhost:8000/doctor/assignfollowUp/${appId}`,
+        const response = await axios.put(
+            `http://localhost:8000/patient/rescheduleAppointment/${appId}`,
             {date},
             { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
           );
           if (response.status === 200) {
-           alert("Follow up added successfully");
-           window.location.href = '/Health-Plus/DocViewAppointments';
-
+           alert("Reschduled  successfully");
+           window.location.href = '/Health-Plus/viewAppointments';
            
 
           }
@@ -76,7 +75,7 @@ export default function FollowUpDoc() {
         if(valDay<10)
             valDay="0"+valDay;
      
-        var allSlots = new Array(48).fill(true);
+        var allSlots = new Array(48).fill(false);
         if(freeSlots[keyDate]){
             freeSlots[keyDate].forEach(element => {
                 
@@ -85,7 +84,7 @@ export default function FollowUpDoc() {
                 const min=element.substring(14,16);
               
                 const index=hour*2+min/30;
-                allSlots[index]=false;
+                allSlots[index]=true;
                 
             });
         }
@@ -109,7 +108,7 @@ export default function FollowUpDoc() {
             
             <Button variant="outline-dark"               
             style={{ float: 'right' ,width:'100%'}} 
-            onClick={()=>addAvailableSlot(inputDate)}
+            onClick={()=>reschedule(inputDate)}
             onMouseEnter={() => 
                  setIsHovered(currentIsHovered => {
                   const newIsHovered = [...currentIsHovered]; // Create a copy of the current state
@@ -141,9 +140,9 @@ export default function FollowUpDoc() {
     }, [value]);
     return (
         <div>
-          <DoctorNavBar/>
+            <PatientNavBar/>
             <div style={{backgroundColor:'black'}}>
-            <h1 style={{textAlign:'center',color:'white'}}>Choose Date for Followup</h1>
+            <h1 style={{textAlign:'center',color:'white'}}>Choose Date to reschedule</h1>
             </div>
         <div style={{display:'flex',height:'10%'}}>
         <div style={{width:'50%'}}>

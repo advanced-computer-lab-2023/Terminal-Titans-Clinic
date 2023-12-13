@@ -54,6 +54,8 @@ import NewMed from "./Pages/newmedPage";
 import AvailableMeds from './Pages/AvailableMeds';
 import MedPharm from './Pages/MedPagePharm.js'
 import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
+import Reschdule from "./Pages/Reschedule.js";
+import FollowUp from "./Pages/FollowUp.js";
 
 
 function App() {
@@ -106,6 +108,8 @@ function App() {
           <Route path="/FamilyMember" element={<FamilyMember />} />
           <Route path="/viewDoctors" element={<DoctorsList />} />
           <Route path="/ViewDoctorInfo" element={<ViewDoctorInfo />} />
+          <Route path="/reschedule" element={<Reschdule />} />
+          <Route path="/followUp" element={<FollowUp />} />
       {/* doctor Routes */}
           <Route path="/docViewAppointments" element={<DocViewAppointments />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />

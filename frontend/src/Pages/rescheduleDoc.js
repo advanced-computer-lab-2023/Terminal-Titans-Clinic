@@ -17,6 +17,8 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
+import {DoctorNavBar} from '../components/doctorNavBar';
+
 import { get } from 'mongoose';
 
 //not finished yet
@@ -139,6 +141,7 @@ export default function ReschduleDoc() {
     }, [value]);
     return (
         <div>
+          <DoctorNavBar/>
             <div style={{backgroundColor:'black'}}>
             <h1 style={{textAlign:'center',color:'white'}}>Choose Date to reschedule</h1>
             </div>
