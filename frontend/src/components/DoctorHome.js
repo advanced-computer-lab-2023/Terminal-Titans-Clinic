@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 const DoctorHome = () => {
   const [wltAmnt, setWltAmnt] = useState([]);
- // const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
- const navigate = useNavigate();
+  // const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
+  const navigate = useNavigate();
 
-  const fetchwltAmnt = async () => {    
+  const fetchwltAmnt = async () => {
     try {
       const response = await axios.get("http://localhost:8000/doctor/getWalletAmount", {
         headers: {
@@ -19,7 +19,7 @@ const DoctorHome = () => {
       const result = response.data.Amount;
       console.log(result);
       setWltAmnt(result);
-      
+
 
     } catch (error) {
       console.error('Error fetching wallet data:', error.message);
@@ -38,7 +38,7 @@ const DoctorHome = () => {
         <h3>Wallet:</h3>
         {/* <p><strong>Doctor ID:</strong> {DoctorHealthPackageData._id}</p> */}
         <p><strong>Amount:</strong> {wltAmnt}EGP</p>
-        </div>
+      </div>
 
       <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={() => window.location.pathname = '/Health-Plus/docViewAppointments'}>
@@ -57,8 +57,8 @@ const DoctorHome = () => {
         Forgot Password
       </button>
       <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
-  onClick={() => window.location.href = 'http://localhost:3006/Health-Plus/patient'}>
-  pharmacy
+        onClick={() => window.location.href = 'http://localhost:3006/Health-Plus/patient'}>
+        pharmacy
       </button>
       {/* <button style={{ background: 'green', color: 'white', padding: '10px', cursor: 'pointer' }}
         onClick={() => window.location.pathname = '/Health-Plus/EmploymentContract'}>
