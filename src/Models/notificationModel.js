@@ -13,14 +13,14 @@ const notificationSchema = new mongoose.Schema({
     default: 'unread',
     required: true
   },
-  type:{
-    type:String,
-    required:true
+  type: {
+    type: String,
+    required: true
   },
-  Category:{
-    type:String,
-    default:'inbox',
-    enum:['inbox','save','done'],
+  Category: {
+    type: String,
+    default: 'inbox',
+    enum: ['inbox', 'save', 'done'],
   },
 
   timestamp: { type: Date, default: Date.now },
@@ -28,8 +28,8 @@ const notificationSchema = new mongoose.Schema({
 });
 const Notification = mongoose.model('Notification', notificationSchema);
 const notificationChangeStream = Notification.watch();
-notificationChangeStream.on('change', (change) => {
-
-});
+// notificationChangeStream.on('change', (change) => {
+//   console.log('in notification change stream', change);
+// });
 export default mongoose.model('Notification', notificationSchema);
 export { notificationChangeStream };

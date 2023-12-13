@@ -253,21 +253,6 @@ router.get('/appointments', protect, async (req, res) => {
     }
 });
 
-router.get('/notifications', protect, async (req, res) => {
-    const exists = await doctorModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Doctor not found", success: false })
-    }
-    try {
-        const userId = req.user._id; 
-        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
-        res.status(200).json({ notifications, success: true });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error retrieving notifications', success: false });
-    }
-});
-
 router.get('/getfollowups', protect, async (req, res) => {
     const exists = await doctorModel.findOne(req.user);
     if (!exists) {
@@ -417,24 +402,6 @@ router.put('/rejectfollowup/:_id', protect, async (req, res) => {
     }
 });
 
-router.put('/readnotification/:_id', protect, async (req, res) => {
-
-    const exists = await doctorModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Doctor not found", success: false })
-    }
-    try {
-        
-       const ID = req.params._id;
-        const notification = await notificationModel.findByIdAndUpdate( ID ,{ $set:{Status :'read'}},{ new: true });
-        console.log( 'Notification marked as read');
-        res.status(200).json({ notification, success: true });
-      
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error marking notifications as read', success: false });
-    }
-});
 
 const mailSender = async (email, title, body) => {
     try {
@@ -1375,7 +1342,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
             const DnewNotification = new notificationModel({
                 userId: DID, 
                 Message: `You rescheduled your appointment with patient:  ${patient.Name} to be on the following date: ${newdate}`,
-
+                type: "Appointment",
             });
             await DnewNotification.save();
 

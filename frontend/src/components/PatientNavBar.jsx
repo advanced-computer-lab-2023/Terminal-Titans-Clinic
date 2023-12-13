@@ -13,7 +13,6 @@ import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
 import { useEffect } from 'react';
-import { set } from 'lodash';
 import axios from 'axios';
 
 const defaultTheme = createTheme();
@@ -23,6 +22,7 @@ const defaultTheme = createTheme();
 
 export function PatientNavBar() {
   const [notificationsCount, setNotificationsCount] = React.useState(0);
+  const [notifications, setNotifications] = React.useState([]);
   // const [notifications, setNotifications] = React.useState([]);
 
   useEffect(() => {
@@ -61,9 +61,11 @@ export function PatientNavBar() {
 
   function handleNotifications(event) {
     const data = JSON.parse(event.data);
-    if (data.type === 'notification') {
+    // notifications
+    if (data.type === 'notification' && notifications.findIndex((notification) => notification == data?._id?.toString()) === -1) {
       console.log('notification received');
       setNotificationsCount((prev) => prev + 1);
+      setNotifications((prev) => [...prev, data._id]);
       // console.log(data.myNotification.Message);
       // setNotifications((prev) => [...prev, data.myNotification.Message]);
     }
@@ -91,7 +93,7 @@ export function PatientNavBar() {
       >
         <Toolbar sx={{ flexWrap: 'wrap' }}>
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/patientHome' }}>Health Plus+</span>
+            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
           </Typography>
           <nav>
             <Button
