@@ -23,6 +23,10 @@ const prescriptionSchema = new mongoose.Schema({
         type:Date,
         required:true
     },
+    InCart:{
+        type:Boolean,
+        default:false
+    }
     //appointment?
 });
 export default model('prescription',prescriptionSchema);

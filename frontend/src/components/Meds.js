@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
 import axios from 'axios';
+import FormLabel from '@mui/material/FormLabel';
 
 
 
@@ -13,7 +14,7 @@ const Meds = ({ medicines }) => {
     const params = new URLSearchParams(window.location.search);
     const prescId = params.get('Id');
     const [show, setShow] = useState(false);
-    const [value, setValue] = useState(0);
+    const [value, setValue] = useState(1);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
@@ -23,6 +24,7 @@ const Meds = ({ medicines }) => {
       }
 
       const handleAddToprescription = async (medicine, dosage) => {
+        handleClose();
         console.log(medicine);
         console.log(dosage);
         try {
@@ -80,7 +82,9 @@ const Meds = ({ medicines }) => {
                 </Modal.Header>
                 <Modal.Body>{medicine.MedicalUse.join(' ')}</Modal.Body>
                 <Modal.Footer>
+                  <FormLabel for="dosage">Dosage:</FormLabel>
                 <NumberInput
+                    style={{ width: '80%' }}
                     aria-label="Demo number input"
                     placeholder="Enter Dosage…"
                     value={value}

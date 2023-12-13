@@ -24,6 +24,9 @@ import nodemailer from 'nodemailer';
 import followupRequest from '../Models/followupRequest.js';
 import { Console } from 'console';
 
+import prescDoc from '../Models/prescDoc.js';
+
+
 import RegisteredFamilyMemberModel from '../Models/RegisteredFamilyMemberModel.js';
 import NotRegisteredFamilyMemberModel from '../Models/NotRegisteredFamilyMemberModel.js';
 
@@ -75,8 +78,16 @@ const mailSender = async (email, title, body) => {
         console.log(error.message);
     }
 };
-
-
+router.get('/downloadPres/:_id',protect,async(req,res)=>{
+    try{
+    const pres=await prescDoc.findOne({Prescription:req.params._id});
+    console.log(pres)
+    return res.status(200).json(pres.prescDoc);
+    }
+    catch(error){
+        return res.status(200).json('error getting doc');
+    }
+})
 //req. 64
 router.post('/followup/:_id', protect, async (req, res) => {
     const exist = await patientModel.findOne(req.user);
@@ -464,7 +475,19 @@ router.get('/viewPrescriptions', protect, async (req, res) => {
 })
 
 // requirement number 38
+router.get('/getDoctorNames', protect, async (req, res) => {
+   const getDoctors = await Doctor.find({});
+   var final = []
+   let allDoctors = getDoctors;
+   for (let x in allDoctors) {
+    
+  
+       final.push(allDoctors[x].Name)
 
+   }
+   //console.log(final)
+   return res.status(200).json({ Result: final, success: true });
+})
 
 router.post('/getDoctors', protect, async (req, res) => {
     let exists = await patientModel.findOne(req.user);
@@ -1346,14 +1369,15 @@ router.post('/filterPrescriptions', async (req, res) => {
         Date: {
             $gte: startDate,
             $lte: endDate
-        }, PatientId: req.user._id
+        }, 
+        PatientId: exists._id
     });
 
     var id = await doctorModel.find({ Name: req.body.Name });
     // var id=await prescriptionsModel.find({DoctorId: req.body.DoctorId,PatientId:pId})
     const status = req.body.status;
     // presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
-    var presStatus = await prescriptionsModel.find({ status: status, PatientId: req.user._id });
+    var presStatus = await prescriptionsModel.find({ status: status, PatientId: exists._id });
     if (!req.body.Name) {
         var id = await doctorModel.find({});
     }
@@ -1364,7 +1388,7 @@ router.post('/filterPrescriptions', async (req, res) => {
     //      presDate = await prescriptionsModel.find({PatientId:pId});
     // }
     if (!req.body.status) {
-        var presStatus = await prescriptionsModel.find({ PatientId: req.user._id });
+        var presStatus = await prescriptionsModel.find({ PatientId:exists._id });
     }
     var temp = presDate.filter((pres) => {
         var flag1 = false;
@@ -1388,17 +1412,29 @@ router.post('/filterPrescriptions', async (req, res) => {
     for (let x in temp) {///if you need the doctor's name in front end
         var result = {}
         const doc = await Doctor.find({ _id: temp[x].DoctorId })
-        console.log(doc.Name)
+        console.log("pp"+doc.Name)
         if (doc.length > 0)
             result.Name = doc[0].Name;
         //result.prescriptionDoc=temp[x].prescriptionDoc;
         result.Date = temp[x].Date;
         result.status = temp[x].status;
         result.id = temp[x].id;
-        result.prescriptionDoc = temp[x].prescriptionDoc.binData.toString('base64');
+      //  result.prescriptionDoc = temp[x].prescriptionDoc.binData.toString('base64');
+      result.medicine=[]
+      for (let y in temp[x].items ){
+        const med=await MedicineModel.findById(temp[x].items[y].medicineId)
+        var medicine={
+            "Name":med.Name,
+            "Dosage":temp[x].items[y].dosage
+        }
+        console.log(medicine)
+
+        result.medicine.push(medicine);
+      }
         final.push(result);
 
     }
+    console.log(final)
     res.status(200).json({ final, success: true });
 
 
@@ -3584,6 +3620,98 @@ const addTransaction = (amount, userId, paymentMethod, description) => {
     console.log('l')
 }
 
+router.post('buyPrescription/id', protect, async (req, res) => {
+    const patient = await patientModel.findOne(req.user);
+    if (!patient) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const prescription = await prescriptionsModel.findById(req.params.id);
+        if (!prescription) {
+            return res.status(400).json({ message: "Prescription not found", success: false })
+        }
+        for(var x in prescription.items){
+            const medicine = await MedicineModel.findById(prescription.items[x].medicineId);
+            const cart =new CartItem({
+                userId:req.user._id,
+                medicineId:prescription.items[x].medicineId,
+                quantity:prescription.items[x].dosage,
+                price:medicine.Price
+            });
+        }
 
+        await prescriptionsModel.findByIdAndUpdate(id)
+        const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id:req.params.id },
+            {
+                InCart: true,
+            });
+        return res.status(200).json({ Result: updatedPres, success: true });
+    }
+    catch (error) {
+        console.error('Error getting prescription', error.message);
+    }
+});
+async function changeStatusOfPres(userId){ 
+    try{ 
+        const cartItems = await CartItem.find({ userId: userId }); 
+        const prescriptions = await prescriptionsModel.find({ PatientId: userId ,addedToCart:true}); 
+        let flag=true; 
+        for (var pres in prescriptions){ 
+            var medList =prescriptions[pres].items; 
+            for (var x in cartItems) { 
+                console.log(cartItems[x]) 
+                const med = await MedicineModel.findById(cartItems[x].medicineId); 
+                if(!med.OverTheCounter){ 
+                   
+                    
+                    let matchingMed = [...medList].find(item => item.medicineId === med._id); 
+           
+                    if(!matchingMed || cartItems[x].quantity > matchingMed.dosage) 
+                    flag=false; 
+                
+                } } 
+
+
+                if(flag){ 
+                    const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id: prescriptions[pres]._id }, { status:"filled"}); 
+                    return; 
+                    //  prescriptions = await PrescriptionModel.find({ PatientId: patient._id}); 
+                    }
+                }
+                prescriptions = await prescriptionsModel.find({ PatientId: userId }); 
+                
+                let arr = new Array(cartItems.length).fill(false);
+                flag=false;
+                for (var pres in prescriptions){ 
+                    var medList =prescriptions[pres].items; 
+                    for (var x in cartItems) { 
+                        if(arr[x])
+                        continue;
+                        console.log(cartItems[x]) 
+                        const med = await MedicineModel.findById(cartItems[x].medicineId); 
+                        if(!med.OverTheCounter){ 
+                           
+                            let matchingMed = [...medList].find(item => item.medicineId === med._id); 
+                   
+                            if(matchingMed && cartItems[x].quantity == matchingMed.dosage){ 
+                                arr[x]=true;
+                                flag=true;
+                            }
+                        
+                        } 
+                    } 
+        
+        
+                        if(flag){ 
+                            const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id: prescriptions[pres]._id }, { status:"filled"}); 
+                            return; 
+                            //  prescriptions = await PrescriptionModel.find({ PatientId: patient._id}); 
+                            }
+                        }
+
+                }catch(error){
+
+                     } 
+                    }
 
 export default router;
