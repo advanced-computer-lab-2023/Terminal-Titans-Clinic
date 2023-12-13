@@ -99,7 +99,7 @@ const Meds = ({ medicines }) => {
 
 
   const handleAddToprescription = async (medicine, dosage) => {
-        handleClose();
+    handleClose();
     console.log(medicine);
     console.log(dosage);
     try {
@@ -155,7 +155,7 @@ const Meds = ({ medicines }) => {
           <div style={{}}>
             <div className="Medcines">
               {medicines.map((medicine) => (
-                <div key={medicine._id} className="medicine">
+                <div key={medicine.id} className="medicine">
                   {medicine.Picture && medicine.Picture.data && medicine.Picture.contentType && (
                     <img
                       src={`data:${medicine.Picture.contentType};base64,${arrayBufferToBase64(medicine.Picture.data.data)}`}
@@ -169,7 +169,28 @@ const Meds = ({ medicines }) => {
                     <Button className="info_buttom" onClick={handleShow}>
                       View
                     </Button>
+
                   </div>
+                  <Modal show={show} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>{medicine.Name}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>{medicine.MedicalUse.join(' ')}</Modal.Body>
+                    <Modal.Footer>
+                      <FormLabel for="dosage">Dosage:</FormLabel>
+                      <NumberInput
+                        style={{ width: '80%' }}
+                        aria-label="Demo number input"
+                        placeholder="Enter Dosage…"
+                        value={value}
+                        onChange={(event, val) => setValue(val)}
+                        min={1} max={99}
+                      />
+                      <Button variant="primary" onClick={() => { handleAddToprescription(medicine, value) }}>
+                        Add to Prescription
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
                 </div>
               ))}
             </div>
@@ -177,6 +198,7 @@ const Meds = ({ medicines }) => {
         </div>
       </div>
     </div>
+
   );
 };
 
