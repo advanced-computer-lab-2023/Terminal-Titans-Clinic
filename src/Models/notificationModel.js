@@ -17,6 +17,11 @@ const notificationSchema = new mongoose.Schema({
     type:String,
     required:true
   },
+  Category:{
+    type:String,
+    default:'inbox',
+    enum:['inbox','save','done'],
+  },
 
   timestamp: { type: Date, default: Date.now },
   //   relatedAppointment: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }

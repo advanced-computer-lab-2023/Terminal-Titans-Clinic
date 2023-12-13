@@ -261,39 +261,38 @@ router.get('/viewFamMem', protect, async (req, res) => {
     var unRegFamMemebers = await unRegFamMem.find({ PatientId: req.user._id });
     var regFamMemebers = await RegFamMem.find({ PatientId: req.user._id });
     var list = []
-   // console.log(regFamMemebers)
+    // console.log(regFamMemebers)
 
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].Patient2Id })
-        if (patientFam)
-            {
-                let temp={
-                    "Name":patientFam.Name,
-                    "_id":patientFam._id,
-                    "Relation":regFamMemebers[x].Relation,
-                    "Gender":patientFam.Gender,
-                    "Mobile":patientFam.Mobile,
-                    "Email":patientFam.Email,
-                }
-                list.push(temp)
+        if (patientFam) {
+            let temp = {
+                "Name": patientFam.Name,
+                "_id": patientFam._id,
+                "Relation": regFamMemebers[x].Relation,
+                "Gender": patientFam.Gender,
+                "Mobile": patientFam.Mobile,
+                "Email": patientFam.Email,
             }
+            list.push(temp)
+        }
     }
     regFamMemebers = await RegFamMem.find({ Patient2Id: req.user._id });
     for (var x in regFamMemebers) {
         var patientFam = await patientModel.findOne({ _id: regFamMemebers[x].PatientId })
-        
-        if (patientFam){
-        let temp={
-            "Name":patientFam.Name,
-            "_id":patientFam._id,
-            "Relation":regFamMemebers[x].Relation,
-            "Gender":patientFam.Gender,
-            "Mobile":patientFam.Mobile,
-            "Email":patientFam.Email,
-        }
-       //console.log(temp)
+
+        if (patientFam) {
+            let temp = {
+                "Name": patientFam.Name,
+                "_id": patientFam._id,
+                "Relation": regFamMemebers[x].Relation,
+                "Gender": patientFam.Gender,
+                "Mobile": patientFam.Mobile,
+                "Email": patientFam.Email,
+            }
+            //console.log(temp)
             list.push(temp)
-    }
+        }
     }
     let famMembers = {
         registered: list,
@@ -693,58 +692,6 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
 
 
 }
-
-router.get('/notifications', protect, async (req, res) => {
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
-    try {
-        const userId = req.user._id;
-        const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
-        const length = notifications.length;
-        res.status(200).json({ notifications, length, success: true });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error retrieving notifications', success: false });
-    }
-});
-
-router.get('/unReadNotifications', protect, async (req, res) => {
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
-    try {
-        const userId = req.user._id;
-        const notifications = await notificationModel.find({ userId, Status: 'unread' }).sort({ timestamp: -1 });
-        const length = notifications.length;
-        res.status(200).json({ length, success: true });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error retrieving notifications', success: false });
-    }
-});
-
-
-router.put('/readnotification/:_id', protect, async (req, res) => {
-
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
-    try {
-
-        const ID = req.params._id;
-        const notification = await notificationModel.findByIdAndUpdate(ID, { $set: { Status: 'read' } }, { new: true });
-        console.log('Notification marked as read');
-        res.status(200).json({ notification, success: true });
-
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Error marking notifications as read', success: false });
-    }
-});
 //reschedule an appointment req.47
 
 

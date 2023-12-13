@@ -17,6 +17,7 @@ import Message from './Models/messageModel.js'
 import protect from './middleware/authMiddleware.js'
 import appointmentModel from './Models/appointmentModel.js'
 import notificationModel from './Models/notificationModel.js'
+import notificationModule from './Routes/notificationRoute.js'
 import { notificationChangeStream } from './Models/notificationModel.js'
 import mongoose from 'mongoose'
 
@@ -44,6 +45,7 @@ app.use('/doctor', DoctorModule)
 app.use('/patient', PatientModule)
 app.use('/admin', AdminModule)
 app.use('/Pharma', PharmacistModule)
+app.use('/notification', notificationModule)
 
 app.set('view engine', 'ejs');
 
