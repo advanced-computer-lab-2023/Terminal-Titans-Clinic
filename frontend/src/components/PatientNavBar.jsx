@@ -100,7 +100,7 @@ export function PatientNavBar() {
               className='navButton'
               variant="button"
               color="text.primary"
-              onClick={() => { window.location.href = '/Health-Plus/prescriptions' }}
+              onClick={() => { window.location.href = `http://localhost:4000/patient/${sessionStorage.getItem('token')}` }}
               sx={{ my: 1, mx: 1.5 }}
             >
               Visit pharmacy
