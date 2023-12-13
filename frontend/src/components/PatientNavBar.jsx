@@ -31,7 +31,7 @@ export function PatientNavBar() {
   }, []);
 
   async function getNotifications() {
-    const response = await axios('http://localhost:8000/patient/unReadNotifications', {
+    const response = await axios('http://localhost:8000/notification/unReadNotifications', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
