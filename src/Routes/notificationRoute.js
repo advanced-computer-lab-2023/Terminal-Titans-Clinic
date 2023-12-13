@@ -9,10 +9,6 @@ const router = express.Router();
 
 
 router.get('/notifications', protect, async (req, res) => {
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
     try {
         const userId = req.user._id;
         const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
@@ -25,10 +21,6 @@ router.get('/notifications', protect, async (req, res) => {
 });
 
 router.get('/unReadNotifications', protect, async (req, res) => {
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
     try {
         const userId = req.user._id;
         const notifications = await notificationModel.find({ userId, Status: 'unread' }).sort({ timestamp: -1 });
@@ -57,11 +49,6 @@ router.put('/readnotification/:_id', protect, async (req, res) => {
 });
 
 router.put('/unReadnotification/:_id', protect, async (req, res) => {
-
-    const exists = await patientModel.findOne(req.user);
-    if (!exists) {
-        return res.status(400).json({ message: "Patient not found", success: false })
-    }
     try {
 
         const ID = req.params._id;

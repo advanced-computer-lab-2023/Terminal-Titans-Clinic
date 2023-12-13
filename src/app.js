@@ -146,7 +146,7 @@ io.on("connection", async (socket) => {
 	} catch (error) {
 	}
 })
-
+const lastSentNotifications = {};
 //chat
 const wss = new WebSocketServer({ server });
 wss.on('connection', async (connection, req) => {
@@ -238,21 +238,38 @@ wss.on('connection', async (connection, req) => {
 				})));
 		}
 		else {
-			if (recipient) {
-				notificationChangeStream.on('change', (change) => {
-					console.log('in change2', change);
-					console.log();
+			// if (recipient) {
+			notificationChangeStream.on('change', (change) => {
+				console.log('in change2', change);
+				console.log();
+				const userId = change?.fullDocument?.userId.toString();
+				if (shouldSendNotification({ type: 'notification', _id: change?.fullDocument?._id }, userId)) {
 					[...wss.clients]
-						.filter(c => c.userId == recipient.toString())
+						.filter(c => c.userId == change?.fullDocument?.userId?.toString())
 						.forEach(c => c.send(JSON.stringify({
-							myNotification: notification,
-							type: 'notification'
+							type: 'notification',
+							_id: change?.fullDocument?._id,
 						})));
 					// io.emit('notification', 'New notification!');
-				});
-			}
+				}
+			});
+			// }
 		}
 	});
+
+	function shouldSendNotification(newNotification, userId) {
+		const lastSentNotification = lastSentNotifications[userId];
+
+		// If no last sent notification or it's different from the new one, return true
+		if (!lastSentNotification || lastSentNotification !== newNotification?._id) {
+			// Update the last sent notification for the user
+			lastSentNotifications[userId] = newNotification?._id;
+			return true;
+		}
+
+		// If it's the same as the last sent one, return false
+		return false;
+	}
 
 	// notify everyone about online people (when someone connects)
 	notifyAboutOnlinePeople();

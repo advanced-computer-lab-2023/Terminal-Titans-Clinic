@@ -12,10 +12,64 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
+import { useEffect } from 'react';
+import axios from 'axios';
 
 const defaultTheme = createTheme();
 
+
+
+
 export function DoctorNavBar() {
+  const [notificationsCount, setNotificationsCount] = React.useState(0);
+  const [notifications, setNotifications] = React.useState([]);
+  // const [notifications, setNotifications] = React.useState([]);
+
+  useEffect(() => {
+    getNotifications();
+    connectToWs();
+  }, []);
+
+  async function getNotifications() {
+    const response = await axios('http://localhost:8000/notification/unReadNotifications', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+      },
+    });
+    console.log(response.data);
+    setNotificationsCount(response.data.length);
+  }
+
+  function goToNotification() {
+    window.location.href = '/Health-Plus/notifications';
+  }
+
+  function connectToWs() {
+    const ws = new WebSocket('ws://localhost:8000');
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ token: sessionStorage.getItem('token') }));
+    };
+    ws.addEventListener('message', handleNotifications);
+    ws.addEventListener('close', () => {
+      setTimeout(() => {
+        console.log('Disconnected. Trying to reconnect.');
+        connectToWs();
+      }, 1000);
+    });
+  }
+
+  function handleNotifications(event) {
+    const data = JSON.parse(event.data);
+    // notifications
+    if (data.type === 'notification' && notifications.findIndex((notification) => notification == data?._id?.toString()) === -1) {
+      console.log('notification received');
+      setNotificationsCount((prev) => prev + 1);
+      setNotifications((prev) => [...prev, data._id]);
+      // console.log(data.myNotification.Message);
+      // setNotifications((prev) => [...prev, data.myNotification.Message]);
+    }
+  }
 
   const signoutButtonFunc = () => {
     sessionStorage.removeItem('token');
@@ -23,7 +77,7 @@ export function DoctorNavBar() {
   }
 
   function goToChat() {
-    window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
+    window.location.href = `chat/${sessionStorage.getItem('token')}`;
   }
 
   return (
@@ -42,7 +96,7 @@ export function DoctorNavBar() {
             <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
           </Typography>
           <nav>
-            <Button
+            {/* <Button
               className='navButton'
               variant="button"
               color="text.primary"
@@ -50,7 +104,7 @@ export function DoctorNavBar() {
               sx={{ my: 1, mx: 1.5 }}
             >
               Visit pharmacy
-            </Button>
+            </Button> */}
             {/* <Link
               variant="button"
               color="text.primary"
@@ -70,18 +124,16 @@ export function DoctorNavBar() {
               Support
             </Button>
 
-            <Dropdown className="d-inline mx-2">
-              <Dropdown.Toggle id="dropdown-autoclose-true">
-                <Badge color="warning" badgeContent={0} showZero>
-                  <MailIcon />
-                </Badge>
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu>
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/0">Patient Profile</Dropdown.Item>
-                <Dropdown.Divider />
-              </Dropdown.Menu>
-            </Dropdown>
+            <Button
+              // hena link el chatting
+              style={{ color: 'black' }}
+              onClick={() => { goToNotification() }}
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              <Badge color="warning" badgeContent={notificationsCount} showZero>
+                <MailIcon />
+              </Badge>
+            </Button>
 
             <Dropdown className="d-inline mx-2">
               <Dropdown.Toggle id="dropdown-autoclose-true">
@@ -89,11 +141,17 @@ export function DoctorNavBar() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/0">Doctor Profile</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/0">Patient Profile</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/1">Password</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/1">Health Records</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewDocProfile/2">Payment</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/2">Medical History</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/3">Change Password</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/4">Family Members Info</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/5">My Health Packages</Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={signoutButtonFunc}>Sign Out</Dropdown.Item>
               </Dropdown.Menu>

@@ -56,8 +56,8 @@ export default function Reschdule() {
           );
           if (response.status === 200) {
            alert("Reschduled  successfully");
-           window.location.href = '/Health-Plus/viewAppointments';
-          //  navigate('/viewAppointments')
+          //  window.location.href = '/Health-Plus/viewAppointments';
+           navigate('/viewAppointments')
 
           }
       
