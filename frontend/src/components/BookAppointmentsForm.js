@@ -65,8 +65,8 @@ console.log(params.get('success'))
             );
             if (response.status === 200) {
                 const doctors = response.data;
-                console.log(doctors.Doctors);
-                setDoctors(doctors.Doctors);
+                console.log(doctors.Result);
+                setDoctors(doctors.Result);
 
             }
     };
@@ -122,7 +122,7 @@ console.log(params.get('success'))
         //     (doctor) => doctor.name === event.target.value
         // )._id;
 
-        window.location.href=`/Health-Plus/showAvailableSlots?Id=${doctors[(event.target.selectedIndex)-1]._id}`
+        window.location.href=`/Health-Plus/showAvailableSlots?Id=${doctors[(event.target.selectedIndex)-1].id}`
         allAppointments(doctors[(event.target.selectedIndex)-1]._id);
     };
     const handleFamilyChange = (event) => {
@@ -158,34 +158,7 @@ console.log(params.get('success'))
                     </option>
                 ))}
             </select>
-            <label>Patient:</label>
-            <select value={selectedFam} onChange={handleFamilyChange}>
-                <option value='myself'>myslef</option>
-                {unRegFamily.map((famMem) => (
-                    <option key={famMem._id} value={famMem.Name}>
-                        {famMem.Name}
-                    </option>
-                ))}
-            </select>
-            <div
-                style={{
-                    height: "280px",
-                    width: "700px",
-                    overflow: "scroll",
-                    border: "1px solid #ddd",
-                }}
-            >
-                <div className="days">{renderDays()}</div>
-            </div>
-            {showPaymentButtons && (
-      <PaymentPage
-        selectedDoctor={selectedDoctor}
-        selectedDate={selectedDate}
-        famMemId={famMemId}
-        packageId={null}
-        success={success}
-      />
-    )}
+            
         </div>
     );
 }

@@ -417,10 +417,9 @@ router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
     var result = {};
     for (var x in slots) {
         var date = slots[x].Date;
-        const day = date.getDate()+1;
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const dateKey = year + "-" + month + "-" + day;
+        
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if (result[dateKey]) {
             result[dateKey].push(date);
@@ -447,10 +446,8 @@ router.get('/getAllFreeSlots2/:id', protect, async (req, res) => {
     var result = {};
     for (var x in slots) {
         var date = slots[x].Date;
-        const day = date.getDate()+1;
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const dateKey = year + "-" + month + "-" + day;
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if (result[dateKey]) {
             result[dateKey].push(date);
@@ -535,6 +532,7 @@ router.post('/getDoctors', protect, async (req, res) => {
         return res.status(400).json({ message: "No doctors found " });
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
+    if(myHealthStatus){
     const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
     if (packId) {
@@ -545,6 +543,7 @@ router.post('/getDoctors', protect, async (req, res) => {
             return (res.status(400).send({ error: "cant find package", success: false }));
 
     }
+}
     else {
         discountP = 0;
     }
@@ -682,10 +681,10 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
             return false;
         }
         console.log("pio")
-        const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
-        if (availableSlot.length < 1) {
-            return false;
-        }
+        // const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
+        // if (availableSlot.length < 1) {
+        //     return false;
+        // }
         console.log("pioppp")
         newAppointment = new appointmentModel({
             PatientId: patientId,
@@ -704,10 +703,10 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
         // return false;
         //         }
         console.log("571")
-        const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
-        if (availableSlot.length < 1) {
-            return false;
-        }
+        // const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
+        // if (availableSlot.length < 1) {
+        //     return false;
+        // }
         const newAppointment = new appointmentModel({
             PatientId: patientId,
             DoctorId: dId,
@@ -2284,7 +2283,7 @@ const processAppCardPayment = async (req, res, fees, description, doctor, subscr
             }],
             success_url: `http://localhost:8000/patient/bookAppointmentCard/${pid}/${did}/${encodeURIComponent(date)}/${famId}/${fees}/${fam}`,
 
-            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
+            cancel_url: `http://localhost:3000/Health-Plus/patientHome`,
         });
 
 
@@ -2631,7 +2630,7 @@ const processSubCardPayment = async (req, res, fees, description, doctor, subscr
             success_url: `http://localhost:8000/patient/subscribeHealthPackageCard/${pid}/${packageId}/${fees}`,
 
 
-            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
+            cancel_url: `http://localhost:3000/Health-Plus/patientHome`,
         });
 
 
