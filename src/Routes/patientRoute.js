@@ -78,17 +78,19 @@ const mailSender = async (email, title, body) => {
 
 
 //req. 64
-router.post('/followup', protect, async (req, res) => {
+router.post('/followup/:_id', protect, async (req, res) => {
     const exist = await patientModel.findOne(req.user);
     if (!exist) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     const pId = req.user._id;
     // const name = req.body.Name;
-    const doc = await doctorModel.findOne({ _id: req.body.docId })
+    const appId=req.params._id;
+    const appointment=await appointmentModel.findById(appId);
+    const doc = await doctorModel.findOne({ _id: appointment.DoctorId })
     const dId = doc._id;
-    const date = req.body.Date;
-    const famId = req.body.famId;
+    const date = req.body.date;
+    const famId = appointment.famId;
 
 
     let newfollowup;
@@ -351,6 +353,8 @@ router.post('/getAppointment', protect, async (req, res) => {
     var final = [];
     for (let x in temp) {///if you need the patient's name in front end
         var result = {}
+        result.id=temp[x]._id;
+
         const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
         if (doctor && doctor.length > 0)
             result.Name = doctor[0].Name;
@@ -380,7 +384,37 @@ router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
     var result = {};
     for (var x in slots) {
         var date = slots[x].Date;
-        const day = date.getDate();
+        const day = date.getDate()+1;
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const dateKey = year + "-" + month + "-" + day;
+
+        if (result[dateKey]) {
+            result[dateKey].push(date);
+        }
+        else {
+            result[dateKey] = [date];
+        }
+    }
+
+    console.log("done");
+    return res.status(200).json(result);
+});
+router.get('/getAllFreeSlots2/:id', protect, async (req, res) => {
+    console.log("in getAllslots");
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    //const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
+    console.log("357");
+    var app=await appointmentModel.findById(req.params.id);
+    var slots = await docAvailableSlots.find({ DoctorId: app.DoctorId });
+    console.log("359")
+    var result = {};
+    for (var x in slots) {
+        var date = slots[x].Date;
+        const day = date.getDate()+1;
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         const dateKey = year + "-" + month + "-" + day;
@@ -738,23 +772,39 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     }
 
     const appId = req.params._id;
-    const newdate = req.body.Date;
+    const newdate = req.body.date;
     const appointment = await appointmentModel.findById(appId);
     const Did = appointment.DoctorId;
     const doc = await doctorModel.findById(Did);
     const aptmnt = await appointmentModel.find({ DoctorId: Did, Date: newdate });
     // console.log(aptmnt);
-    if (aptmnt && aptmnt.length > 0) {
-        return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
-    }
+    // if (aptmnt && aptmnt.length > 0) {
+    //     return (res.status(400).send({ error: "The doctor is not available during this slot", success: false }));
+    // }
+    const availableSlots = new docAvailableSlots({
+        DoctorId: appointment.DoctorId,
+        Date: appointment.Date,
+    });
+    availableSlots.save();
+
     await docAvailableSlots.deleteMany({ DoctorId: Did, Date: newdate });
     //   console.log(appId);
     const result = await appointmentModel.findByIdAndUpdate(appId, {
         $set: {
-            Date: newdate,
+           
             Status: "rescheduled"
         }
     }, { new: true });
+    const newAppointment = new appointmentModel({
+        PatientId: result.PatientId,
+        DoctorId: result.DoctorId,
+        Status: "upcoming",
+        Date: newdate,
+        Price: 0,
+        FamilyMemId: appointment.FamilyMemId,
+    });
+
+    await newAppointment.save();
     const DmailResponse = await mailSender(
         doc.Email,
         "rescheduled:appointment",
@@ -812,26 +862,38 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const Pid = patient._id
     const appId = req.params._id;
-    const appointment = await appointmentModel.findByIdAndUpdate(appId, { $set: { Status: "cancelled" } }, { new: true });
+    const appointment = await appointmentModel.findByIdAndUpdate(appId, { $set: {Status: "cancelled"  } }, { new: true });
 
 
     if (!appointment) {
 
         return res.status(404).json({ message: "Appointment not found", success: false });
     }
+    const availableSlots = new docAvailableSlots({
+        DoctorId: appointment.DoctorId,
+        Date: appointment.Date,
+    });
+    availableSlots.save();
 
 
     const Did = appointment.DoctorId;
     const doc = await doctorModel.findById(Did);
 
-    const date = appointment.Date;
-    const maxdate = date.setHours(date.getHours() - 24);
-    const currdate = Date.now();
+    var date = appointment.Date;
+    const temp=date.toISOString()
+    date=new Date(temp);
+    console.log(date);
+    //const maxdate = date.setHours(date.getHours() - 24);
+    const maxdate=date;
+    const currdate = new Date();
+    console.log(currdate);
+    console.log(maxdate);
+
 
     const DmailResponse = await mailSender(
         doc.Email,
         "cancelled:appointment",
-        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}<p>`
+        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${temp}<p>`
 
     );
     if (DmailResponse) {
@@ -846,7 +908,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const mailResponse = await mailSender(
         patient.Email,
         "cancelled:appointment",
-        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}<p>`
+        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${temp}<p>`
 
     );
     if (mailResponse) {
@@ -859,7 +921,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const DnewNotification = new notificationModel({
         userId: Did,
-        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${date}`,
+        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${temp}`,
 
     });
 
@@ -867,7 +929,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const newNotification = new notificationModel({
         userId: Pid,
-        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${date}`,
+        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${temp}`,
 
     });
 
@@ -887,18 +949,59 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
         try {
             await patientModel.findByIdAndUpdate(Pid, patient);
             console.log('you have recieved your refund successfully');
-            return res.status(200).json({ appointment, message: "appointment is cancelled successfully and you have recieved a refund", success: true });
+            const temp=await appointmentModel.find({PatientId:Pid});
+            var final = [];
+            for (let x in temp) {///if you need the patient's name in front end
+                var result = {}
+                result.id=temp[x]._id;
+                const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
+                if (doctor && doctor.length > 0)
+                    result.Name = doctor[0].Name;
+                result.Date = temp[x].Date;
+                result.Status = temp[x].Status;
+                if (temp[x].FamilyMemId) {
+                    const famNam = await familyMemberModel.findOne({ _id: temp[x].FamilyMemId });
+                    result.famMem = famNam.Name;
+                }
+        
+                final.push(result);
+        
+            }
+            console.log(final);
+            res.status(200).json(final);
+
+
+            //return res.status(200).json({ appointment, message: "appointment is cancelled successfully and you have recieved a refund", success: true });
 
         } catch (e) {
             console.error('Error recieving your refund:', e.message);
             return res.status(400).send({ error: e.message });
         }
 
+
     }
     else {
-
-        return res.status(200).json({ appointment, message: "appointment is cancelled successfully, however, you did not recieve a refund", success: true });
+        var final = [];
+        const temp=await appointmentModel.find({PatientId:Pid});
+        for (let x in temp) {///if you need the patient's name in front end
+            var result = {}
+            result.id=temp[x]._id;
+            const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
+            if (doctor && doctor.length > 0)
+                result.Name = doctor[0].Name;
+            result.Date = temp[x].Date;
+            result.Status = temp[x].Status;
+            if (temp[x].FamilyMemId) {
+                const famNam = await familyMemberModel.findOne({ _id: temp[x].FamilyMemId });
+                result.famMem = famNam.Name;
+            }
+        
+            final.push(result);
+        }
+            res.status(200).json(final);
     }
+        //return res.status(200).json({ appointment, message: "appointment is cancelled successfully, however, you did not recieve a refund", success: true });
+    
 
 
 });
