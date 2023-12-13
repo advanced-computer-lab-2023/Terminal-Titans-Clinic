@@ -736,7 +736,24 @@ router.get('/notifications', protect, async (req, res) => {
     try {
         const userId = req.user._id;
         const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
-        res.status(200).json({ notifications, success: true });
+        const length = notifications.length;
+        res.status(200).json({ notifications, length, success: true });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error retrieving notifications', success: false });
+    }
+});
+
+router.get('/unReadNotifications', protect, async (req, res) => {
+    const exists = await patientModel.findOne(req.user);
+    if (!exists) {
+        return res.status(400).json({ message: "Patient not found", success: false })
+    }
+    try {
+        const userId = req.user._id;
+        const notifications = await notificationModel.find({ userId, Status: 'unread' }).sort({ timestamp: -1 });
+        const length = notifications.length;
+        res.status(200).json({ length, success: true });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ message: 'Error retrieving notifications', success: false });
@@ -1718,7 +1735,7 @@ router.get('/subscribeHealthPackageCard/:pid/:packageId/:fees', async (req, res)
 // });
 async function subscribeHealthPackageFamilyWallet(userId, familyMemberId, healthPackageId) {
     try {
-        if(req.user.__t != "patient"){
+        if (req.user.__t != "patient") {
             return res.status(500).json({ message: 'Not authorized' });
         }
         const user = await patientModel.findById(familyMemberId);
@@ -1756,7 +1773,7 @@ async function subscribeHealthPackageFamilyWallet(userId, familyMemberId, health
 //test done here (req 30)
 router.get('/viewSubscriptions', protect, async (req, res) => {
     try {
-        if(req.user.__t != "patient"){
+        if (req.user.__t != "patient") {
             return res.status(500).json({ message: 'Not authorized' });
         }
         // get the patient package
@@ -1824,7 +1841,7 @@ router.get('/viewSubscriptions', protect, async (req, res) => {
 //req 31 done
 router.get('/viewSubscriptionStatus', protect, async (req, res) => {
     try {
-        if(req.user.__t != "patient"){
+        if (req.user.__t != "patient") {
             return res.status(500).json({ message: 'Not authorized' });
         }
         // get the patient package

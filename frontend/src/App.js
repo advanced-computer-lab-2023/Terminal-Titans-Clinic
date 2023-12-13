@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Register from "./Pages/Register";
@@ -39,7 +39,8 @@ import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
 import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
 import ReschduleDoc from "./Pages/rescheduleDoc.js";
-import FollowUpDoc from "./Pages/followUpDoc.js";
+import FollowUpDoc from "./Pages/followUpDoc.js";import Notification from "./components/Notification";
+
 
 
 import Form from 'react-bootstrap/Form';
@@ -61,7 +62,7 @@ function App() {
 
   return (
     <div className="App">
-      
+
 
       <Router basename="/Health-Plus">
 
@@ -78,14 +79,15 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/notifications" element={<Notification />} />
 
           {/* PHARMACIST ROUTES */}
-          <Route path="/pharmacistHome" element={<PharmacistScreen/>}/>
-          <Route path="/NewMed" element={<NewMed/>}/>
-          <Route path="/AvailableMeds" element={<AvailableMeds/>}/>
-          <Route path="/medicinepharm" element={<MedPharm/>}/>
+          <Route path="/pharmacistHome" element={<PharmacistScreen />} />
+          <Route path="/NewMed" element={<NewMed />} />
+          <Route path="/AvailableMeds" element={<AvailableMeds />} />
+          <Route path="/medicinepharm" element={<MedPharm />} />
 
-          
+
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
@@ -96,7 +98,7 @@ function App() {
           <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat/:token" element={<Chat/>} />
+          <Route path="/chat/:token" element={<Chat />} />
           <Route path="/" element={<SignIn />} />
           <Route path="/viewMyProfile/:id" element={<ViewMyProfile />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />

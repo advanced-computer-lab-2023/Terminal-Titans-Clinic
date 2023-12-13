@@ -16,6 +16,9 @@ import userModel from './Models/userModel.js'
 import Message from './Models/messageModel.js'
 import protect from './middleware/authMiddleware.js'
 import appointmentModel from './Models/appointmentModel.js'
+import notificationModel from './Models/notificationModel.js'
+import { notificationChangeStream } from './Models/notificationModel.js'
+import mongoose from 'mongoose'
 
 
 const dotenv = dotenvModule.config();
@@ -145,7 +148,6 @@ io.on("connection", async (socket) => {
 //chat
 const wss = new WebSocketServer({ server });
 wss.on('connection', async (connection, req) => {
-	console.log('wsss');
 	function notifyAboutOnlinePeople() {
 		console.log('notify');
 		[...wss.clients].forEach(client => {
@@ -204,6 +206,25 @@ wss.on('connection', async (connection, req) => {
 				text,
 				file: file ? filename : null,
 			});
+			const notification = await notificationModel.create({
+				userId: recipient,
+				Message: 'You have a new message from ' + connection.username,
+				Status: 'unread',
+				type: 'Chat',
+			});
+
+			notificationChangeStream.on('change', (change) => {
+				console.log('in change', change);
+				console.log();
+				[...wss.clients]
+					.filter(c => c.userId == recipient.toString())
+					.forEach(c => c.send(JSON.stringify({
+						myNotification: notification,
+						type: 'notification'
+					})));
+				// io.emit('notification', 'New notification!');
+			});
+
 			[...wss.clients]
 				.filter(c => c.userId == recipient.toString())
 				.forEach(c => c.send(JSON.stringify({
@@ -213,6 +234,21 @@ wss.on('connection', async (connection, req) => {
 					// file: file ? filename : null,
 					_id: messageDoc._id,
 				})));
+		}
+		else {
+			if (recipient) {
+				notificationChangeStream.on('change', (change) => {
+					console.log('in change2', change);
+					console.log();
+					[...wss.clients]
+						.filter(c => c.userId == recipient.toString())
+						.forEach(c => c.send(JSON.stringify({
+							myNotification: notification,
+							type: 'notification'
+						})));
+					// io.emit('notification', 'New notification!');
+				});
+			}
 		}
 	});
 
@@ -271,7 +307,7 @@ app.get('/people', protect, async (req, res) => {
 	}
 	else if (myUser.__t == 'Pharmacist') {
 		let people = await userModel.find({ __t: { $in: ['patient', 'Doctor'] } }).select('-ID -License -Degree -HealthHistory -password');
-		
+
 		res.status(200).json({ myUser: myUser, Result: people });
 	}
 });
