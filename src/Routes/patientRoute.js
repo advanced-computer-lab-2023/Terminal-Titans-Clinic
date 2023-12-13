@@ -2419,11 +2419,13 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
             message: "You are not authorised "
         });
     }
+    try{
     var famId = req.params.famId;
     var userId = req.user._id;
     var discount = 0;
     const healthPackageId = req.params.packageId;
-    if (famId) {
+    console.log(famId)
+    if (famId!='null') {
         console.log("discount here")
         userId = famId;
         const sub = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
@@ -2452,6 +2454,11 @@ console.log("discount  "+discount)
         "wallet": wallet
     }
     return res.status(200).json({ result: result, success: true });
+}
+catch(error){
+    
+    return res.status(400).json({ result: error, success: true });
+}
 });
 router.get('/checkSub/:userId', protect, async (req, res) => {
     try {
@@ -2568,6 +2575,7 @@ const processSubscription = async (req, res, userType, paymentType) => {
         famId = user._id;
     }
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
+    console.log("feess"+fees)
     try {
         if (paymentType == "wallet") {
             return await processSubWalletPayment(req, res, req.user._id, fees, famId, healthPackageId);
