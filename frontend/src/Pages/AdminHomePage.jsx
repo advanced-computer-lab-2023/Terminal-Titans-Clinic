@@ -82,19 +82,19 @@ const tiers = [
 function getLinkForTier(title) {
   switch (title) {
     case 'Users List':
-      return '/manageUsers';
+      return 'http://localhost:3000/Health-Plus/manageUsers';
     case 'HealthPackages':
-      return '/managePackages';
+      return 'http://localhost:3000/Health-Plus/managePackages';
     case 'Doctor Applications':
-      return '/docApplicationList';
+      return 'http://localhost:3000/Health-Plus/docApplicationList';
     case 'Adding Admins':
-      return '/createAdmin';
+      return 'http://localhost:3000/Health-Plus/createAdmin';
     case 'Pharmacists Applications':
-      return '/createAdmin';
+      return 'http://localhost:4000/Health-Plus/adminPharmApplicationList';
     case 'Sales Report':
-      return '/createAdmin';
+      return 'http://localhost:4000/Health-Plus/adminSalesReport';
     case 'Medicines':
-      return '/createAdmin';
+      return 'http://localhost:4000/Health-Plus/adminAvailableMeds';
     default:
       return '/';
   }
@@ -226,12 +226,8 @@ export default function Pricing() {
                 variant={tier.buttonVariant}
                 style={{ background:'black' }}
                 onClick={() => {
-                  if (tier.title == "Healthkages") {
-                    alert("This page is still under maintenance");
-                  }else{
-                    
-                    navigate(getLinkForTier(tier.title));
-                  }
+                    window.location.href = getLinkForTier(tier.title);
+                  
                 }}
                 >
               <Link
