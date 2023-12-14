@@ -402,7 +402,6 @@ router.put('/rejectfollowup/:_id', protect, async (req, res) => {
     }
 });
 
-
 const mailSender = async (email, title, body) => {
     try {
         let transporter = nodemailer.createTransport({
@@ -805,7 +804,6 @@ router.get('/getAllPrescriptions',protect,async(req,res)=>{
 }); 
 
 //requirement number 33
-
 router.get('/getPatientsList', protect, async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ _id: req.user._id })
@@ -883,6 +881,7 @@ router.get('/getPatientsList2', protect, async (req, res) => {
             }
         }
         const appointments = await appointmentModel.find({ DoctorId: req.user._id });
+        console.log(appointments)
        
         // if (appointments.length == 0) {
         //     res.status(400).json({ message: "No patients found", success: false })
@@ -894,8 +893,8 @@ router.get('/getPatientsList2', protect, async (req, res) => {
         for (let i = 0; i < appointments.length; i++) {
             let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
             if(patient){
-            const hasSameId = result.find((pat) => pat.id.equals(patient._id));
-            
+           const hasSameId = result.find((pat) => pat.id.equals(patient._id));
+            //const hasSameId=false
             if(!hasSameId){
             console.log(patient._id)
             const date=appointments[i].Date;
@@ -915,6 +914,7 @@ router.get('/getPatientsList2', protect, async (req, res) => {
             result.push(pat);
         }
         else{
+            console.log("9")
             const date=appointments[i].Date;
             var upcoming=false;
             if(date>new Date()){
@@ -930,7 +930,7 @@ router.get('/getPatientsList2', protect, async (req, res) => {
         }
         }
 
-
+        console.log(result)
         if (result.length == 0) {
             res.status(400).json({ message: "No patient found", success: false })
         }
@@ -2208,10 +2208,8 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
     var result={};
     for(var x in slots){
         var date=slots[x].Date;
-        const day=date.getDate()+1;
-        const month=date.getMonth()+1;
-        const year=date.getFullYear();
-        const dateKey=year+"-"+month+"-"+day;
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if(result[dateKey]){
             result[dateKey].push(date);
@@ -2260,10 +2258,8 @@ router.get('/getAllFreeSlotsinviewApp', protect, async (req, res) => {
 
     for(var x in appointments){
         var date=appointments[x].Date;
-        const day=date.getDate()+1;
-        const month=date.getMonth()+1;
-        const year=date.getFullYear();
-        const dateKey=year+"-"+month+"-"+day;
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if(result[dateKey]){
             result[dateKey].push(date);

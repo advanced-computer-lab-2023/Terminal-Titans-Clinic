@@ -141,6 +141,29 @@ router.post('/followup/:_id', protect, async (req, res) => {
 
 
 })
+router.get('/getTransactionHistory',protect,async(req,res)=>{
+    try{
+        const exists = await patientModel.findOne(req.user);
+        if (!exists) {
+            return res.status(400).json({ message: "Patient not found", success: false })
+        }
+        console.log(exists.Wallet)
+        const transactions=await transactionsModel.find({userId:req.user._id});
+        
+        res.status(200).json({
+            success: true,
+            transactions:transactions,
+            wallet:Math.round(exists.Wallet * 100) / 100
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error mate2refnash"
+        });
+    }
+});
 
 //requirement 18 (add family member)
 router.post('/addFamilyMem', protect, async (req, res) => {
@@ -394,10 +417,9 @@ router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
     var result = {};
     for (var x in slots) {
         var date = slots[x].Date;
-        const day = date.getDate()+1;
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const dateKey = year + "-" + month + "-" + day;
+        
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if (result[dateKey]) {
             result[dateKey].push(date);
@@ -424,10 +446,8 @@ router.get('/getAllFreeSlots2/:id', protect, async (req, res) => {
     var result = {};
     for (var x in slots) {
         var date = slots[x].Date;
-        const day = date.getDate()+1;
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const dateKey = year + "-" + month + "-" + day;
+        const temp=date.toISOString();
+        const dateKey=temp.substring(0,10);
 
         if (result[dateKey]) {
             result[dateKey].push(date);
@@ -512,6 +532,7 @@ router.post('/getDoctors', protect, async (req, res) => {
         return res.status(400).json({ message: "No doctors found " });
     }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
+    if(myHealthStatus){
     const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
     if (packId) {
@@ -522,6 +543,7 @@ router.post('/getDoctors', protect, async (req, res) => {
             return (res.status(400).send({ error: "cant find package", success: false }));
 
     }
+}
     else {
         discountP = 0;
     }
@@ -659,10 +681,10 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
             return false;
         }
         console.log("pio")
-        const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
-        if (availableSlot.length < 1) {
-            return false;
-        }
+        // const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
+        // if (availableSlot.length < 1) {
+        //     return false;
+        // }
         console.log("pioppp")
         newAppointment = new appointmentModel({
             PatientId: patientId,
@@ -681,10 +703,10 @@ async function bookApppByWallet(doctor, date, price, patientId, famId) {
         // return false;
         //         }
         console.log("571")
-        const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
-        if (availableSlot.length < 1) {
-            return false;
-        }
+        // const availableSlot = await docAvailableSlotsModel.find({ DoctorId: dId, Date: date });
+        // if (availableSlot.length < 1) {
+        //     return false;
+        // }
         const newAppointment = new appointmentModel({
             PatientId: patientId,
             DoctorId: dId,
@@ -1099,7 +1121,7 @@ router.get('/bookAppointmentCard/:pid/:did/:date/:famId/:fees/:fam', async (req,
             giveDoctorMoney(req, res, doc, fees / 1.1);
         }
         let price = req.params.fees;
-        addTransaction(price, pId, 'Card', 'Book Appointment');
+        addTransaction(-1* price, pId, 'Card', 'Book Appointment');
         console.log('money to pat');
         addTransaction(price / 1.1, dId, 'Card', 'Book Appointment');
         await docAvailableSlots.deleteOne({ DoctorId: dId, Date: date });
@@ -2261,7 +2283,7 @@ const processAppCardPayment = async (req, res, fees, description, doctor, subscr
             }],
             success_url: `http://localhost:8000/patient/bookAppointmentCard/${pid}/${did}/${encodeURIComponent(date)}/${famId}/${fees}/${fam}`,
 
-            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
+            cancel_url: `http://localhost:3000/Health-Plus/patientHome`,
         });
 
 
@@ -2424,6 +2446,8 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
     var userId = req.user._id;
     var discount = 0;
     const healthPackageId = req.params.packageId;
+    const cur=await patientModel.findById(userId);
+    var wallet = cur.Wallet
     console.log(famId)
     if (famId!='null') {
         console.log("discount here")
@@ -2446,7 +2470,7 @@ router.get('/packageSubsInfo/:packageId/:famId', protect, async (req, res) => {
     const user = await patientModel.findById(userId);
 console.log("discount  "+discount)
     const fees = calculateFees(healthPackage.subsriptionFeesInEGP, discount);
-    var wallet = user.Wallet
+    
     let result = {
         "fees": Math.round(fees * 100) / 100,
         "user": user.Name,
@@ -2606,7 +2630,7 @@ const processSubCardPayment = async (req, res, fees, description, doctor, subscr
             success_url: `http://localhost:8000/patient/subscribeHealthPackageCard/${pid}/${packageId}/${fees}`,
 
 
-            cancel_url: `http://localhost:3000/Health-Plus/${subscribtion ? 'packageSubscribtion' : 'bookAppointments'}`,
+            cancel_url: `http://localhost:3000/Health-Plus/patientHome`,
         });
 
 
@@ -3666,6 +3690,8 @@ router.post('buyPrescription/id', protect, async (req, res) => {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     try {
+        await CartItem.deleteMany({ userId: patientId });
+
         const prescription = await prescriptionsModel.findById(req.params.id);
         if (!prescription) {
             return res.status(400).json({ message: "Prescription not found", success: false })

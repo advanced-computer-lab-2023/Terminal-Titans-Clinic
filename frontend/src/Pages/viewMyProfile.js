@@ -17,6 +17,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { PatientNavBar } from './../components/PatientNavBar';import Button from '@mui/material/Button';
 import Prescriptions from '../components/MyPrescriptions'
+import PatientTransactions from '../components/PatientTransactions';
 const drawerWidth = 260;
 
 function ViewMyInfo() {
@@ -87,6 +88,12 @@ function ViewMyInfo() {
             <ListItemText primary='MyPrescriptions' />
           </ListItemButton>
         </ListItem>
+        <ListItem key='transactions' disablePadding>
+          <ListItemButton onClick={() => goToTab(7)}>
+
+            <ListItemText primary='MyWallet' />
+          </ListItemButton>
+        </ListItem>
 
       </List>
       <Divider />
@@ -103,7 +110,7 @@ function ViewMyInfo() {
           position="fixed"
           sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, height: '100vh', overflow: 'auto' }}
         >
-          {show == 0 ? <ViewMyProfile /> : show == 1 ? <PatientRecord /> : show == 2 ? <PatientMedicalHistory /> : show == 3 ? <ChangePasswordForm /> : show == 4 ? <FamilyMember /> : show==5? <HealthPackage />:<Prescriptions/>}
+          {show == 0 ? <ViewMyProfile /> : show == 1 ? <PatientRecord /> : show == 2 ? <PatientMedicalHistory /> : show == 3 ? <ChangePasswordForm /> : show == 4 ? <FamilyMember /> : show==5? <HealthPackage />: show==6?<Prescriptions/>: <PatientTransactions/>}
         </Box>
         <Drawer
           variant="permanent"

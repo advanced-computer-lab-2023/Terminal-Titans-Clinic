@@ -153,6 +153,10 @@ export function PatientNavBar() {
                 <Dropdown.Divider />
                 <Dropdown.Item href="/Health-Plus/viewMyProfile/5">My Health Packages</Dropdown.Item>
                 <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/6">My Prescriptions</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item href="/Health-Plus/viewMyProfile/7">My Wallet</Dropdown.Item>
+                <Dropdown.Divider />
                 <Dropdown.Item onClick={signoutButtonFunc}>Sign Out</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

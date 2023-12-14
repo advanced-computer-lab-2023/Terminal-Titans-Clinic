@@ -29,7 +29,7 @@ const bull = (
 export default function PackageCheckout() {
     const params = new URLSearchParams(window.location.search);
     const packageId = params.get('packageId');
-   
+    
     const famId=params.get('famMemId');
     const [fees,setFees]=React.useState(0)
     const [packageName,setpackageName]=React.useState('');
@@ -62,7 +62,7 @@ export default function PackageCheckout() {
           );
     }
     useEffect(() => {
-        getPackage();
+                  getPackage();
     }, [])
     const handlePayment = async () => {
       try {
@@ -113,7 +113,7 @@ export default function PackageCheckout() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
     <Card sx={{ minWidth: 275, width:'50%' }}>
-      <CardContent>
+            <CardContent>
        
         <Typography variant="h5" component="div">
          Package Subscribition Details
@@ -155,13 +155,13 @@ export default function PackageCheckout() {
             </RadioGroup>
         </FormControl>
       </CardContent>
-      
+
       <CardActions>
-        <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
-        onClick={handlePayment}
-        >Proceed</Button>
-      </CardActions>
-    </Card>
+      <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
+      onClick={handlePayment}
+      >Proceed</Button>
+    </CardActions>
+        </Card>
     </div>
   );
 }
