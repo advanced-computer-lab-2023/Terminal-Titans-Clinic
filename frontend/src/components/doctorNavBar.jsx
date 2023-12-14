@@ -141,17 +141,12 @@ export function DoctorNavBar() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/0">Patient Profile</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewDocProfile/0">My Profile</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/1">Health Records</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewDocProfile/1">Change Password</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/2">Medical History</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/3">Change Password</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/4">Family Members Info</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item href="/Health-Plus/viewMyProfile/5">My Health Packages</Dropdown.Item>
+                <Dropdown.Item href="/Health-Plus/viewDocProfile/2">Wallet</Dropdown.Item>
+                
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={signoutButtonFunc}>Sign Out</Dropdown.Item>
               </Dropdown.Menu>

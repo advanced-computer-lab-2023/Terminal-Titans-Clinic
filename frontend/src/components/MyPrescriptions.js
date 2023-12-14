@@ -42,7 +42,9 @@ function Prescriptions() {
   const [anchorEl, setAnchorEl] = React.useState(null);
 const [allNames,setAllNames]=useState([]);
     const [curDoc, setCurDoc] = useState('');
+    const[enable,setEnable]=useState(false);
     const getPres = async () => {
+      setEnable(false);
       const response = await axios.post(
         `http://localhost:8000/patient/filterPrescriptions`,
         { startDate, endDate, status,Name },
@@ -54,38 +56,37 @@ const [allNames,setAllNames]=useState([]);
         setPrescriptions(data.final);
         if(data.final.length>0){
           setCurPres(data.final[0]);
+          
+        await axios.get(`http://localhost:8000/patient/generatePdf/${data.final[0].id}`, {
+          headers: {
+            Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
+          }
+        }).then(
+          (res) => {
+              const data = res.data;
+              console.log(data.data.data)
+              const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
+              setCurDoc(src)
+              setEnable(true);
+              
+    
+          }
+        );
         }
       }
     }
     const downloadPres=async(id)=>{
-      await axios.get(`http://localhost:8000/patient/downloadPres/${id}`, {
+      await axios.get(`http://localhost:8000/patient/generatePdf/${id}`, {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
         }
       }).then(
         (res) => {
             const data = res.data;
+            console.log(data.data.data)
+            const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
+            setCurDoc(src)
             
-          //   const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
-          //   setCurDoc(src)
-          //   console.log(data);
-          // console.log(data.data.data)
-          //   // Create a Blob from the PDF data
-          //   const blob = new Blob([arrayBufferToBase64(data.data.data)], { type: 'application/pdf' });
-        
-          //   // Create a temporary URL for the Blob
-          //   const url = URL.createObjectURL(blob);
-        
-          //   // Create a link element
-          //   const link = document.createElement('a');
-          //   link.href = url;
-          //   link.download = `prescription_${id}.pdf`; // Set the file name
-        
-          //   // Simulate a click to trigger the download
-          //   link.click();
-        
-            // Clean up: remove the temporary URL
-          //  URL.revokeObjectURL(url);
   
         }
       );
@@ -170,14 +171,49 @@ useEffect(()=>{
   getDoctorsNames(); 
     },[]
     )
-   const showPres = (item,index) => {
+   const showPres = async (item,index) => {
     setIndex(index)
+    setEnable(false);
    
       setCurPres(prescriptions[index]);
+      
+        await axios.get(`http://localhost:8000/patient/generatePdf/${prescriptions[index].id}`, {
+          headers: {
+            Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
+          }
+        }).then(
+          (res) => {
+              const data = res.data;
+              console.log(data.data.data)
+              const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
+              setCurDoc(src)
+              setEnable(true);
+              
+    
+          }
+        );
+      
     }
-    const handleChange = (event, value) => {
+    const handleChange = async (event, value) => {
+      setEnable(false);
       setIndex(value-1)
       setCurPres(prescriptions[value-1]);
+      await axios.get(`http://localhost:8000/patient/generatePdf/${prescriptions[index].id}`, {
+          headers: {
+            Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
+          }
+        }).then(
+          (res) => {
+              const data = res.data;
+              console.log(data.data.data)
+              const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
+              setCurDoc(src)
+              setEnable(true);
+              
+    
+          }
+        );
+      
 
     };
     return (
@@ -203,7 +239,7 @@ useEffect(()=>{
         }}
         subheader={<li />}
       >
-       <Button variant="outline-dark" style={{ marginLeft: '40%' ,marginTop:'10%'}} onClick={handleClick}>
+       <Button variant="outline-dark" style={{ marginLeft: '30%' ,marginTop:'10%'}} onClick={handleClick}>
       <FilterListIcon />
       Filter
     </Button>
@@ -303,9 +339,12 @@ useEffect(()=>{
                 <form>
                
                 <div style={{ width: "100%", display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="dark" style={{ marginRight:'5%' }}>
-                <DownloadIcon  onClick={() => { downloadPres(currPresc.id) }}/>
-                  </Button>
+                  {enable?
+                <Button variant="dark" style={{ marginRight:'5%' }} href={curDoc} download="Prescription.pdf">
+                <DownloadIcon >
+                
+                </DownloadIcon>
+                  </Button>:null}
                
                   <Button variant="dark" style={{ width: '45%' }} onClick={() => { buyPres(currPresc.id) }}>
                     Buy Prescription
@@ -342,7 +381,8 @@ useEffect(()=>{
                 ))}
               </tbody>
             </Table>
-                 
+            {/* <p><a href={curDoc} download="your-filename.pdf">Download Health Doc</a></p>
+                 <iframe src={curDoc} style={{width:'100%',height:'500px'}}></iframe> */}
                     </div>
 
                 </form>

@@ -23,6 +23,8 @@ import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import followupRequest from '../Models/followupRequest.js';
 import { Console } from 'console';
+import PDFDocument from 'pdfkit';
+import fs from 'fs';
 
 import prescDoc from '../Models/prescDoc.js';
 
@@ -3606,21 +3608,13 @@ const addTransaction = (amount, userId, paymentMethod, description) => {
     console.log('l')
 }
 
-router.post('/generatePdf', protect,async(req,res)=>{
+router.get('/generatePdf/:id', protect,async(req,res)=>{
     try{
-        const exists = await doctorModel.findById(req.user);
-        if (!exists) {
-            return res.status(500).json({
-                success: false,
-                message: "You are not a doctor"
-            });
+        const patient = await patientModel.findOne(req.user);
+        if (!patient) {
+            return res.status(400).json({ message: "Patient not found", success: false })
         }
-        else{
-            if(exists.employmentContract!="Accepted"){
-                return res.status(400).json({ message: "Contract not accepted", success: false })
-            }
-        }
-        const prescriptionId=req.body.prescriptionId;
+        const prescriptionId=req.params.id;
         const prescription=await prescriptionsModel.findById(prescriptionId);
         if(!prescription){
             return res.status(400).json({
@@ -3640,40 +3634,43 @@ router.post('/generatePdf', protect,async(req,res)=>{
         let prescriptionString = '';
         prescriptionString += `Prescription ID: ${prescription._id}\n`;
         //get patient name from his id
-        const patientName =await patientsModel.findOne({ _id: prescription.PatientId });
+        const patientName =await patientModel.findOne({ _id: prescription.PatientId });
         prescriptionString += `Patient Name: ${patientName.Name}\n`;
         //get doctor name from his id
         const doctorName =await doctorModel.findOne({ _id: prescription.DoctorId });
         prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
         prescriptionString += `Date: ${prescription.Date}\n\n`;
         const medication = prescription.items;
-        for (let i = 0; i < medication.length; i++) {
+        prescriptionString += 'Medications:\n';
+        for (let i in medication) {
             const medicine = await MedicineModel.findById(medication[i].medicineId);
             prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
         }
 
         // Add medication details
         if (medication && Array.isArray(medication)) {
-            prescriptionString += 'Medications:\n';
-            const medicine = await MedicineModel.findById(medication[i].medicineId);
-            medication.forEach((medication, index) => {
+            
+            
+            medication.forEach(async (medication, index) => {
+                const medicine = await MedicineModel.findById(medication.medicineId);
                 prescriptionString += `${index + 1}. ${medicine.Name} - ${medication.dosage}\n`;
             });
         }
 
         // Add additional notes
         prescriptionString += '\nAdditional Notes:\n';
-        prescriptionString += prescription.notes;
+        prescriptionString += prescription.notes?prescription.notes:'None';
         // get a blob when you're done
         doc.text(prescriptionString);
         const filePath = "./presc.pdf";
         doc.pipe(fs.createWriteStream(filePath));
         doc.end();
-        prescription.Pdf=doc;
-        res.status(200).json({
-            success: true,
-            message: "Prescription updated successfully"
-        });
+        await fs.readFile(filePath, function (err, data) {
+       console.log("done read")
+            res.status(200).json({data, status:"success"});
+          });
+        
+        
     }
     catch(error){
         console.log(error);
