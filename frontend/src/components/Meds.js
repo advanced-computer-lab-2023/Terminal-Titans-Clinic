@@ -22,9 +22,9 @@ const Meds = ({ medicines }) => {
   const [selectedDosage, setSelectedDosage] = useState(1);
   const [patientId, setPatientId] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
 
   // if (!medicines || !Array.isArray(medicines)) {
@@ -32,38 +32,38 @@ const Meds = ({ medicines }) => {
   // }
 
   // get the prescription of the id
-  const getPrescription = async () => {
-    try {
-      console.log('res');
-      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
-      if (response.status === 200) {
-        console.log('Successfully fetched patient.');
-        console.log(response.data.Result.result);
-        setPatientId(response.data.Result.result._id);
-        console.log(patientId);
-      } else {
-        console.error('Failed to fetch patient. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
+  // const getPrescription = async () => {
+  //   try {
+  //     console.log('res');
+  //     const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+  //     if (response.status === 200) {
+  //       console.log('Successfully fetched patient.');
+  //       console.log(response.data.Result.result);
+  //       setPatientId(response.data.Result.result._id);
+  //       console.log(patientId);
+  //     } else {
+  //       console.error('Failed to fetch patient. Unexpected response:', response);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // }
 
 
-  const getPatient = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
-      if (response.status === 200) {
-        console.log('Successfully fetched patient.');
-        console.log(response.data.Result.result);
-        setPatientId(response.data.Result.result._id);
-      } else {
-        console.error('Failed to fetch patient. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
+  // const getPatient = async () => {
+  //   try {
+  //     const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+  //     if (response.status === 200) {
+  //       console.log('Successfully fetched patient.');
+  //       console.log(response.data.Result.result);
+  //       setPatientId(response.data.Result.result._id);
+  //     } else {
+  //       console.error('Failed to fetch patient. Unexpected response:', response);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // }
 
 
   const handlePrescItems = async () => {
@@ -71,8 +71,8 @@ const Meds = ({ medicines }) => {
       const response = await axios.get(`http://localhost:8000/doctor/getPrescMeds/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched prescription items.');
-        console.log(response.data.Result.result);
-        updatePrescItems(response.data.Result.result);
+        console.log(response.data);
+        // updatePrescItems(response.data.Result.result);
 
       } else {
         console.error('Failed to fetch prescription items. Unexpected response:', response);
@@ -82,11 +82,11 @@ const Meds = ({ medicines }) => {
     }
   }
 
-  const fetchData = async () => {
-    await getPrescription();
-    await getPatient();
-    await handlePrescItems();
-  };
+  // const fetchData = async () => {
+  //   await getPrescription();
+  //   await getPatient();
+  //   await handlePrescItems();
+  // };
 
 
 
@@ -137,7 +137,7 @@ const Meds = ({ medicines }) => {
     <div>
             <div className="Medcines">
               {medicines.map((medicine) => (
-                <div key={medicine.id} className="medicine">
+                <div key={medicine._id} className="medicine">
                   {medicine.Picture && medicine.Picture.data && medicine.Picture.contentType && (
                     <img
                       src={`data:${medicine.Picture.contentType};base64,${arrayBufferToBase64(medicine.Picture.data.data)}`}
