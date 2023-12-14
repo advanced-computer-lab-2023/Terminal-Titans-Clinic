@@ -89,7 +89,7 @@ function getLinkForTier(title) {
       return 'http://localhost:3000/Health-Plus/docApplicationList';
     case 'Adding Admins':
       return 'http://localhost:3000/Health-Plus/createAdmin';
-    case 'Pharmacists Applications':
+    case 'Pharm Applications':
       return 'http://localhost:4000/Health-Plus/adminPharmApplicationList';
     case 'Sales Report':
       return 'http://localhost:4000/Health-Plus/adminSalesReport';
