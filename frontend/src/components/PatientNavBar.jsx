@@ -121,7 +121,7 @@ export function PatientNavBar() {
          
             :null}
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
+            <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/patientHome' }}>Health Plus+</span>
           </Typography>
           <nav>
             <Button

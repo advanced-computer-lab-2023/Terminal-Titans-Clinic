@@ -15,7 +15,8 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import Container from '@mui/material/Container';
-import {PatientNavBar} from './PatientNavBar.jsx';
+import { PatientNavBar } from './PatientNavBar.jsx';
+import { useNavigate } from 'react-router-dom';
 
 
 const tiers = [
@@ -23,8 +24,8 @@ const tiers = [
     title: 'Doctors',
     description: [
       'View our  skilled doctors and their specialized fields.',
-       'Book appointments effortlessly at competitive prices.',  
-          ],
+      'Book appointments effortlessly at competitive prices.',
+    ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
   },
@@ -47,25 +48,28 @@ const tiers = [
     buttonVariant: 'contained',
   },
 ];
-function getLinkForTier(title) {
-  switch (title) {
-    case 'Prescriptions':
-      return '/Health-Plus/prescriptions';
-    case 'HealthPackages':
-      return '/Health-Plus/packageSubscribtion';
-    case 'Appointments':
-      return '/Health-Plus/viewAppointments';
-    default:
-      return '/';
-  }
-}
 
 
-// TODO remove, this demo shouldn't need to reset the theme.
+
 const defaultTheme = createTheme();
 
 export default function Pricing() {
-  
+
+  const navigate = useNavigate();
+
+  function getLinkForTier(title) {
+    console.log(title);
+    switch (title) {
+      case 'Prescriptions':
+        return navigate('/prescriptions');
+      case 'HealthPackages':
+        return navigate('/packageSubscribtion');
+      case 'Appointments':
+        return navigate('/viewAppointments');
+      default:
+        return '/';
+    }
+  }
   return (
     <ThemeProvider theme={defaultTheme}>
       <PatientNavBar />
@@ -81,8 +85,8 @@ export default function Pricing() {
           Your Patient Dashboard
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" component="p">
-        View our  skilled doctors and their specialized fields. Book appointments effortlessly at competitive prices.  
-              </Typography>
+          View our  skilled doctors and their specialized fields. Book appointments effortlessly at competitive prices.
+        </Typography>
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
@@ -135,13 +139,9 @@ export default function Pricing() {
                   <Button
                     fullWidth
                     variant={tier.buttonVariant}
+                    onClick={() => { getLinkForTier(tier.title) }}
                   >
-                    <Link
-                      href={getLinkForTier(tier.title)}
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                      {tier.buttonText}
-                    </Link>
+                    {tier.buttonText}
                   </Button>
                 </CardActions>
               </Card>

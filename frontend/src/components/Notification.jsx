@@ -31,6 +31,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { PatientNavBar } from './PatientNavBar.jsx';
 import style from '../Styles/Notification.css';
+import { DoctorNavBar } from './doctorNavBar.jsx';
 
 const drawerWidth = 240;
 const ITEM_HEIGHT = 48;
@@ -55,6 +56,7 @@ export default function ClippedDrawer() {
     const [doneRows, setDoneRows] = React.useState([]);
     const [notifications, setNotifications] = React.useState([]);
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [type, setType] = React.useState('');
     const open = Boolean(anchorEl);
 
     const handleClick = (event) => {
@@ -105,6 +107,8 @@ export default function ClippedDrawer() {
                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
             },
         });
+
+        setType(getNotifications.data.type)
 
         let saveTempRows = [];
         let doneTempRows = [];
@@ -307,7 +311,9 @@ export default function ClippedDrawer() {
             <CssBaseline />
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
-                    <PatientNavBar />
+                    {type === 'patient' ? <PatientNavBar /> : <div />}
+                    {type === 'Doctor' ? <DoctorNavBar /> : <div />}
+
                 </Toolbar>
             </AppBar>
             <Drawer

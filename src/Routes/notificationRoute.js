@@ -11,9 +11,10 @@ const router = express.Router();
 router.get('/notifications', protect, async (req, res) => {
     try {
         const userId = req.user._id;
+        const type = req.user.__t;
         const notifications = await notificationModel.find({ userId }).sort({ timestamp: -1 });
         const length = notifications.length;
-        res.status(200).json({ notifications, length, success: true });
+        res.status(200).json({ notifications, type, length, success: true });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ message: 'Error retrieving notifications', success: false });
