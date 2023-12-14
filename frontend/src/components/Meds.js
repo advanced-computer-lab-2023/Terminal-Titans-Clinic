@@ -110,6 +110,7 @@ const Meds = ({ medicines }) => {
       }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully added medicine to prescription.');
+        window.location.reload();
       } else {
         console.error('Failed to add medicine to prescription. Unexpected response:', response);
       }

@@ -19,7 +19,9 @@ function arrayBufferToBase64(buffer) {
 const PrescItem = ({ item }) => {
   const [quantity, setQuantity] = useState(item.quantity);
   const [medicine, setMedicine] = useState(null);
-  const presc = new URLSearchParams(window.location.search);
+
+  const params = new URLSearchParams(window.location.search);
+  const prescId = params.get('Id');
 
   useEffect(() => {
     const fetchMedicines = async () => {
@@ -36,6 +38,8 @@ const PrescItem = ({ item }) => {
         console.error('Error fetching medicines data:', error);
       }
     };
+    setQuantity(item.dosage);
+    
 
     fetchMedicines();
   }, [item.med._id]);
@@ -43,11 +47,11 @@ const PrescItem = ({ item }) => {
   const handleQuantityChange = async (newQuantity) => {
     try {
       if (newQuantity==0){
-        await axios.delete(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:presc,medicineId:item.med._id,action:"add"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        await axios.delete(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:prescId,medicineId:item.med._id,action:"add"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
         window.location.reload();
       }
       else{
-        await axios.put(`http://localhost:8000/doctor/updateDosage`, { prescriptionId:presc,medicineId:item.med._id,dosage:newQuantity},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        await axios.put(`http://localhost:8000/doctor/updateDosage`, { prescriptionId:prescId,medicineId:item.med._id,dosage:newQuantity},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
       setQuantity(newQuantity);
       }
     } catch (error) {
@@ -57,7 +61,8 @@ const PrescItem = ({ item }) => {
 
   const handleDeletePrescItem = async () => {
     try {
-      await axios.delete(`http://localhost:8000/Patient/addOrDeleteMedFromPresc`, { prescriptionId:presc,medicineId:item.med._id,action:"delete"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+      await axios.post(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:prescId,medicineId:item.med._id,action:"delete"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting presc item:', error);
     }
@@ -77,24 +82,27 @@ const PrescItem = ({ item }) => {
                         />
                     )}
       </div>
+      <select
+        className="presc_select"
+        value={quantity}
+        onChange={(e) => handleQuantityChange(e.target.value)}
+      >
+        {[...Array(20).keys()].map((option) => (
+          <option key={option + 1} value={option + 1}>
+            {option + 1}
+          </option>
+        ))}
+      </select>
       <Link to={`/medicine/${item.med._id}`} className="presc_name">
         <p>{medicine.Name}</p>
       </Link>
-      <p className="Presc_dosage">${item.dosage}</p>
-      <select
-  className="presc_select"
-  value={quantity}
-  onChange={(e) => handleQuantityChange(e.target.value)}
->
-  {[...Array(medicine.Quantity).keys()].map((option) => (
-    <option key={option + 1} value={option + 1}>
-      {option + 1}
-    </option>
-  ))}
-</select>
-      <button className="presc_del" onClick={handleDeletePrescItem}>
-        <i className="fas fa-delete"></i>
-      </button>
+      {/* <p className="Presc_dosage">${item.dosage}</p> */}
+      <div>
+        <div style={{ cursor: "pointer" }}>
+          <button className="presc_del" onClick={handleDeletePrescItem}>DELETE
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
