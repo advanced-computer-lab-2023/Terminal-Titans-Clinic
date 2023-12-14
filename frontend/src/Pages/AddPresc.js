@@ -64,11 +64,11 @@ const AddPresc = () => {
   const getPrescription = async () => {
     try {
       console.log('res');
-      const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+      const response = await axios.get(`http://localhost:8000/doctor/getPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
-        console.log('Successfully fetched patient.');
-        console.log(response.data.Result.result);
-        setPatientId(response.data.Result.result._id);
+        console.log('Successfully fetched presc.');
+        console.log(response.data);
+        setPatientId(response.data.Result);
         console.log(patientId);
       } else {
         console.error('Failed to fetch patient. Unexpected response:', response);
@@ -84,8 +84,8 @@ const AddPresc = () => {
       const response = await axios.get(`http://localhost:8000/doctor/getPatientOfPrescription/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched patient.');
-        console.log(response.data.Result.result);
-        setPatientId(response.data.Result.result._id);
+        console.log(response.data);
+        setPatientId(response.data.patient._id);
       } else {
         console.error('Failed to fetch patient. Unexpected response:', response);
       }
@@ -100,8 +100,8 @@ const AddPresc = () => {
       const response = await axios.get(`http://localhost:8000/doctor/getPrescMeds/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched prescription items.');
-        console.log(response.data.Result.result);
-        updatePrescItems(response.data.Result.result);
+        console.log(response.data);
+        updatePrescItems(response.data.Result);
 
       } else {
         console.error('Failed to fetch prescription items. Unexpected response:', response);

@@ -724,7 +724,7 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
 
 //requirement 26
 //get all prescriptions of the logged in doctor with the patient whose id is given in the body array
-router.get('/getPrescription/:id', protect, async (req, res) => {
+router.get('/getPrescriptionOfPatient/:id', protect, async (req, res) => {
     try {
         console.log('a');
         const doctor = await doctorModel.findById(req.user)
@@ -737,7 +737,7 @@ router.get('/getPrescription/:id', protect, async (req, res) => {
             }}
         const patientIds = req.params.id;
         console.log('b');
-        const prescriptions = await prescriptionModel.find({ DoctorId: req.user._id, PatientId: { $in: patientIds } });
+        const prescriptions = await prescriptionModel.find({ DoctorId: req.user._id, PatientId: patientIds });
         console.log('c');
         let result=[];
         console.log(prescriptions);
@@ -768,6 +768,30 @@ router.get('/getPrescription/:id', protect, async (req, res) => {
             "presc": result,
         }
         res.status(200).json({ result1, success: true });
+    }
+    catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
+
+//get a prescription with it's id in the params
+router.get('/getPrescription/:id', protect, async (req, res) => {
+    try {
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else{
+            if(doctor.employmentContract!="Accepted"){
+             return   res.status(400).json({ message: "Contract not accepted", success: false })
+            }}
+        const prescription = await prescriptionModel.findById(req.params.id);
+        if (!prescription) {
+            res.status(400).json({ message: "Prescription not found", success: false })
+        }
+        else {
+            res.status(200).json({ Result: prescription, success: true })
+        }
     }
     catch (err) {
         res.status(400).json({ message: err.message, success: false })
