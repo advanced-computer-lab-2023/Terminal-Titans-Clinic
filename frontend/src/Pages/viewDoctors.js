@@ -146,7 +146,8 @@ console.log(error);
                 <Button
                   variant="dark"
                   style={{ width: '45%' }}
-                  onClick={() => navigate(`/Health-Plus/viewDoctorInfo?Id=${doctor.id}`)}
+                  onClick={() => navigate(`/ViewDoctorInfo?Id=${doctor.id}`)}
+                 // onClick={() => navigate(`/reschedule`)}
                 >
                   View
                 </Button>
