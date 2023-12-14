@@ -18,6 +18,8 @@ import Button from 'react-bootstrap/Button';
 import { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
 import { get } from 'mongoose';
+import {DoctorNavBar} from '../components/doctorNavBar';
+
 
 //not finished yet
 export default function AddAvailableSlots() {
@@ -136,6 +138,7 @@ export default function AddAvailableSlots() {
     }, [value]);
     return (
         <div>
+            <DoctorNavBar/>
             <div style={{backgroundColor:'black'}}>
             <h1 style={{textAlign:'center',color:'white'}}>Add Available Slots</h1>
             </div>

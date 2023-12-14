@@ -20,11 +20,11 @@ import {PatientNavBar} from './PatientNavBar.jsx';
 
 const tiers = [
   {
-    title: 'Prescriptions',
+    title: 'Doctors',
     description: [
-      'Explore and manage your prescriptions conveniently through this part.',
-      'Order new prescriptions, view prescription history, and more.'
-    ],
+      'View our  skilled doctors and their specialized fields.',
+       'Book appointments effortlessly at competitive prices.',  
+          ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
   },
@@ -81,9 +81,8 @@ export default function Pricing() {
           Your Patient Dashboard
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" component="p">
-          Manage your health effectively with our patient dashboard.
-          Access your prescriptions, health packages, and appointments in one place.
-        </Typography>
+        View our  skilled doctors and their specialized fields. Book appointments effortlessly at competitive prices.  
+              </Typography>
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">

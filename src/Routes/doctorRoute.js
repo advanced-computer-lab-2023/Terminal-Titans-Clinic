@@ -724,7 +724,7 @@ router.get('/getPatientInfoAndHealth3/:id', protect, async (req, res) => {
 
 //requirement 26
 //get all prescriptions of the logged in doctor with the patient whose id is given in the body array
-router.get('/getPrescriptionOfPatient/:id', protect, async (req, res) => {
+router.post('/getPrescriptionOfPatient/:id', protect, async (req, res) => {
     try {
         console.log('a');
         const doctor = await doctorModel.findById(req.user)
@@ -739,35 +739,38 @@ router.get('/getPrescriptionOfPatient/:id', protect, async (req, res) => {
         console.log('b');
         const prescriptions = await prescriptionModel.find({ DoctorId: req.user._id, PatientId: patientIds });
         console.log('c');
-        let result=[];
+       // let result=[];
         console.log(prescriptions);
-        
-        for(var x in prescriptions){
-            const presc=prescriptions[x];
-            const medList=presc.items;
-            let medList2=[];
-            for(var y in medList){
-                const med=medList[y];
-                const medName=med.medName;
-                const dosage=med.dosage;
-                const med2={
-                    "medName":medName,
-                    "dosage":dosage
-                }
-                medList2.push(med2);
+        var temp=prescriptions;
+        var final = [];
+        for (let x in temp) {///if you need the doctor's name in front end
+            var result = {}
+            const doc = await patientsModel.find({ _id: temp[x].PatientId })
+            console.log("pp"+doc.Name)
+            if (doc.length > 0)
+                result.Name = doc[0].Name;
+            //result.prescriptionDoc=temp[x].prescriptionDoc;
+            result.Date = temp[x].Date;
+            result.status = temp[x].status;
+            result.id = temp[x].id;
+          //  result.prescriptionDoc = temp[x].prescriptionDoc.binData.toString('base64');
+          result.medicine=[]
+          for (let y in temp[x].items ){
+            const med=await MedicineModel.findById(temp[x].items[y].medicineId)
+            var medicine={
+                "Name":med.Name,
+                "Dosage":temp[x].items[y].dosage
             }
-            const presc2={
-                "prescId":presc._id,
-                "date":presc.Date,
-                "medList":medList2,
-                "status":presc.status
-            }
-            result.push(presc2);
+            //console.log(medicine)
+    
+            result.medicine.push(medicine);
+          }
+            final.push(result);
+    
         }
-        const result1 = {
-            "presc": result,
-        }
-        res.status(200).json({ result1, success: true });
+        console.log(final)
+        res.status(200).json({ final, success: true });
+    
     }
     catch (err) {
         res.status(400).json({ message: err.message, success: false })
@@ -915,11 +918,11 @@ router.get('/getPatientsList2', protect, async (req, res) => {
         let result = []
 
         for (let i = 0; i < appointments.length; i++) {
-            let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
-            if(patient){
-           const hasSameId = result.find((pat) => pat.id.equals(patient._id));
+            
+           const hasSameId = result.find((pat) => pat.id.equals(appointments[i].PatientId));
             //const hasSameId=false
             if(!hasSameId){
+                let patient = await patientsModel.findOne({ _id: appointments[i].PatientId })
             console.log(patient._id)
             const date=appointments[i].Date;
             var upcoming=false;
@@ -945,12 +948,12 @@ router.get('/getPatientsList2', protect, async (req, res) => {
                 upcoming=true;
             }
             result = result.map(pat => {
-                if (pat.id === patient._id) {
+                if (pat.id === appointments[i].PatientId) {
                     return { ...pat, upcoming: true };
                 }
                 return pat;
             });            
-        }
+        
         }
         }
 
@@ -1720,7 +1723,7 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
         }
         await prescription.save();
-        cres.status(200).json({
+        res.status(200).json({
             success: true,
             message: "Prescription updated successfully"
         });
@@ -1735,7 +1738,7 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
 
 })
 //gemerate pdf
-router.post('/generatePdf', protect,async(req,res)=>{
+router.get('/generatePdf/:id', protect,async(req,res)=>{
     try{
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
@@ -1749,7 +1752,7 @@ router.post('/generatePdf', protect,async(req,res)=>{
                 return res.status(400).json({ message: "Contract not accepted", success: false })
             }
         }
-        const prescriptionId=req.body.prescriptionId;
+        const prescriptionId=req.params.id;
         const prescription=await prescriptionModel.findById(prescriptionId);
         if(!prescription){
             return res.status(400).json({
@@ -1776,33 +1779,35 @@ router.post('/generatePdf', protect,async(req,res)=>{
         prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
         prescriptionString += `Date: ${prescription.Date}\n\n`;
         const medication = prescription.items;
-        for (let i = 0; i < medication.length; i++) {
+        for (let i in medication) {
             const medicine = await MedicineModel.findById(medication[i].medicineId);
             prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
         }
 
         // Add medication details
         if (medication && Array.isArray(medication)) {
-            prescriptionString += 'Medications:\n';
-            const medicine = await MedicineModel.findById(medication[i].medicineId);
-            medication.forEach((medication, index) => {
+            
+            
+            medication.forEach(async (medication, index) => {
+                const medicine = await MedicineModel.findById(medication.medicineId);
                 prescriptionString += `${index + 1}. ${medicine.Name} - ${medication.dosage}\n`;
             });
         }
 
         // Add additional notes
         prescriptionString += '\nAdditional Notes:\n';
-        prescriptionString += prescription.notes;
+        prescriptionString += prescription.notes?prescription.notes:'None';
         // get a blob when you're done
         doc.text(prescriptionString);
         const filePath = "./presc.pdf";
         doc.pipe(fs.createWriteStream(filePath));
         doc.end();
-        prescription.Pdf=doc;
-        res.status(200).json({
-            success: true,
-            message: "Prescription updated successfully"
-        });
+        await fs.readFile(filePath, function (err, data) {
+       console.log("done read")
+            res.status(200).json({data, status:"success"});
+          });
+        
+        
     }
     catch(error){
         console.log(error);
