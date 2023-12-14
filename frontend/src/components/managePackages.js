@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
+import Nav from "../components/Admin-NavBar.js";
+
 
 function ManagePackages() {
   const [packageList, setPackageList] = useState([]);
@@ -163,6 +165,8 @@ function ManagePackages() {
   };
 
   return (
+    <div>
+      <Nav/>
     <div style={{ padding: '20px' }}>
       <h1>Health Packages</h1>
       <Button variant="success" style={{ width: '100%' }} onClick={handleAddPackage}>
@@ -360,6 +364,7 @@ function ManagePackages() {
           <p>No health packages available.</p>
         )}
       </div>
+    </div>
     </div>
   );
 }

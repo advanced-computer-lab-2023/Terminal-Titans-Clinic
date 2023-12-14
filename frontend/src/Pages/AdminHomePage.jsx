@@ -17,6 +17,8 @@ import GlobalStyles from '@mui/material/GlobalStyles';
 import Container from '@mui/material/Container';
 import '../Styles/adminHome.css';
 import { useNavigate } from "react-router-dom";
+import Nav from "../components/Admin-NavBar.js";
+
 
 
 const tiers = [
@@ -90,12 +92,12 @@ function getLinkForTier(title) {
     case 'Adding Admins':
       return 'http://localhost:3000/Health-Plus/createAdmin';
     case 'Pharm Applications':
-      return 'http://localhost:4000/Health-Plus/adminPharmApplicationList';
+      return `http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}` ;
     case 'Sales Report':
-      return 'http://localhost:4000/Health-Plus/adminSalesReport';
-    case 'Medicines':
-      return 'http://localhost:4000/Health-Plus/adminAvailableMeds';
-    default:
+      return `http://localhost:4000/Health-Plus/adminSalesReport?id=${sessionStorage.getItem('token')}`;
+          case 'Medicines':
+            return `http://localhost:4000/Health-Plus/adminAvailableMeds?id=${sessionStorage.getItem('token')}`;
+                default:
       return '/';
   }
 }
@@ -114,49 +116,7 @@ export default function Pricing() {
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
       <CssBaseline />
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-      >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Health Plus+
-          </Typography>
-          <nav>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Visit pharmacy
-            </Link>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="/Health-Plus/viewMyProfile"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Other Informations
-            </Link>
-            <Link
-              variant="button"
-              color="text.primary"
-              // hena link el chatting
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Support
-            </Link>
-          </nav>
-          {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
-          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}> 
-            Home
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <Nav/>
       {/* Hero unit */}
       <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography

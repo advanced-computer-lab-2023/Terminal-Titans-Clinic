@@ -3,6 +3,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import "../Styles/LoginForm.css";
 import DoctorCard from './DoctorApplicationCard';
+import Nav from "../components/Admin-NavBar.js";
+
 
 function ViewDocApplications() {
     const [doctors, setDoctors] = useState([]);
@@ -66,6 +68,8 @@ function ViewDocApplications() {
 
     return (
         <div>
+        <Nav/>
+        <div>
           <div style={{ width: "100%", padding: '10px' }}>
             <h1 style={{ color: 'white', textAlign: 'center',backgroundColor: 'black',borderRadius:'15px' }}>Requested Doctors List </h1>
           </div>
@@ -79,6 +83,7 @@ function ViewDocApplications() {
               />
             ))}
           </div>
+        </div>
         </div>
       );
 
