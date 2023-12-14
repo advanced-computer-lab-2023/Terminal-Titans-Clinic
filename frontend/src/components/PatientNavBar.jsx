@@ -14,7 +14,9 @@ import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
 import { useEffect } from 'react';
 import axios from 'axios';
-
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 const defaultTheme = createTheme();
 
 
@@ -24,6 +26,8 @@ export function PatientNavBar() {
   const [notificationsCount, setNotificationsCount] = React.useState(0);
   const [notifications, setNotifications] = React.useState([]);
   // const [notifications, setNotifications] = React.useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     getNotifications();
@@ -44,6 +48,17 @@ export function PatientNavBar() {
   function goToNotification() {
     window.location.href = '/Health-Plus/notifications';
   }
+  function goBack(){
+      
+    console.log(location.pathname.substring(0,14))
+    if(location.pathname.substring(0,14)==='/viewMyProfile'){
+      
+      window.location.href = '/Health-Plus/patientHome';
+      return;      
+    }
+    navigate(-1);
+
+    }
 
   function connectToWs() {
     const ws = new WebSocket('ws://localhost:8000');
@@ -92,6 +107,19 @@ export function PatientNavBar() {
         sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
       >
         <Toolbar sx={{ flexWrap: 'wrap' }}>
+        {location.pathname!=='/patientHome'?
+           <Button
+           // hena link el chatting
+           style={{ color: 'black' }}
+           onClick={() => { goBack() }}
+                      sx={{ my: 1, mx: 0 }}
+                      size="small"
+         >
+             <ArrowBackIosIcon />
+           
+         </Button>
+         
+            :null}
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
             <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
           </Typography>

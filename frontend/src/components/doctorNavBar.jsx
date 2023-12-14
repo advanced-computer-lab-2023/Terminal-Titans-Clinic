@@ -14,17 +14,25 @@ import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
 import { useEffect } from 'react';
 import axios from 'axios';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
+
 
 const defaultTheme = createTheme();
-
 
 
 
 export function DoctorNavBar() {
   const [notificationsCount, setNotificationsCount] = React.useState(0);
   const [notifications, setNotifications] = React.useState([]);
-  // const [notifications, setNotifications] = React.useState([]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
+
+  // const [notifications, setNotifications] = React.useState([]);
+console.log(location.pathname)
   useEffect(() => {
     getNotifications();
     connectToWs();
@@ -79,7 +87,17 @@ export function DoctorNavBar() {
   function goToChat() {
     window.location.href = `chat/${sessionStorage.getItem('token')}`;
   }
+    function goBack(){
+      
+    console.log(location.pathname.substring(0,15))
+    if(location.pathname.substring(0,15)==='/viewDocProfile'){
+      
+      window.location.href = '/Health-Plus/doctorHome';
+      return;      
+    }
+    navigate(-1);
 
+    }
   return (
     require("../Styles/PatientNavBar.css"),
     <ThemeProvider theme={defaultTheme}>
@@ -91,7 +109,21 @@ export function DoctorNavBar() {
         elevation={0}
         sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
       >
+        
         <Toolbar sx={{ flexWrap: 'wrap' }}>
+          {location.pathname!=='/doctorHome'?
+           <Button
+           // hena link el chatting
+           style={{ color: 'black' }}
+           onClick={() => { goBack() }}
+                      sx={{ my: 1, mx: 0 }}
+                      size="small"
+         >
+             <ArrowBackIosIcon />
+           
+         </Button>
+         
+            :null}
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
             <span className='homePage' onClick={() => { window.location.href = '/Health-Plus/doctorHome' }}>Health Plus+</span>
           </Typography>

@@ -28,6 +28,7 @@ function ResponsiveDrawer(props) {
   const [show, setShow] = useState(id);
 
   console.log(id);
+  console.log(show+"p")
 
   const navigate = useNavigate();
 

@@ -18,6 +18,9 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import profileImage from "../Assets/profile.png";
 import {DoctorNavBar} from '../components/doctorNavBar';
+import "../Styles/viewMyPatProfile.css";
+import CssBaseline from '@mui/material/CssBaseline';
+
 
 
 
@@ -31,7 +34,7 @@ function ViewPatInfo() {
     const drawer = (
       <div>
 
-        
+        <Toolbar/>
         <List>
         <ListItem key='photo' disablePadding>
               
@@ -77,31 +80,30 @@ function ViewPatInfo() {
       </div>
     );
     return (
-      <div>
-        <DoctorNavBar/>
-        <Box sx={{ display: 'flex'}}>
-             <Box
-        position="fixed"
-        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
-      >
-       
-         {show==0? <ViewMyPatientBasicInfo/>:show==1?<ViewMyPatientMedHistory/>:show==2?<ViewMyPatientHealthRec/>:<ViewMyPatientPresc/>}
-      </Box>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          style={{position:'relative'}}
-          open
-        >
-          {drawer}
-        </Drawer>
-        
-    </Box>
-       </div>
-        
+      require("../Styles/ViewMyInfo.css"),
+      <>
+        <DoctorNavBar />
+        <Box sx={{ display: 'flex' }}>
+          <Box
+            position="fixed"
+            sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, height: '100vh', overflow: 'auto' }}
+          >
+  
+  {show==0? <ViewMyPatientBasicInfo/>:show==1?<ViewMyPatientMedHistory/>:show==2?<ViewMyPatientHealthRec/>:<ViewMyPatientPresc/>}
+          </Box>
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            }}
+            open
+          >
+            {drawer}
+          </Drawer>
+  
+        </Box>
+      </>
     );
 }
 

@@ -64,14 +64,17 @@ const getPatientName= async () => {
     return (
         <div>
             <DoctorNavBar/>
-    <h1>Patients List</h1>
+            <div   style={{ width: "100% ",backgroundColor:'black' }}>
+           
+           <h1 style={{color:'white', textAlign:'center'}}>Patients List </h1>
+           </div>
     {/* <TextField id="patName" label="Patient's Name" variant="outlined" size="small" sx={{ paddingRight: 1 }}
     value={name}
     onChange={(e) => setName(e.target.value)}/>
    
     <Button variant="dark"  onClick={(event) => { getPatientName() }} size="sm">Search</Button> */}
     <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
-    <InputGroup className="mb-1" style={{width:'30%'}}>
+    <InputGroup className="mb-1" style={{width:'30%', height:"10%"}}>
         
         <Form.Control
           id="searchInput"
@@ -79,12 +82,14 @@ const getPatientName= async () => {
           placeholder="Search"
           aria-label="Text input for search"
           value={name}
+          size="small"
           onChange={(e) => setName(e.target.value)}
         />
         <Button
           variant="outline-secondary"
           title="Search"
           id="segmented-button-dropdown-1"
+          size="small"
           onClick={(event) => { getPatientName() }} 
         >
           Search

@@ -12,7 +12,9 @@ import Typography from '@mui/material/Typography';
 import Modal from 'react-bootstrap/Modal';
 import validator from 'validator';
 import "../Styles/AdminScreen.css";
-
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 
 
@@ -21,7 +23,8 @@ import "../Styles/AdminScreen.css";
 
 export default function Pricing() {
   const [modalShow, setModalShow] = React.useState(false);
-
+  const location = useLocation();
+  const navigate = useNavigate();
   function goToHome() {
     window.location.href = `http://localhost:3000/Health-Plus/admin`
   }
@@ -47,7 +50,20 @@ export default function Pricing() {
         elevation={0}
         sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
       >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
+         <Toolbar sx={{ flexWrap: 'wrap' }}>
+          {location.pathname!=='/admin'?
+           <Button
+           // hena link el chatting
+           style={{ color: 'black' }}
+           onClick={() => { navigate(-1) }}
+                      sx={{ my: 1, mx: 0 }}
+                      size="small"
+         >
+             <ArrowBackIosIcon />
+           
+         </Button>
+         
+            :null}
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
             Health Plus+
           </Typography>
