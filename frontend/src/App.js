@@ -37,7 +37,7 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
-import ViewDoctorInfo from "./Pages/viewDoctorInfo.js";
+import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
 import ReschduleDoc from "./Pages/rescheduleDoc.js";
 import FollowUpDoc from "./Pages/followUpDoc.js";
 import Notification from "./components/Notification";

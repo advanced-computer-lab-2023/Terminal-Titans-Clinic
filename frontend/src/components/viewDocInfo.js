@@ -4,31 +4,36 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function ViewDocInfo() {
+
+
+<h1>anaa</h1>
+    
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('Id');
     const [doctor, setdoctor] = useState({});
 
 const getDocInfo=async()=>{
-    await axios.get(`http://localhost:8000/patient/selectDoctors/${userId}`, {
-        headers: {
-          Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
-        }
-      }).then(
-        (res) => {
-          const selectedDoc = res.data.Result
-          console.log(selectedDoc)
-         setdoctor(selectedDoc)
-         
+    
+    try {
+        const response = await axios.get(`http://localhost:8000/patient/selectDoctors/${userId}`, {
+          headers: {
+            Authorization: 'Bearer ' + sessionStorage.getItem("token")
+          }
+        });
   
-        }
-      );
-
-}
-console.log(doctor.Name);
-useEffect(()=>{
-    getDocInfo();
-    },[]
-    )
+        const selectedDoc = response.data.Result;
+        console.log(selectedDoc);
+        setdoctor(selectedDoc);
+      } catch (error) {
+        console.error("Error fetching doctor info:", error);
+      }
+    }
+  
+    useEffect(() => {
+      getDocInfo();
+    }, []);
+  
+    console.log(doctor.Name);
    
     return (
         <div>

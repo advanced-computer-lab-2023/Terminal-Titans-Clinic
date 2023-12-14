@@ -1,9 +1,36 @@
 import PropTypes from 'prop-types';
 import CurrencyDollarIcon from '@heroicons/react/24/solid/CurrencyDollarIcon';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Avatar, Card, CardContent, Stack, SvgIcon, Typography } from '@mui/material';
 
 export const OverviewTotalProfit = (props) => {
-  const { value, sx } = props;
+  const { sx } = props;
+
+  const [wltAmnt, setWltAmnt] = useState([]);
+
+  useEffect(() => {
+    fetchwltAmnt();
+  }, []);
+
+  const fetchwltAmnt = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/doctor/getWalletAmount", {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
+
+      let result = response.data.Amount;
+      // get only 2 digits after decimal
+      result = result.toFixed(2);
+      setWltAmnt(result);
+
+
+    } catch (error) {
+      console.error('Error fetching wallet data:', error.message);
+    }
+  };
 
   return (
     <Card sx={sx}>
@@ -19,10 +46,10 @@ export const OverviewTotalProfit = (props) => {
               color="text.secondary"
               variant="overline"
             >
-              Total Profit
+              Your Wallet
             </Typography>
             <Typography variant="h4">
-              {value}
+              ${wltAmnt}
             </Typography>
           </Stack>
           <Avatar

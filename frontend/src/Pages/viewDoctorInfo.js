@@ -13,7 +13,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import ViewDocInfo from '../components/viewDocInfo';
+import ViewDocInfo from './../components/viewDocInfo';
+
 
 
 const drawerWidth = 260;

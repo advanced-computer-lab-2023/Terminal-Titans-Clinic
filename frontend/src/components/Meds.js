@@ -105,33 +105,35 @@ const Meds = ({ medicines }) => {
       const response = await axios.post('http://localhost:8000/doctor/addOrDeleteMedFromPresc', {
         medicineId: medicine._id,
         action: 'add',
-        prescriptionId: prescId
+        prescriptionId: prescId,
+        dosage: dosage
       }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully added medicine to prescription.');
+        window.location.reload();
       } else {
         console.error('Failed to add medicine to prescription. Unexpected response:', response);
       }
     } catch (error) {
       console.error('Error:', error);
     }
-    //update dosage of the specified medicine in the dosage specified
-    try {
-      const response = await axios.post('http://localhost:8000/doctor/updateDosage', {
-        medicineId: medicine._id,
-        dosage: dosage,
-        prescriptionId: prescId
-      }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
+    // //update dosage of the specified medicine in the dosage specified
+    // try {
+    //   const response = await axios.post('http://localhost:8000/doctor/updateDosage', {
+    //     medicineId: medicine._id,
+    //     dosage: dosage,
+    //     prescriptionId: prescId
+    //   }, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
 
-      if (response.status === 200) {
-        console.log('Successfully updated dosage of medicine.');
+    //   if (response.status === 200) {
+    //     console.log('Successfully updated dosage of medicine.');
 
-      } else {
-        console.error('Failed to update dosage of medicine. Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    //   } else {
+    //     console.error('Failed to update dosage of medicine. Unexpected response:', response);
+    //   }
+    // } catch (error) {
+    //   console.error('Error:', error);
+    // }
   }
   return (
     <div>
@@ -147,7 +149,6 @@ const Meds = ({ medicines }) => {
                   <div className="meds_info">
                     <p className="info_name">{medicine.Name}</p>
                     <p className="infooo">{medicine.MedicalUse.join(' ')}</p>
-                    <p className="price">${medicine.Price}</p>
                     <Button className="info_buttom" onClick={handleShow}>
                       View
                     </Button>
