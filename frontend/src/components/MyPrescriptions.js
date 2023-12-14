@@ -91,15 +91,15 @@ const [allNames,setAllNames]=useState([]);
       );
     }
     const buyPres = async (id) => {
-      const response = await axios.post(
-        `http://localhost:8000/patient/buyPrescription/${id}`,
-        { },
-        { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-      );
-      if (response.status === 200) {
-       
-             
-      }
+    const response = await axios.post(
+      `http://localhost:8000/patient/buyPrescription/${id}`,
+      {},
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    if (response.status === 200) {
+      window.location.href = `http://localhost:4000/checkout?sessid=${sessionStorage.getItem('token')}`
+
+    }
     }
     function arrayBufferToBase64(buffer) {
       let binary = '';
@@ -307,7 +307,7 @@ useEffect(()=>{
                 <DownloadIcon  onClick={() => { downloadPres(currPresc.id) }}/>
                   </Button>
                
-                  <Button variant="dark" style={{ width: '45%' }}>
+                  <Button variant="dark" style={{ width: '45%' }} onClick={() => { buyPres(currPresc.id) }}>
                     Buy Prescription
                   </Button>
                 </div>

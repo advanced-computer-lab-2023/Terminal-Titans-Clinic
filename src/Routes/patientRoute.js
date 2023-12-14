@@ -3684,13 +3684,13 @@ router.post('/generatePdf', protect,async(req,res)=>{
     }
 })
 
-router.post('buyPrescription/id', protect, async (req, res) => {
+router.post('/buyPrescription/:id', protect, async (req, res) => {
     const patient = await patientModel.findOne(req.user);
     if (!patient) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
     try {
-        await CartItem.deleteMany({ userId: patientId });
+        await CartItem.deleteMany({ userId: patient._id });
 
         const prescription = await prescriptionsModel.findById(req.params.id);
         if (!prescription) {
@@ -3704,9 +3704,10 @@ router.post('buyPrescription/id', protect, async (req, res) => {
                 quantity:prescription.items[x].dosage,
                 price:medicine.Price
             });
+            cart.save();
         }
 
-        await prescriptionsModel.findByIdAndUpdate(id)
+        // await prescriptionsModel.findByIdAndUpdate(req.params.id)
         const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id:req.params.id },
             {
                 InCart: true,
@@ -3717,67 +3718,5 @@ router.post('buyPrescription/id', protect, async (req, res) => {
         console.error('Error getting prescription', error.message);
     }
 });
-async function changeStatusOfPres(userId){ 
-    try{ 
-        const cartItems = await CartItem.find({ userId: userId }); 
-        const prescriptions = await prescriptionsModel.find({ PatientId: userId ,addedToCart:true}); 
-        let flag=true; 
-        for (var pres in prescriptions){ 
-            var medList =prescriptions[pres].items; 
-            for (var x in cartItems) { 
-                console.log(cartItems[x]) 
-                const med = await MedicineModel.findById(cartItems[x].medicineId); 
-                if(!med.OverTheCounter){ 
-                   
-                    
-                    let matchingMed = [...medList].find(item => item.medicineId === med._id); 
-           
-                    if(!matchingMed || cartItems[x].quantity > matchingMed.dosage) 
-                    flag=false; 
-                
-                } } 
-
-
-                if(flag){ 
-                    const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id: prescriptions[pres]._id }, { status:"filled"}); 
-                    return; 
-                    //  prescriptions = await PrescriptionModel.find({ PatientId: patient._id}); 
-                    }
-                }
-                prescriptions = await prescriptionsModel.find({ PatientId: userId }); 
-                
-                let arr = new Array(cartItems.length).fill(false);
-                flag=false;
-                for (var pres in prescriptions){ 
-                    var medList =prescriptions[pres].items; 
-                    for (var x in cartItems) { 
-                        if(arr[x])
-                        continue;
-                        console.log(cartItems[x]) 
-                        const med = await MedicineModel.findById(cartItems[x].medicineId); 
-                        if(!med.OverTheCounter){ 
-                           
-                            let matchingMed = [...medList].find(item => item.medicineId === med._id); 
-                   
-                            if(matchingMed && cartItems[x].quantity == matchingMed.dosage){ 
-                                arr[x]=true;
-                                flag=true;
-                            }
-                        
-                        } 
-                    } 
-        
-        
-                        if(flag){ 
-                            const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id: prescriptions[pres]._id }, { status:"filled"}); 
-                            return; 
-                            //  prescriptions = await PrescriptionModel.find({ PatientId: patient._id}); 
-                            }
-                        }
-
-                }catch(error){
-
-                     } 
-                    }
 
 export default router;

@@ -14,6 +14,8 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { useEffect } from 'react';
 import React, { useState } from 'react';
+import { PatientNavBar } from '../components/PatientNavBar';
+
 
 // Your component code here
 
@@ -110,6 +112,9 @@ export default function PackageCheckout() {
       }
     };
   return (
+    <div>
+        <PatientNavBar/>
+  
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
     <Card sx={{ minWidth: 275, width:'50%' }}>
@@ -162,6 +167,7 @@ export default function PackageCheckout() {
       >Proceed</Button>
     </CardActions>
         </Card>
+    </div>
     </div>
   );
 }
