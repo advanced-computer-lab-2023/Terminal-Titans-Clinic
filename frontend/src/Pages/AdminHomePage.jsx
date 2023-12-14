@@ -92,12 +92,12 @@ function getLinkForTier(title) {
     case 'Adding Admins':
       return 'http://localhost:3000/Health-Plus/createAdmin';
     case 'Pharm Applications':
-      return 'http://localhost:4000/Health-Plus/adminPharmApplicationList';
+      return `http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}` ;
     case 'Sales Report':
-      return 'http://localhost:4000/Health-Plus/adminSalesReport';
-    case 'Medicines':
-      return 'http://localhost:4000/Health-Plus/adminAvailableMeds';
-    default:
+      return `http://localhost:4000/Health-Plus/adminSalesReport?id=${sessionStorage.getItem('token')}`;
+          case 'Medicines':
+            return `http://localhost:4000/Health-Plus/adminAvailableMeds?id=${sessionStorage.getItem('token')}`;
+                default:
       return '/';
   }
 }
