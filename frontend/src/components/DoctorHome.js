@@ -6,32 +6,12 @@ import { Carousel } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { OverviewTotalCustomers } from '../overview/overview-total-customers';
 import { OverviewTotalProfit } from '../overview/overview-total-profit';
+import { OverviewLatestPatients } from '../overview/overview-latest-patients';
 import { Container, Grid, Box } from '@mui/material';
 import style from '../Styles/DoctorHome.css';
 
 
 const DoctorHome = () => {
-  const [wltAmnt, setWltAmnt] = useState([]);
-  // const [familyHealthPackageData, setFamilyHealthPackageData] = useState([]);
-  const navigate = useNavigate();
-
-  const fetchwltAmnt = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/doctor/getWalletAmount", {
-        headers: {
-          Authorization: 'Bearer ' + sessionStorage.getItem('token')
-        }
-      });
-
-      const result = response.data.Amount;
-      console.log(result);
-      setWltAmnt(result);
-
-
-    } catch (error) {
-      console.error('Error fetching wallet data:', error.message);
-    }
-  };
 
   return (
     <>
@@ -73,12 +53,24 @@ const DoctorHome = () => {
         }}
       >
         <Container maxWidth="xl">
-          <Grid container spacing={3}>
-            <Grid xs={12} md={6} lg={3}>
-              <OverviewTotalCustomers sx={{ height: '100%' }} value="$15k" />
+          <Grid container>
+            <Grid xs={12} md={6} lg={4} rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+              <Grid item xs={12} md={10} sx={{ marginBottom: 1, marginRight: { xs: 1, sm: 2, md: 3 } }}>
+                <OverviewTotalCustomers sx={{ height: '100%' }} />
+              </Grid>
+              <Grid item xs={12} md={10} sx={{ marginBottom: 1, marginRight: { xs: 1, sm: 2, md: 3 } }}>
+                <OverviewTotalProfit sx={{ height: '100%' }} />
+              </Grid>
             </Grid>
-            <Grid xs={12} sm={6} lg={3}>
-              <OverviewTotalProfit sx={{ height: '100%' }} value="$15k" />
+
+            <Grid
+              xs={12}
+              md={6}
+              lg={8}
+            >
+              <OverviewLatestPatients
+                sx={{ height: '100%' }}
+              />
             </Grid>
           </Grid>
         </Container>

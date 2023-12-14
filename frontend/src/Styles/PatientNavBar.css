@@ -33,3 +33,7 @@
 .homePage{
     cursor: pointer;
 }
+
+.simplebar-placeholder{
+    height: 0px !important;
+}

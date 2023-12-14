@@ -936,7 +936,9 @@ router.get('/getPatientsList2', protect, async (req, res) => {
                 "Email":patient.Email,
                 "DateOfBirth":patient.DateOfBirth,
                 "upcoming":upcoming,
-                "id":patient._id
+                "id":patient._id,
+                "Status":appointments[i].Status,
+                "createdAt":appointments[i].createdAt
             }
             result.push(pat);
         }
@@ -2342,4 +2344,33 @@ router.get('/getAllMedicine2', protect, async (req, res) => {
       res.status(500).json({ success: false, message: error.message });
     }
   });
+
+
+
+//   7gat seif
+router.get('/getTotalPatients',protect,async(req,res)=>{
+    try{
+        console.log(req.user.__t);
+        if (req.user.__t != "Doctor") {
+            return res.status(500).json({
+                success: false,
+                message: "You are not a doctor"
+            });
+        }
+
+        const patients=await appointmentModel.find({DoctorId:req.user._id});
+        console.log(patients);
+        res.status(200).json({
+            success: true,
+            patients:patients.length
+        });
+    }
+    catch(error){
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error"
+        });
+    }
+});
 export default router;
