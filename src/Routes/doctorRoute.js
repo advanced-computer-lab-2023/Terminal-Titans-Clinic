@@ -2373,8 +2373,8 @@ router.get('/getTotalPatients', protect, async (req, res) => {
             });
         }
 
-        const patients = await appointmentModel.find({ DoctorId: req.user._id });
-        console.log(patients);
+        const patients = await appointmentModel.distinct('PatientId', { DoctorId: req.user._id });
+
         res.status(200).json({
             success: true,
             patients: patients.length

@@ -16,6 +16,15 @@ import style from '../Styles/DoctorHome.css';
 
 const DoctorHome = () => {
 
+  const navigate = useNavigate();
+  const goToViewPatientList = () => navigate('/viewMyPatientsList');
+
+  const viewAppointments = () => navigate('/docViewAppointments');
+
+  const addAvailableTimeSlots = () => navigate('/addAvailableSlots');
+
+  const followUpDoc = () => navigate('/acceptRejectFollowUp');
+
   return (
     <>
       <Carousel fade={true}>
@@ -25,7 +34,7 @@ const DoctorHome = () => {
           <Carousel.Caption>
             <h2 className="captionText">View Patient List</h2>
             <h4 className="captionText">Click below to view your list of patients and their details.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }}>View Patients</Button>
+            <Button className="navButton" style={{ minWidth: "150px" }} onClick={goToViewPatientList}>View Patients</Button>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -34,7 +43,7 @@ const DoctorHome = () => {
           <Carousel.Caption>
             <h2 className="captionText">View Appointments List</h2>
             <h4 className="captionText">Check your upcoming appointments and manage your schedule.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }}>View Appointments</Button>
+            <Button className="navButton" style={{ minWidth: "150px" }} onClick={viewAppointments}>View Appointments</Button>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -43,7 +52,7 @@ const DoctorHome = () => {
           <Carousel.Caption>
             <h2 className="captionText">Follow-up Requests</h2>
             <h4 className="captionText">Review and respond to follow-up requests from your patients.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }}>Handle Requests</Button>
+            <Button className="navButton" style={{ minWidth: "150px" }} onClick={followUpDoc}>Handle Requests</Button>
           </Carousel.Caption>
         </Carousel.Item>
       </Carousel>
@@ -96,11 +105,11 @@ const DoctorHome = () => {
                       Appointments
                     </Typography>
                     <Typography variant="body2" color="text.secondary" className='text-center'>
-                      View your upcoming appointments and manage your schedule.
+                      Add your available time slots and view your upcoming appointments.
                     </Typography>
                   </CardContent>
                   <CardActions className=''>
-                    <Button size="small" className='w-100'>View Appointments</Button>
+                    <Button size="small" className='w-100' onClick={addAvailableTimeSlots}>View Appointments</Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -110,7 +119,7 @@ const DoctorHome = () => {
                   <CardMedia
                     sx={{ height: 140 }}
                     image={require('../Assets/prescription.jpeg')}
-                    title="Appointment picture"
+                    title="Prescription picture"
                   />
                   <CardContent>
                     <Typography gutterBottom variant="h5" component="div" className='text-center'>

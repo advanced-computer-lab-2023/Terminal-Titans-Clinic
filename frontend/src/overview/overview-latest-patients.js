@@ -112,6 +112,7 @@ export const OverviewLatestPatients = (props) => {
           )}
           size="small"
           variant="text"
+          onClick={() => { window.location.href = '/Health-Plus/viewMyPatientsList' }}
         >
           View all
         </Button>
