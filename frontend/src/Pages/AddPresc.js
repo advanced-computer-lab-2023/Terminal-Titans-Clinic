@@ -100,7 +100,7 @@ const AddPresc = () => {
       const response = await axios.get(`http://localhost:8000/doctor/getPrescMeds/${prescId}`, { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } });
       if (response.status === 200) {
         console.log('Successfully fetched prescription items.');
-        console.log(response.data);
+        console.log(response.data.Result);
         updatePrescItems(response.data.Result);
 
       } else {
@@ -157,21 +157,21 @@ const AddPresc = () => {
           {errorMessage}
         </div>
       )}
-      <div className="addPresc" style={{ marginLeft: '7%' }}>
-        <h2 className="addPresc_title">Meds</h2>
+      {/* <div className="addPresc" style={{ marginLeft: '7%' }}>
+        <h2 className="addPresc_title">Meds</h2> */}
         <div className="addPresc_meds">
           <div style={{ display: "flex" }}>
             <div style={{ width: " 20%" }}>
               <div className="cartscreen">
-              {prescItems && prescItems.map((item) => (
+              {/* {prescItems && prescItems.map((item) => (
                 <PrescItem key={item.med._id} item={item} />
-              ))}
+              ))} */}
               <h2>Prescription Medicines</h2>
               {prescItems.map((item) => (
                 <PrescItem key={item.med._id} item={item} />
               ))}
               <div>
-                <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile\/${patientId}`}>Back to Patient Profile</button>
+                <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile/${patientId}`}>Back to Patient Profile</button>
               </div>
           </div>
             </div>
@@ -188,7 +188,7 @@ const AddPresc = () => {
             </div>
           </div>         
         </div>
-      </div>
+      {/* </div> */}
     </div>
 
   );

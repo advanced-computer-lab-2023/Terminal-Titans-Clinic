@@ -24,7 +24,7 @@ const PrescItem = ({ item }) => {
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/doctor/getAllMedicine/',{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        const response = await axios.get('http://localhost:8000/doctor/getAllMedicines/',{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
         const medicines = response.data.meds;
 
         const matchedMedicine = item.med;

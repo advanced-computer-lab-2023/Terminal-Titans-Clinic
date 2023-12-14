@@ -1702,6 +1702,7 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
         const medicineId=req.body.medicineId;
         const action=req.body.action;
         const prescription=await prescriptionModel.findById(prescriptionId);
+        let dosage=req.body.dosage;
         if(!prescription){
             return res.status(400).json({
                 success: false,
@@ -1717,7 +1718,24 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
                     message: "This medicine is already in the prescription"
                 });
             }
-            prescription.items.push({medicineId:medicineId,dosage:1});
+            if (!dosage)
+                dosage=1;
+            //I want to check if the medicineId is already in the items array, that contains sets of medicineId and dosage, in the prescription model
+            //if it is, then I want to update the dosage of this medicineId
+            //if it is not, then I want to add this medicineId to the items array
+            items=prescription.items;
+            let f = false;
+            for (x in items){
+                if (items[x].medicineId == medicineId){
+                    f = true;
+                    
+                    let curr = items[x].dosage;
+                    items[x].dosage = curr + dosage;
+                    await prescription.save();
+                    break;
+                }   
+            }
+            prescription.items.push({medicineId:medicineId,dosage:dosage});
         }
         else if(action=="delete"){
             prescription.items=prescription.items.filter((item)=>item.medicineId!=medicineId);
