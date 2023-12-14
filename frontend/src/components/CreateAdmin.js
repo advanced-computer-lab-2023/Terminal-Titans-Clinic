@@ -11,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
+import Nav from "../components/Admin-NavBar.js";
+
 
 const defaultTheme = createTheme();
 
@@ -53,6 +55,8 @@ const CreateAdmin = () => {
   };
 
   return (
+    <div>
+      <Nav/>
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -108,6 +112,7 @@ const CreateAdmin = () => {
         </Box>
       </Container>
     </ThemeProvider>
+    </div>
   );
 };
 

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import UserCard from './UserCard';
 import UserInfoPopup from './ViewUserPopup'; // Import the new popup component
+import Nav from "../components/Admin-NavBar.js";
+
 
 function AdminUserPage() {
   const [userList, setUserList] = useState([]);
@@ -57,6 +59,8 @@ function AdminUserPage() {
 
   return (
     <div>
+      <Nav/>
+    <div>
       <div style={{ width: '100%', padding: '10px' }}>
         <h1 style={{ color: 'white', textAlign: 'center', backgroundColor: 'black', borderRadius: '15px' }}>
           User Management Page
@@ -70,6 +74,7 @@ function AdminUserPage() {
 
       {/* Render the popup conditionally */}
       {popupVisible && <UserInfoPopup user={selectedUser} onClose={closeUserInfoPopup} />}
+    </div>
     </div>
   );
 }
