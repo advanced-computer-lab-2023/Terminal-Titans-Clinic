@@ -36,6 +36,9 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
+import AdminDocProfile from "./components/adminViewDocReq";
+import CreateAdmin from "./components/CreateAdmin";
+import ManagePackages from "./components/managePackages";
 
 
 
@@ -75,8 +78,11 @@ function App() {
           <Route path="/medicine/:medicineId" element={<MedsPage />} />
 
           <Route path="/admin" element={<AdminHome />} />
-          <Route path="/docApplicationList" element={<ViewDocApplications />} />
+          <Route path="/docApplicationList" element={<ViewDocApplications />} /> 
+          <Route path="/viewRegDocDoc" element={<AdminDocProfile />} /> 
           <Route path="/manageUsers" element={<AdminUserPage />} />
+          <Route path="/managePackages" element={<ManagePackages />} />
+          <Route path="/createAdmin" element={<CreateAdmin />} />
           {/* <Route path="/admin" element={<AdminPage />} /> */}
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
@@ -99,7 +105,7 @@ function App() {
           <Route path="/addRegFamilymember" element={<AddRegFamMem />} />
           <Route path="/packageSubscribtion" element={<SubPackage />} />
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
-          <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} />
+          {/* <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} /> */}
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/viewMyPatientsList" element={<PatientList />} />
           <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />

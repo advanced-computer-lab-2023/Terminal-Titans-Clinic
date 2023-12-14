@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import Container from '@mui/material/Container';
+import '../Styles/adminHome.css';
 import { useNavigate } from "react-router-dom";
 
 
@@ -23,7 +24,14 @@ const tiers = [
     title: 'Adding Admins',
     description: [
       'Work load is getting too big? Add another admin now to help you!',
-      'Create an admin with ease.'
+    ],
+    buttonText: 'Visit',
+    buttonVariant: 'contained',
+  },
+  {
+    title: 'Users List',
+    description: [
+      'Manage every user conveniently through this page.',
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -31,8 +39,7 @@ const tiers = [
   {
     title: 'HealthPackages',
     description: [
-      'Manage Health Care Packages with ease through this page.',
-      'View, add, update and delete Packages on the spot.'
+      'View, add, update and delete Packages on the spot through here.'
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -47,9 +54,26 @@ const tiers = [
     buttonVariant: 'contained',
   },
   {
-    title: 'Users List',
+    title: 'Pharm Applications',
     description: [
-      'Manage every user conveniently through this page.',
+      'Manage Pharmacists Applications with a click of a button.',
+      'View, accept or reject Pharmacists Applications.'
+    ],
+    buttonText: 'Visit',
+    buttonVariant: 'contained',
+  },
+  {
+    title: 'Sales Report',
+    description: [
+      "View the pharmacy's sales report month by month through here.",
+    ],
+    buttonText: 'Visit',
+    buttonVariant: 'contained',
+  },
+  {
+    title: 'Medicines',
+    description: [
+      'View, filter and search for all medicines in the Pharmacy through here.',
     ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
@@ -58,13 +82,19 @@ const tiers = [
 function getLinkForTier(title) {
   switch (title) {
     case 'Users List':
-      return '/admin';
+      return '/manageUsers';
     case 'HealthPackages':
-      return '/admin';
+      return '/managePackages';
     case 'Doctor Applications':
       return '/docApplicationList';
     case 'Adding Admins':
-      return '/admin';
+      return '/createAdmin';
+    case 'Pharmacists Applications':
+      return '/createAdmin';
+    case 'Sales Report':
+      return '/createAdmin';
+    case 'Medicines':
+      return '/createAdmin';
     default:
       return '/';
   }
@@ -80,6 +110,7 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   return (
+        require("../Styles/adminHome.css"),
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
       <CssBaseline />
@@ -176,7 +207,7 @@ export default function Pricing() {
                   mb: 2,
                 }}
               />
-              <ul>
+              <ul   className='longBody'>
                 {tier.description.map((line) => (
                   <Typography
                     component="li"
@@ -195,9 +226,10 @@ export default function Pricing() {
                 variant={tier.buttonVariant}
                 style={{ background:'black' }}
                 onClick={() => {
-                  if (tier.title !== "Doctor Applications") {
+                  if (tier.title == "Healthkages") {
                     alert("This page is still under maintenance");
                   }else{
+                    
                     navigate(getLinkForTier(tier.title));
                   }
                 }}

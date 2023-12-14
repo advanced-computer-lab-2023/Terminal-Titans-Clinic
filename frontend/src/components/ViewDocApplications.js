@@ -66,8 +66,8 @@ function ViewDocApplications() {
 
     return (
         <div>
-          <div style={{ width: "100%", backgroundColor: 'black' }}>
-            <h1 style={{ color: 'white', textAlign: 'center' }}>Appointments List </h1>
+          <div style={{ width: "100%", padding: '10px' }}>
+            <h1 style={{ color: 'white', textAlign: 'center',backgroundColor: 'black',borderRadius:'15px' }}>Requested Doctors List </h1>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             {doctors.map((doctor, index) => (

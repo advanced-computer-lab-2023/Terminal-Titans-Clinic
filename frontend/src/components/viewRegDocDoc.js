@@ -76,37 +76,65 @@ const rejectDoctor = async (username) => {
   console.log(user);
 
   return (
-    <div style={{ textAlign: 'center', backgroundColor: '#f0f0f0', padding: '20px' }}>
-      <h1 style={{ backgroundColor: 'black', color: 'white', padding: '10px' }}>Doctor Information</h1>
-      <Button variant="dark" style={{ width: '100%', background:"#000000b8" }} onClick={handleBack}>
-          Go Back
-        </Button>
-        {user && (
-        <div>
-          <h2>{user.Name}</h2>
-          <p>Email: {user.Email}</p>
-          <p>Date of Birth: {user.DateOfBirth}</p>
-          <p>Hourly Rate: {user.HourlyRate}</p>
-          <p>Affiliation: {user.Affiliation}</p>
-          <p>Education: {user.Education}</p>
-          <p>Speciality: {user.Speciality}</p>
+    <div>
+    
 
-          <div style={{ whiteSpace: 'nowrap', overflowX: 'auto', margin: '20px' }}>
-            <DocumentCard title="ID" imageData={user.ID} />
-            <DocumentCard title="Degree" imageData={user.Degree} />
-            <DocumentCard title="License" imageData={user.License} />
-            {/* Add more documents as needed */}
-          </div>
-        </div>
-      )}
-    <Button variant="success" style={{ width: '48%', marginRight: '4%', marginTop: '4%' }} onClick={() => acceptDoctor(user.Username)}>
-        Accept
-    </Button>
-    <Button variant="danger" style={{ width: '48%', marginTop: '4%' }} onClick={() => rejectDoctor(user.Username)}>
-        Reject
-    </Button>
-    </div>
+  <div>
+
+      <div id="login-form"  style={{ width: "600px " }}>
+          <form style={{paddingTop:'15px'}}>
+              <h1 style={{ backgroundColor: 'black', color: 'white', padding: '10px',borderRadius:'15px' ,marginTop:'5px' }}>Doctor Information</h1>
+              <div className="form-group">
+              {user && ( 
+              <div style={{paddingTop:'15px'}}>
+                <input type="text" id="name"  style={{width: "50%", border:"0px",padding:'8px'}} value='Name' readOnly />
+                <input type="text" id="name"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Name} disabled />
+
+                <input type="text" id="Username"  style={{width: "50%", border:"0px",padding:'8px'}} value='Username' readOnly />
+                <input type="text" id="outlined-disabled" style={{width: "50%", border:"0px",padding:'8px'}} value={user.Username} disabled />
+                
+
+                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value='Date of birth' readOnly />
+                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.DateOfBirth} disabled />
+
+                <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value='Email' readOnly />
+                <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Email} disabled/>
+
+                <input type="text" id="Affiliation"  style={{width: "50%", border:"0px",padding:'8px'}} value='Affiliation' readOnly />
+                <input type="text" id="Affiliation"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Affiliation} disabled/>
+
+
+                <input type="text" id="Education"  style={{width: "50%", border:"0px",padding:'8px'}} value='Education' readOnly />
+                <input type="text" id="Education"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Education}  disabled/>
+
+                <input type="text" id="HourlyRate"  style={{width: "50%", border:"0px",padding:'8px'}} value='Hourly Rate' readOnly />
+                <input type="text" id="HourlyRate"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.HourlyRate} disabled/>
+                <input type="text" id="Speciality"  style={{width: "50%", border:"0px",padding:'8px'}} value='Speciality' readOnly />
+                <input type="text" id="Speciality"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Speciality} disabled />
+                <div style={{ whiteSpace: 'nowrap', overflowX: 'auto', margin: '20px' }}>
+                  <DocumentCard title="ID" imageData={user.ID} />
+                  <DocumentCard title="Degree" imageData={user.Degree} />
+                  <DocumentCard title="License" imageData={user.License} />
+                </div> 
+              </div>
+              
+              
+             )}   
+             <Button variant="success" style={{ width: '48%', marginRight: '4%', marginTop: '4%' }} onClick={() => acceptDoctor(user.Username)}>
+                  Accept
+              </Button>
+              <Button variant="danger" style={{ width: '48%', marginTop: '4%' }} onClick={() => rejectDoctor(user.Username)}>
+                  Reject
+              </Button>
+              
+              </div>
+
+          </form>
+      </div>
+  </div>
+  </div>
   );
+
 }
 
 export default ViewRegDocDoc;

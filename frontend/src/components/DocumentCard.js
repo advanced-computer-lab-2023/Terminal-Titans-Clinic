@@ -17,7 +17,7 @@ const DocumentCard = ({ title, imageData }) => {
   return (
     <Card style={{ width: '18rem', margin: '10px', display: 'inline-block', textAlign: 'center' }}>
       <Card.Body>
-        <Card.Title style={{ backgroundColor: 'black', color: 'white' }}>{title}</Card.Title>
+        <Card.Title style={{ backgroundColor: 'black', color: 'white', borderRadius:'15px'}}>{title}</Card.Title>
         <Card.Img src={`data:image/jpeg;base64,${arrayBufferToBase64(imageData.data.data)}`} />
       </Card.Body>
     </Card>
