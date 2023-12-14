@@ -5,7 +5,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from 'react-bootstrap/Button'
 import Typography from '@mui/material/Typography';
-import { set } from 'lodash';
+import { set, xor } from 'lodash';
 import axios from 'axios';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -13,6 +13,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { useEffect } from 'react';
+import { PatientNavBar } from '../components/PatientNavBar';
 
 
 const bull = (
@@ -29,7 +30,7 @@ export default function AppointmentCheckout() {
     const doctorId = params.get('doctorId');
     const date=params.get('date');
     const famId=params.get('famMemId');
-    const [fees,setFees]=React.useState(0)
+        const [fees,setFees]=React.useState(0)
     const [docName,setDocName]=React.useState('');
     const [userName,setUserName]=React.useState('');
     const [wallet,setWallet]=React.useState(0);
@@ -56,8 +57,8 @@ export default function AppointmentCheckout() {
           );
     }
     useEffect(() => {
-        getAppointment();
-    }, [])
+               getAppointment();
+            }, [])
     const handlePayment = async () => {
       try {
         console.log(famId);
@@ -90,8 +91,8 @@ export default function AppointmentCheckout() {
               const url = response.data.url;
               window.location = url;
             }else{
-              alert('Successfull payment');
-              window.location.href = `/Health-Plus/appointments`;
+             alert('Successfull payment');
+              window.location.href = `/Health-Plus/patientHome`;
   
             }
             
@@ -106,11 +107,13 @@ export default function AppointmentCheckout() {
         }
     };
   return (
+    <div>
+      <PatientNavBar/>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
     <Card sx={{ minWidth: 275, width:'50%' }}>
-      <CardContent>
-       
+                <CardContent>
+
         <Typography variant="h5" component="div">
          Book Appointment Details
         </Typography>
@@ -124,7 +127,7 @@ export default function AppointmentCheckout() {
          With Doctor: {docName}
         </Typography>
         <Typography variant="h6" component="div">
-         On: {date.substring(0,10)}
+         On: {date?.substring(0,10)}
         </Typography>
         <br/>
         <FormControl style={{width:'100%',textAlign:'left'}}>
@@ -152,14 +155,15 @@ export default function AppointmentCheckout() {
                 )}
             </RadioGroup>
         </FormControl>
-      </CardContent>
+        </CardContent>
       
       <CardActions>
         <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
         onClick={handlePayment}
         >Proceed</Button>
       </CardActions>
-    </Card>
+            </Card>
+    </div>
     </div>
   );
 }

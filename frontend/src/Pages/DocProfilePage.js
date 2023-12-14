@@ -15,75 +15,90 @@ import PaidIcon from '@mui/icons-material/Paid';
 import ViewDocProfile from '../components/DocProfileInfoComponent';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ViewDocTransactions from '../components/DocTransactions';
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { DoctorNavBar } from '../components/doctorNavBar.jsx';
 
 
 const drawerWidth = 260;
 
 function ResponsiveDrawer(props) {
-const [show, setShow] = useState(0);
+  const { id } = useParams();
 
+  const [show, setShow] = useState(id);
 
+  console.log(id);
+
+  const navigate = useNavigate();
+
+  function goToTab(id) {
+    setShow(id);
+    navigate(`/viewDocProfile/${id}`);
+  }
 
   const drawer = (
     <div>
       <Toolbar />
-      
+
       <List>
-      <ListItem key='photo' disablePadding>
-            
-             
-            <div style={{ textAlign: "center" , paddingLeft:'25px'}}>
-                        <img src={profileImage} width='200'   alt="Image description" />
-                    </div>
-            
-          </ListItem>
-          <br></br>
-          <Divider />
-        
+        <ListItem key='photo' disablePadding>
 
-          <ListItem key='profile' disablePadding>
-            <ListItemButton  onClick={() => setShow(0)}>
-              <ListItemIcon>
-               <AccountCircleIcon/>
-              </ListItemIcon>
-              <ListItemText primary='Profile' />
-            </ListItemButton>
-          </ListItem>
 
-          <ListItem key='password' disablePadding>
-            <ListItemButton   onClick={() => setShow(1)}>
-              <ListItemIcon>
-               <PasswordIcon/>
-              </ListItemIcon>
-              <ListItemText primary='Password' />
-            </ListItemButton>
-          </ListItem>
-          <ListItem key='payment' disablePadding>
-            <ListItemButton   onClick={() => setShow(2)}>
-              <ListItemIcon>
-               <PaidIcon/>
-              </ListItemIcon>
-              <ListItemText primary='payment' />
-            </ListItemButton>
-          </ListItem>
-       
+          <div style={{ textAlign: "center", paddingLeft: '25px' }}>
+            <img src={profileImage} width='200' alt="Image description" />
+          </div>
+
+        </ListItem>
+        <br></br>
+        <Divider />
+
+
+        <ListItem key='profile' disablePadding>
+          <ListItemButton onClick={() => goToTab(0)}>
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary='Profile' />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem key='password' disablePadding>
+          <ListItemButton onClick={() => goToTab(1)}>
+            <ListItemIcon>
+              <PasswordIcon />
+            </ListItemIcon>
+            <ListItemText primary='Password' />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key='payment' disablePadding>
+          <ListItemButton onClick={() => goToTab(2)}>
+            <ListItemIcon>
+              <PaidIcon />
+            </ListItemIcon>
+            <ListItemText primary='payment' />
+          </ListItemButton>
+        </ListItem>
+
       </List>
       <Divider />
-      
+
     </div>
   );
 
   // Remove this const when copying and pasting into your project.
 
   return (
-    <Box sx={{ display: 'flex'}}>
-             <Box
-        position="fixed"
-        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
-      >
-       
-         {show==0? <ViewDocProfile/>:show==1?<ChangePasswordForm/>:<ViewDocTransactions/>}
-      </Box>
+    require("../Styles/ViewMyInfo.css"),
+    <>
+      <DoctorNavBar />
+      <Box sx={{ display: 'flex' }}>
+        <Box
+          position="fixed"
+          sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, height: '100vh', overflow: 'auto' }}
+        >
+
+          {show == 0 ? <ViewDocProfile /> : show == 1 ? <ChangePasswordForm /> : <ViewDocTransactions />}
+        </Box>
         <Drawer
           variant="permanent"
           sx={{
@@ -94,8 +109,9 @@ const [show, setShow] = useState(0);
         >
           {drawer}
         </Drawer>
-        
-    </Box>
+
+      </Box>
+    </>
   );
 }
 

@@ -14,6 +14,8 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { useEffect } from 'react';
 import React, { useState } from 'react';
+import { PatientNavBar } from '../components/PatientNavBar';
+
 
 // Your component code here
 
@@ -29,7 +31,7 @@ const bull = (
 export default function PackageCheckout() {
     const params = new URLSearchParams(window.location.search);
     const packageId = params.get('packageId');
-   
+    
     const famId=params.get('famMemId');
     const [fees,setFees]=React.useState(0)
     const [packageName,setpackageName]=React.useState('');
@@ -52,6 +54,7 @@ export default function PackageCheckout() {
                 
               const InfoData = res.data.result;
               console.log(InfoData);
+              
               setFees(InfoData.fees);
               setpackageName(InfoData.healthPackage);
                 setUserName(InfoData.user);
@@ -61,7 +64,7 @@ export default function PackageCheckout() {
           );
     }
     useEffect(() => {
-        getPackage();
+                  getPackage();
     }, [])
     const handlePayment = async () => {
       try {
@@ -94,7 +97,7 @@ export default function PackageCheckout() {
               window.location = url;
             }else{
               alert('Successfull payment');
-              window.location.href = `/Health-Plus/packages`;
+              window.location.href = `/Health-Plus/patientHome`;
   
             }
           } else {
@@ -109,10 +112,13 @@ export default function PackageCheckout() {
       }
     };
   return (
+    <div>
+        <PatientNavBar/>
+  
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
     <Card sx={{ minWidth: 275, width:'50%' }}>
-      <CardContent>
+            <CardContent>
        
         <Typography variant="h5" component="div">
          Package Subscribition Details
@@ -154,13 +160,14 @@ export default function PackageCheckout() {
             </RadioGroup>
         </FormControl>
       </CardContent>
-      
+
       <CardActions>
-        <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
-        onClick={handlePayment}
-        >Proceed</Button>
-      </CardActions>
-    </Card>
+      <Button size="small" variant='dark' style={{marginLeft:'70%',width:'20%'}}
+      onClick={handlePayment}
+      >Proceed</Button>
+    </CardActions>
+        </Card>
+    </div>
     </div>
   );
 }

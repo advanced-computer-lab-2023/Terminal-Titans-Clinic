@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Register from "./Pages/Register";
@@ -25,6 +25,7 @@ import ViewDocApplications from "./components/ViewDocApplications";
 import AdminPharmPage from "./Pages/AdminPharmPage";
 import PharmacistScreen from "./Pages/pharmacistScreen";
 import PatientList from "./Pages/viewMyPatientsList";
+import DoctorsList from "./Pages/viewDoctors"
 import ViewPatInfo from "./Pages/viewMyPatientInfo";
 import ViewDocProfile from "./Pages/DocProfilePage";
 import ViewMyProfile from "./Pages/viewMyProfile";
@@ -36,6 +37,9 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
+import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
+import ReschduleDoc from "./Pages/rescheduleDoc.js";
+import FollowUpDoc from "./Pages/followUpDoc.js";import Notification from "./components/Notification";
 import AdminDocProfile from "./components/adminViewDocReq";
 import CreateAdmin from "./components/CreateAdmin";
 import ManagePackages from "./components/managePackages";
@@ -52,23 +56,16 @@ import ShowAvailableSlots from "./Pages/ShowAvailableSlots";
 import NewMed from "./Pages/newmedPage";
 import AvailableMeds from './Pages/AvailableMeds';
 import MedPharm from './Pages/MedPagePharm.js'
+import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
+import Reschdule from "./Pages/Reschedule.js";
+import FollowUp from "./Pages/FollowUp.js";
+
 
 function App() {
 
-  const signoutButtonFunc = () => {
-    sessionStorage.removeItem('token');
-    window.location.href = '/Health-Plus';
-  }
-
   return (
     <div className="App">
-      {
-        window.location.pathname == '/Health-Plus' || window.location.pathname == '/Health-Plus/registerPatient' || window.location.pathname == '/Health-Plus/registerDoctor' ?
-          <></>
-          : <div className="signoutButton">
-            <Button variant="danger" onClick={signoutButtonFunc}>Sign Out</Button>
-          </div>
-      }
+
 
       <Router basename="/Health-Plus">
 
@@ -88,17 +85,17 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />
           <Route path="/doctorHome" element={<Doctor />} />
+          <Route path="/notifications" element={<Notification />} />
 
           {/* PHARMACIST ROUTES */}
-          <Route path="/pharmacistHome" element={<PharmacistScreen/>}/>
-          <Route path="/NewMed" element={<NewMed/>}/>
-          <Route path="/AvailableMeds" element={<AvailableMeds/>}/>
-          <Route path="/medicinepharm" element={<MedPharm/>}/>
+          <Route path="/pharmacistHome" element={<PharmacistScreen />} />
+          <Route path="/NewMed" element={<NewMed />} />
+          <Route path="/AvailableMeds" element={<AvailableMeds />} />
+          <Route path="/medicinepharm" element={<MedPharm />} />
 
-          
+
           <Route path="/bookAppointments" element={<BookAppointments />} />
           <Route path="/viewAppointments" element={<ViewAppointments />} />
-          <Route path="/docViewAppointments" element={<DocViewAppointments />} />
           <Route path="/changePassword" element={<ChangePasswordForm />} />
           <Route path="/healthPackages" element={<HealthPackages />} />
           <Route path="/payment" element={<Payment />} />
@@ -107,20 +104,30 @@ function App() {
           <Route path="/EmploymentContract" element={<EmploymentContract />} />
           {/* <Route path="/viewRegDocDoc" element={<ViewRegDocDoc />} /> */}
           <Route path="/adminPharm" element={<AdminPharmPage />} />
-          <Route path="/viewMyPatientsList" element={<PatientList />} />
-          <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />
-          <Route path="/viewDocProfile" element={<ViewDocProfile />} />
-          <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
           <Route path="/meeting" element={<Room />} />
-          <Route path="/chat/:token" element={<Chat/>} />
+          <Route path="/chat/:token" element={<Chat />} />
           <Route path="/" element={<SignIn />} />
-          <Route path="/viewMyProfile" element={<ViewMyProfile />} />
-          <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
+          <Route path="/viewMyProfile/:id" element={<ViewMyProfile />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
           <Route path="/patientRecord" element={<PatientRecord />} />
           <Route path="/showAvailableSlots" element={<ShowAvailableSlots />} />
           <Route path="/PackageCheckout" element={<PackageCheckout />} />
           <Route path="/FamilyMember" element={<FamilyMember />} />
+          <Route path="/viewDoctors" element={<DoctorsList />} />
+          <Route path="/ViewDoctorInfo" element={<ViewDoctorInfo />} />
+          <Route path="/reschedule" element={<Reschdule />} />
+          <Route path="/followUp" element={<FollowUp />} />
+      {/* doctor Routes */}
+          <Route path="/docViewAppointments" element={<DocViewAppointments />} />
+          <Route path="/EmploymentContract" element={<EmploymentContract />} />
+          <Route path="/viewMyPatientsList" element={<PatientList />} />
+          <Route path="/viewMyPatientInfo" element={<ViewPatInfo />} />
+          <Route path="/viewDocProfile/:id" element={<ViewDocProfile />} />
+          <Route path='/docViewAppointmentsDetails' element={<DocAppointmentDetails />} />
+          <Route path="/addAvailableSlots" element={<AddAvailableSlots />} />
+          <Route path="/acceptRejectFollowUp" element={<AcceptRejectFollowUp />} />
+          <Route path="/reschduleDoc" element={<ReschduleDoc />} />
+          <Route path="/followUpDoc" element={<FollowUpDoc />} />
 
         </Routes>
       </Router>

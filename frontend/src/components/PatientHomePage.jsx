@@ -15,15 +15,16 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import Container from '@mui/material/Container';
+import {PatientNavBar} from './PatientNavBar.jsx';
 
 
 const tiers = [
   {
-    title: 'Prescriptions',
+    title: 'Doctors',
     description: [
-      'Explore and manage your prescriptions conveniently through this part.',
-      'Order new prescriptions, view prescription history, and more.'
-    ],
+      'View our  skilled doctors and their specialized fields.',
+       'Book appointments effortlessly at competitive prices.',  
+          ],
     buttonText: 'Visit',
     buttonVariant: 'contained',
   },
@@ -53,7 +54,7 @@ function getLinkForTier(title) {
     case 'HealthPackages':
       return '/Health-Plus/packageSubscribtion';
     case 'Appointments':
-      return '/Health-Plus/bookAppointments';
+      return '/Health-Plus/viewAppointments';
     default:
       return '/';
   }
@@ -64,53 +65,10 @@ function getLinkForTier(title) {
 const defaultTheme = createTheme();
 
 export default function Pricing() {
+  
   return (
     <ThemeProvider theme={defaultTheme}>
-      <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
-      <CssBaseline />
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-      >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Health Plus+
-          </Typography>
-          <nav>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Visit pharmacy
-            </Link>
-            <Link
-              variant="button"
-              color="text.primary"
-              href="/Health-Plus/viewMyProfile"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Other Informations
-            </Link>
-            <Link
-              variant="button"
-              color="text.primary"
-              // hena link el chatting
-              href="#"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Support
-            </Link>
-          </nav>
-          {/* mehtag a7ot hena el link ely hywadini 3ala el home page tani */}
-          <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}> 
-            Home
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <PatientNavBar />
       {/* Hero unit */}
       <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography
@@ -120,75 +78,74 @@ export default function Pricing() {
           color="text.primary"
           gutterBottom
         >
-              Your Patient Dashboard
+          Your Patient Dashboard
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" component="p">
-        Manage your health effectively with our patient dashboard.
-        Access your prescriptions, health packages, and appointments in one place. 
-        </Typography>
+        View our  skilled doctors and their specialized fields. Book appointments effortlessly at competitive prices.  
+              </Typography>
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
         <Grid container spacing={5} alignItems="flex-end">
-              {tiers.map((tier) => (
-        <Grid
-          item
-          key={tier.title}
-          xs={12}
-          md={4}
-        >
-          <Card>
-            <CardHeader
-              title={tier.title}
-              subheader={tier.subheader}
-              titleTypographyProps={{ align: 'center' }}
-              subheaderTypographyProps={{
-                align: 'center',
-              }}
-              sx={{
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? theme.palette.grey[200]
-                    : theme.palette.grey[700],
-              }}
-            />
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'baseline',
-                  mb: 2,
-                }}
-              />
-              <ul>
-                {tier.description.map((line) => (
-                  <Typography
-                    component="li"
-                    variant="subtitle1"
-                    align="center"
-                    key={line}
+          {tiers.map((tier) => (
+            <Grid
+              item
+              key={tier.title}
+              xs={12}
+              md={4}
+            >
+              <Card>
+                <CardHeader
+                  title={tier.title}
+                  subheader={tier.subheader}
+                  titleTypographyProps={{ align: 'center' }}
+                  subheaderTypographyProps={{
+                    align: 'center',
+                  }}
+                  sx={{
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'light'
+                        ? theme.palette.grey[200]
+                        : theme.palette.grey[700],
+                  }}
+                />
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'baseline',
+                      mb: 2,
+                    }}
+                  />
+                  <ul>
+                    {tier.description.map((line) => (
+                      <Typography
+                        component="li"
+                        variant="subtitle1"
+                        align="center"
+                        key={line}
+                      >
+                        {line}
+                      </Typography>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    fullWidth
+                    variant={tier.buttonVariant}
                   >
-                    {line}
-                  </Typography>
-                ))}
-              </ul>
-            </CardContent>
-            <CardActions>
-              <Button
-                fullWidth
-                variant={tier.buttonVariant}
-              >
-              <Link
-                href={getLinkForTier(tier.title)} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                {tier.buttonText}
-               </Link>
-              </Button>
-            </CardActions>
-           </Card>
-          </Grid>
+                    <Link
+                      href={getLinkForTier(tier.title)}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      {tier.buttonText}
+                    </Link>
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
 
         </Grid>

@@ -22,6 +22,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 
 function createData(
   patientId,
@@ -52,6 +54,7 @@ function createData(
 function Row(props) {
   const { row, fetchHealthPackageData } = props;
   const [open, setOpen] = React.useState(false);
+  const [show, setShow] = useState(false);
 
   const [openDialogue, setOpenDialogue] = React.useState(false);
   const [patientSelected, setPatientSelected] = React.useState('');
@@ -78,6 +81,7 @@ function Row(props) {
       },
     }).then((response) => {
       console.log(response);
+      setShow(true);
       fetchHealthPackageData();
     }).catch((error) => {
       alert(error.response.data.message)
@@ -87,6 +91,18 @@ function Row(props) {
 
   return (
     <React.Fragment>
+      <ToastContainer
+        className="p-3"
+        position='top-end'
+        style={{ zIndex: 1 }}
+      >
+        <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
+          <Toast.Header closeButton={false}>
+            <strong className="me-auto">Successfull</strong>
+          </Toast.Header>
+          <Toast.Body>Cancelled Health Package Successfully</Toast.Body>
+        </Toast>
+      </ToastContainer>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
           <IconButton
@@ -97,17 +113,17 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
+        <TableCell component="th" scope="row" align="center">
           {row.name}
         </TableCell>
         {row.packageType ? (
           <React.Fragment>
-            <TableCell align="right">{row.packageType}</TableCell>
-            <TableCell align="right">{row.subscriptionFee}</TableCell>
-            <TableCell align="right">{row.medicineDiscount}</TableCell>
-            <TableCell align="right">{row.familyDiscount}</TableCell>
-            <TableCell align="right">{row.doctorDiscount}</TableCell>
-            <TableCell align="right">
+            <TableCell align="center">{row.packageType}</TableCell>
+            <TableCell align="center">{row.subscriptionFee}</TableCell>
+            <TableCell align="center">{row.medicineDiscount}</TableCell>
+            <TableCell align="center">{row.familyDiscount}</TableCell>
+            <TableCell align="center">{row.doctorDiscount}</TableCell>
+            <TableCell align="center">
               <Button variant="outlined" startIcon={<CancelIcon />} color="error" onClick={() => handleClickOpen(row.patientId)}>
                 Cancel
               </Button>
@@ -125,7 +141,7 @@ function Row(props) {
                 History
               </Typography>
               {
-                row.history.length !== 0 ? (
+                row.history?.length !== 0 ? (
                   <Table size="small" aria-label="purchases">
                     <TableHead>
                       <TableRow>
@@ -194,9 +210,18 @@ export default function CollapsibleTable() {
       const result = responseViewSubs.data.result;
       const resultStatus = responseViewSubsStatus.data.result;
       let temp = [];
-      temp.push(createData(result.myUser.PatientId, result.myUser.Name, result.myUser.packageType, result.myUser.subsriptionFeesInEGP, result.myUser.medicinDiscountInPercentage, result.myUser.familyDiscountInPercentage, result.myUser.doctorDiscountInPercentage, resultStatus.myUser));
+      temp.push(createData(result.myUser.PatientId, result.myUser.Name,
+        result.myUser?.healthPackage?.packageType, result.myUser?.healthPackage?.subsriptionFeesInEGP,
+        result.myUser?.healthPackage?.medicinDiscountInPercentage,
+        result.myUser?.healthPackage?.familyDiscountInPercentage,
+        result.myUser?.healthPackage?.doctorDiscountInPercentage, resultStatus.myUser));
+
+      console.log(resultStatus?.familyMembers);
       for (let i = 0; i < result.familyMembers.length; i++) {
-        temp.push(createData(result.familyMembers[i].PatientId, result.familyMembers[i].Name, result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP, result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage, result.familyMembers[i].doctorDiscountInPercentage, resultStatus.familyMembers[i]));
+        temp.push(createData(result.familyMembers[i].PatientId, result.familyMembers[i].Name,
+          result.familyMembers[i].packageType, result.familyMembers[i].subsriptionFeesInEGP,
+          result.familyMembers[i].medicinDiscountInPercentage, result.familyMembers[i].familyDiscountInPercentage,
+          result.familyMembers[i].doctorDiscountInPercentage, resultStatus?.familyMembers));
       }
       setRows(temp);
       // setPatientHealthPackageData(result.myUser);
@@ -214,13 +239,13 @@ export default function CollapsibleTable() {
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Patient Name</TableCell>
-            <TableCell align="right">Package Type</TableCell>
-            <TableCell align="right">Subscription Fee</TableCell>
-            <TableCell align="right">Medicine Discount</TableCell>
-            <TableCell align="right">Family Discount</TableCell>
-            <TableCell align="right">Doctor Discount</TableCell>
-            <TableCell align="right">Cancel Subscription</TableCell>
+            <TableCell align="center">Patient Name</TableCell>
+            <TableCell align="center">Package Type</TableCell>
+            <TableCell align="center">Subscription Fee</TableCell>
+            <TableCell align="center">Medicine Discount</TableCell>
+            <TableCell align="center">Family Discount</TableCell>
+            <TableCell align="center">Doctor Discount</TableCell>
+            <TableCell align="center">Cancel Subscription</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

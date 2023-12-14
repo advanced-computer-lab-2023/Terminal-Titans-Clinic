@@ -6,6 +6,9 @@ import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
+import {DoctorNavBar} from '../components/doctorNavBar';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Form from 'react-bootstrap/Form';
 
 
 // ----------------------------------------------------------------------
@@ -60,18 +63,40 @@ const getPatientName= async () => {
 
     return (
         <div>
+            <DoctorNavBar/>
     <h1>Patients List</h1>
-    <TextField id="patName" label="Patient's Name" variant="outlined" size="small" sx={{ paddingRight: 1 }}
+    {/* <TextField id="patName" label="Patient's Name" variant="outlined" size="small" sx={{ paddingRight: 1 }}
     value={name}
     onChange={(e) => setName(e.target.value)}/>
    
-    <Button variant="dark"  onClick={(event) => { getPatientName() }} size="sm">Search</Button>
-    
+    <Button variant="dark"  onClick={(event) => { getPatientName() }} size="sm">Search</Button> */}
+    <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
+    <InputGroup className="mb-1" style={{width:'30%'}}>
+        
+        <Form.Control
+          id="searchInput"
+          type="search"
+          placeholder="Search"
+          aria-label="Text input for search"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <Button
+          variant="outline-secondary"
+          title="Search"
+          id="segmented-button-dropdown-1"
+          onClick={(event) => { getPatientName() }} 
+        >
+          Search
+         
+        </Button>
+       </InputGroup>
     <FormControlLabel
         control={<Checkbox checked={checked} onChange={handleChange} />} 
         label="Upcoming"
         sx={{ marginLeft: 100 }}
     />
+    </div>
 <br></br>
 <br></br>
         <Table striped bordered hover>

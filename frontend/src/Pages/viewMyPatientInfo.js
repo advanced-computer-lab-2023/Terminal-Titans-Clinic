@@ -17,6 +17,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import profileImage from "../Assets/profile.png";
+import {DoctorNavBar} from '../components/doctorNavBar';
 
 
 
@@ -29,7 +30,7 @@ function ViewPatInfo() {
 
     const drawer = (
       <div>
-        <Toolbar />
+
         
         <List>
         <ListItem key='photo' disablePadding>
@@ -76,6 +77,8 @@ function ViewPatInfo() {
       </div>
     );
     return (
+      <div>
+        <DoctorNavBar/>
         <Box sx={{ display: 'flex'}}>
              <Box
         position="fixed"
@@ -90,13 +93,14 @@ function ViewPatInfo() {
             display: { xs: 'none', sm: 'block' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
+          style={{position:'relative'}}
           open
         >
           {drawer}
         </Drawer>
         
     </Box>
-       
+       </div>
         
     );
 }

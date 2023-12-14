@@ -156,6 +156,7 @@ function Room() {
                 signalData: data,
                 from: me,
                 name: username,
+                video:videoParam
             });
         });
 
@@ -177,6 +178,12 @@ function Room() {
         });
 
         connectionRef.current = peer;
+
+        socket.on('callRejected', () => {
+            console.log('callRejected');
+            setCallEnded(true);
+            window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
+        })
     };
 
     const answerCall = (stream) => {
@@ -217,8 +224,8 @@ function Room() {
             connectionRef.current.destroy()
             socket.emit("endCall", { to: callerUser })
             // href to chat
-            window.location.href = "/chat";
         }
+        window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
     }
 
     const closeVideo = () => {

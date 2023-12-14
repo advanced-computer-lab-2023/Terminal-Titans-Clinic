@@ -1,0 +1,15 @@
+.iconsHover{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+}
+
+.buttonGroup{
+    color: black;
+}
+
+.css-hyum1k-MuiToolbar-root{
+    padding: 0 !important;
+}
