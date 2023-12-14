@@ -161,29 +161,31 @@ const AddPresc = () => {
         <h2 className="addPresc_title">Meds</h2> */}
         <div className="addPresc_meds">
           <div style={{ display: "flex" }}>
-            <div style={{ width: " 20%" }}>
-              <div className="cartscreen">
-              {/* {prescItems && prescItems.map((item) => (
-                <PrescItem key={item.med._id} item={item} />
-              ))} */}
-              <h2>Prescription Medicines</h2>
-              {prescItems.map((item) => (
-                <PrescItem key={item.med._id} item={item} />
-              ))}
-              <div>
-                <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile/${patientId}`}>Back to Patient Profile</button>
+            <div style={{ width: " 30%" }}>
+              <div style={{ marginRight: "4rem"}}>
+                <div className="cartscreen2">
+                  {/* {prescItems && prescItems.map((item) => (
+                    <PrescItem key={item.med._id} item={item} />
+                  ))} */}
+                  <h2>Prescription Medicines</h2>
+                  {prescItems.map((item) => (
+                    <PrescItem key={item.med._id} item={item}  />
+                  ))}
+                  <div>
+                  </div>
+                  <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile/${patientId}`}>Back to Patient Profile</button>
+                </div>
               </div>
-          </div>
             </div>
             <div style={{ width: "80%" }}>
-              <div style={{}}>
               <div className="cartscreen">
-                {Array.isArray(allMedicines) ? (
-                  allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
-                ) : (
-                  <p>Error: Medicines data is not in the expected format.</p>
-                )}
-              </div>
+                <div style={{gridTemplateColumns: "repeat(3, 1fr)"}}>
+                  {Array.isArray(allMedicines) ? (
+                    allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
+                  ) : (
+                    <p>Error: Medicines data is not in the expected format.</p>
+                  )}
+                </div>
               </div> 
             </div>
           </div>         

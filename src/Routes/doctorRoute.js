@@ -1725,18 +1725,19 @@ router.post('/addOrDeleteMedFromPresc',protect,async(req,res)=>{
             //I want to check if the medicineId is already in the items array, that contains sets of medicineId and dosage, in the prescription model
             //if it is, then I want to update the dosage of this medicineId
             //if it is not, then I want to add this medicineId to the items array
-            items=prescription.items;
             let f = false;
-            for (x in items){
-                if (items[x].medicineId == medicineId){
-                    f = true;
-                    
-                    let curr = items[x].dosage;
-                    items[x].dosage = curr + dosage;
-                    await prescription.save();
-                    break;
-                }   
-            }
+            let items=prescription.items;
+            if (items.length!=0)
+                for (x in items){
+                    if (items[x].medicineId == medicineId){
+                        f = true;
+
+                        let curr = items[x].dosage;
+                        items[x].dosage = curr + dosage;
+                        await prescription.save();
+                        break;
+                    }   
+                }
             prescription.items.push({medicineId:medicineId,dosage:dosage});
         }
         else if(action=="delete"){
@@ -1840,8 +1841,9 @@ router.get('/generatePdf/:id', protect,async(req,res)=>{
 
 //requirement 54
 //add/update dosage for each medicine added to the prescription
-router.post('/updateDosage',protect,async(req,res)=>{
+router.put('/updateDosage',protect,async(req,res)=>{
     try{
+        console.log()
         const exists = await doctorModel.findById(req.user);
         if (!exists) {
             return res.status(500).json({
