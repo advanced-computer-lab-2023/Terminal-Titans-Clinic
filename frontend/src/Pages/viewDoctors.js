@@ -51,6 +51,7 @@ console.log(error);
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
     console.log("ouuutttt");
+
     if (response.status === 200) {
       console.log("no errrrooorrrrr");
       const doctors = response.data.Result;
@@ -156,6 +157,7 @@ console.log(error);
           ))}
         </tbody>
       </Table>
+      
     </div>
   );
 };

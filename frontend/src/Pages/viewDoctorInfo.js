@@ -25,18 +25,7 @@ function ViewDoctorInfo() {
  
 return <ViewDocInfo/>;
 
-return (
-        <Box sx={{ display: 'flex'}}>
-             <Box 
-        position="fixed"
-        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`,height:'100vh',overflow:'auto' }}
-      >                                         
-        {<viewDocInfo/>} 
-      </Box>
 
-        
-    </Box>             
-    );
 
         }
     export default ViewDoctorInfo;
