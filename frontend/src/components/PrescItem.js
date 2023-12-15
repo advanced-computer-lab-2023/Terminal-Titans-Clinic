@@ -1,8 +1,11 @@
 
 import "../Styles/PrescItem.css"
+import "../Styles/LoginForm.css";
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function arrayBufferToBase64(buffer) {
   let binary = '';
@@ -47,7 +50,7 @@ const PrescItem = ({ item }) => {
   const handleQuantityChange = async (newQuantity) => {
     try {
       if (newQuantity==0){
-        await axios.delete(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:prescId,medicineId:item.med._id,action:"add"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
+        await axios.delete(`http://localhost:8000/doctor/addOrDeleteMedFromPresc`, { prescriptionId:prescId,medicineId:item.med._id,action:"delete"},{headers:{Authorization:'Bearer '+sessionStorage.getItem("token")}});
         window.location.reload();
       }
       else{
@@ -74,14 +77,20 @@ const PrescItem = ({ item }) => {
 
   return (
     <div className="prescitem">
-      <div className="presc_image">
+      {/* <div className="presc_image">
       {medicine.Picture && medicine.Picture.data && medicine.Picture.contentType && (
                         <img
                             src={`data:${medicine.Picture.contentType};base64,${arrayBufferToBase64(medicine.Picture.data.data)}`}
                             alt={medicine.Name}
                         />
                     )}
-      </div>
+      </div> */}
+     
+      {/* <Link to={`/medicine/${item.med._id}`} className="presc_name">
+        <p>{medicine.Name}</p>
+      </Link> */}
+      
+       <input type="text"  style={{width:'100px', border:"0px"}} value={medicine.Name} readOnly />
       <select
         className="presc_select"
         value={quantity}
@@ -93,13 +102,11 @@ const PrescItem = ({ item }) => {
           </option>
         ))}
       </select>
-      <Link to={`/medicine/${item.med._id}`} className="presc_name">
-        <p>{medicine.Name}</p>
-      </Link>
       {/* <p className="Presc_dosage">${item.dosage}</p> */}
       <div>
         <div style={{ cursor: "pointer" }}>
-          <button className="presc_del" onClick={handleDeletePrescItem}>DELETE
+          <button className="presc_del" onClick={handleDeletePrescItem} style={{padding:"5px 10px"}}>
+            <DeleteIcon />
           </button>
         </div>
       </div>

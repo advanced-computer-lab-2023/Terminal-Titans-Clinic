@@ -102,14 +102,14 @@ const DoctorHome = () => {
                   />
                   <CardContent>
                     <Typography gutterBottom variant="h5" component="div" className='text-center'>
-                      Appointments
+                      Add Available Time Slots
                     </Typography>
                     <Typography variant="body2" color="text.secondary" className='text-center'>
-                      Add your available time slots and view your upcoming appointments.
+                      Add your available time slots for future appointments.
                     </Typography>
                   </CardContent>
                   <CardActions className=''>
-                    <Button size="small" className='w-100' onClick={addAvailableTimeSlots}>View Appointments</Button>
+                    <Button size="small" className='w-100' onClick={addAvailableTimeSlots}>Add Available Time Slots</Button>
                   </CardActions>
                 </Card>
               </Grid>

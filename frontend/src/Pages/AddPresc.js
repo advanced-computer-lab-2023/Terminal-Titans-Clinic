@@ -15,7 +15,14 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import SplitButton from 'react-bootstrap/SplitButton';
 import { Link } from 'react-router-dom';
 import PrescItem from '../components/PrescItem';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
 
+import Toolbar from '@mui/material/Toolbar';
+import { DoctorNavBar } from "../components/doctorNavBar";
+
+const drawerWidth = 300;
 const AddPresc = () => {
   const params = new URLSearchParams(window.location.search);
   const prescId = params.get('Id');
@@ -27,6 +34,7 @@ const AddPresc = () => {
   const [selectedDosage, setSelectedDosage] = useState(1);
   const [patientId, setPatientId] = useState(null);
   const [medicines, setMedicines] = useState([]);
+  const [patName, setPatName] = useState('');
   
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -68,7 +76,7 @@ const AddPresc = () => {
       if (response.status === 200) {
         console.log('Successfully fetched presc.');
         console.log(response.data);
-        setPatientId(response.data.Result);
+        setPatientId(response.data.Result._id);
         console.log(patientId);
       } else {
         console.error('Failed to fetch patient. Unexpected response:', response);
@@ -86,6 +94,7 @@ const AddPresc = () => {
         console.log('Successfully fetched patient.');
         console.log(response.data);
         setPatientId(response.data.patient._id);
+        setPatName(response.data.patient.Name);
       } else {
         console.error('Failed to fetch patient. Unexpected response:', response);
       }
@@ -150,62 +159,83 @@ const AddPresc = () => {
     //return () => clearInterval(intervalId);
   }, []); // Runs once on mount
 
-  return (
+
+
+
+  
+  const drawer = (
+    console.log(prescItems),
     <div>
-      {errorMessage && (
+      <Toolbar />
+      <List>
+      <div   style={{ width: "100% ",backgroundColor:'black', padding:'3%',marginBottom:'5px' }}>
+           
+           <h3 style={{color:'white', textAlign:'center'}}>{patName}'s Prescription </h3>
+           </div>
+     
+      <input type="text" style={{ width: '150px', border: "0px", fontWeight: 'bold' }} value="   medicine" readOnly />
+      <input type="text" style={{ width: '60px', border: "0px", fontWeight: 'bold' }} value="#" readOnly />
+      <input type="text"  style={{width:'80px', border:"0px", fontWeight: 'bold'}} value="delete"readOnly />
+      <Divider />
+                   {prescItems.map((item) => (
+                    <>
+                    <PrescItem key={item.med._id} item={item}  />
+                    <Divider />
+                    </>
+                  ))}
+                
+                <Button variant="dark" style={{ width: '90%',marginLeft:'5%',marginTop:'4%' }} onClick={() => window.location.href=`/Health-Plus/viewMyPatientInfo?Id=${patientId}&presId=${prescId}`} >
+Save Prescription</Button>
+                  {/* <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile/${patientId}`}>Back to Patient Profile</button> */}
+               
+       
+
+      </List>
+      
+
+    </div>
+  );
+  return (
+    
+      
+    
+require("../Styles/ViewMyInfo.css"),
+<>
+{errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
         </div>
       )}
-      {/* <div className="addPresc" style={{ marginLeft: '7%' }}>
-        <h2 className="addPresc_title">Meds</h2> */}
-        <div className="addPresc_meds">
-          <div style={{ display: "flex" }}>
-            <div style={{ width: " 30%" }}>
-              <div style={{ marginRight: "4rem"}}>
-                <div className="cartscreen2">
-                  {/* {prescItems && prescItems.map((item) => (
-                    <PrescItem key={item.med._id} item={item} />
-                  ))} */}
-                  <h2>Prescription Medicines</h2>
-                  {prescItems.map((item) => (
-                    <PrescItem key={item.med._id} item={item}  />
-                  ))}
-                  <div>
-                  </div>
-                  <button onClick={() => window.location.pathname = `../Pages/viewMyPatientProfile/${patientId}`}>Back to Patient Profile</button>
-                </div>
-              </div>
-            </div>
-            <div style={{ width: "80%" }}>
-              <div className="cartscreen">
-                <div style={{gridTemplateColumns: "repeat(3, 1fr)"}}>
-                  {Array.isArray(allMedicines) ? (
-                    allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
-                  ) : (
-                    <p>Error: Medicines data is not in the expected format.</p>
-                  )}
-                </div>
-              </div> 
-            </div>
-          </div>         
-        </div>
-      {/* </div> */}
-    </div>
+  <DoctorNavBar />
+  <Box sx={{ display: 'flex' }}>
 
+    <Box
+      position="fixed"
+      sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px`, height: '100vh', overflow: 'auto' }}
+    >
+      <div className="homescreen_meds">
+              {Array.isArray(allMedicines) ? (
+                allMedicines.map((medicine) => <Meds key={medicine.Name} medicines={[medicine]} />)
+              ) : (
+                <p>Error: Medicines data is not in the expected format.</p>
+              )}
+            </div>
+    </Box>
+    <Drawer
+      variant="permanent"
+      sx={{
+        display: { xs: 'none', sm: 'block' },
+        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+      }}
+      open
+    >
+      {drawer}
+    </Drawer>
+
+  </Box>
+</>
   );
 };
 
 export default AddPresc;
 
-function arrayBufferToBase64(buffer) {
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-
-  return btoa(binary);
-}

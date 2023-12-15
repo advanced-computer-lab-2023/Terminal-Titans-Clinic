@@ -45,6 +45,7 @@ const [allNames,setAllNames]=useState([]);
     const[enable,setEnable]=useState(false);
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('Id');
+    const presId = params.get('presId');
     const getPres = async () => {
       setEnable(false);
       const response = await axios.post(
@@ -57,9 +58,14 @@ const [allNames,setAllNames]=useState([]);
         console.log(data)
         setPrescriptions(data.final);
         if(data.final.length>0){
-          setCurPres(data.final[0]);
+          var ind=0;
+          if(presId){
+            setIndex(data.final.findIndex((pres)=>pres.id===presId))
+            ind=data.final.findIndex((pres)=>pres.id===presId)
+          }
+          setCurPres(data.final[ind]);
           
-        await axios.get(`http://localhost:8000/doctor/generatePdf/${data.final[0].id}`, {
+        await axios.get(`http://localhost:8000/doctor/generatePdf/${data.final[ind].id}`, {
           headers: {
             Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
           }
@@ -227,7 +233,7 @@ useEffect(()=>{
                 </DownloadIcon>
                   </Button>:null}
                
-                  <Button variant="dark" style={{ width: '45%' }} onClick={() => { }}>
+                  <Button variant="dark" style={{ width: '45%' }} onClick={() => {  window.location.href = `/Health-Plus/addPresc?Id=${currPresc.id}`; }}>
                     Edit Prescription
                   </Button>
                 </div>

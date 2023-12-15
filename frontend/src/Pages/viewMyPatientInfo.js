@@ -29,7 +29,13 @@ const drawerWidth = 260;
 function ViewPatInfo() {
     const [show, setShow] = useState(0);
 
-
+  const params = new URLSearchParams(window.location.search);
+  const presId = params.get('presId');
+ useEffect(() => {
+  if(presId){
+    setShow(3);
+  }
+}, [presId]);
 
     const drawer = (
       <div>

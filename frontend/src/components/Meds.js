@@ -14,7 +14,7 @@ const Meds = ({ medicines }) => {
   const params = new URLSearchParams(window.location.search);
   const prescId = params.get('Id');
   const [show, setShow] = useState(false);
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
   const [prescItems, updatePrescItems] = useState([]);
   // const [ selectedDosage, setSelectedDosage ] = useState(null);
   const handleClose = () => setShow(false);
@@ -154,21 +154,45 @@ const Meds = ({ medicines }) => {
                     </Button>
 
                   </div>
-                  <Modal show={show} onHide={handleClose}>
+                  <Modal  aria-labelledby="contained-modal-title-vcenter"
+    centered show={show} onHide={handleClose}>
                     <Modal.Header closeButton>
                       <Modal.Title>{medicine.Name}</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>{medicine.MedicalUse.join(' ')}</Modal.Body>
-                    <Modal.Footer>
-                      <FormLabel for="dosage">Dosage:</FormLabel>
-                      <NumberInput
-                        style={{ width: '80%' }}
+                    <Modal.Body>
+                    <h5>Medicine Details:</h5>
+                      {medicine.MedicalUse.join(' ')}
+                    <div style={{ marginTop:"10%"}}>
+                    <h5>Please enter the desired dosage:</h5>
+
+                    <div style={{display:"flex", marginTop:"0%"}}>
+                  
+                    <input type="text"  style={{width:'100px', border:"0px"}} value="Dosage:" readOnly />
+                   
+                      {/* <NumberInput
+                        style={{ width: '50%' }}
                         aria-label="Demo number input"
                         placeholder="Enter Dosage…"
                         value={value}
                         onChange={(event, val) => setValue(val)}
                         min={1} max={99}
-                      />
+                      /> */}
+                         <select
+        className="presc_select"
+        value={value}
+        onChange={(e) => setValue(value)}
+      >
+        {[...Array(20).keys()].map((option) => (
+          <option key={option + 1} value={option + 1}>
+            {option + 1}
+          </option>
+        ))}
+      </select>
+      </div>
+                      </div>
+                      </Modal.Body>
+                    <Modal.Footer>
+                     
                       <Button variant="primary" onClick={() => { handleAddToprescription(medicine, value) }}>
                         Add to Prescription
                       </Button>

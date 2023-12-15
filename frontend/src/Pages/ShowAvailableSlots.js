@@ -20,6 +20,8 @@ import Drawer from '@mui/material/Drawer';
 import { get } from 'mongoose';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import Box from '@mui/material/Box';
+import {PatientNavBar} from '../components/PatientNavBar.jsx';
+
 
 //not finished yet
 export default function ShowAvailableSlots() {
@@ -80,14 +82,13 @@ export default function ShowAvailableSlots() {
         var valDay=dateTemp.getDate();
         var valMonth=dateTemp.getMonth()+1;
         const valYear=dateTemp.getFullYear();
-        
-        const keyDate=valYear+"-"+valMonth+"-"+valDay;
-
         if(valMonth<10)
             valMonth="0"+valMonth;
         if(valDay<10)
             valDay="0"+valDay;
-     
+            const keyDate=valYear+"-"+valMonth+"-"+valDay;
+            console.log(keyDate);
+
         var allSlots = new Array(48).fill(false);
         if(freeSlots[keyDate]){
             freeSlots[keyDate].forEach(element => {
@@ -165,6 +166,7 @@ export default function ShowAvailableSlots() {
     }, []);
     return (
         <div>
+            <PatientNavBar/>
             <div style={{backgroundColor:'black'}}>
             <h1 style={{textAlign:'center',color:'white'}}>Book Appointment</h1>
             </div>
