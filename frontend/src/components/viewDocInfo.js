@@ -12,7 +12,7 @@ function ViewDocInfo() {
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('Id');
-    const [doctor, setdoctor] = useState({});
+    const [doctor, setDoctor] = useState({});
 
 const getDocInfo=async()=>{
     
@@ -24,9 +24,9 @@ const getDocInfo=async()=>{
         });
         console.log(response);
   
-        const selectedDoc = response.data.Result;
+        const selectedDoc = response.data.Result[0];
         console.log(selectedDoc);
-        setdoctor(selectedDoc);
+        setDoctor(selectedDoc);
         console.log("Selected Doctor:", selectedDoc);
       } catch (error) {
         console.error("Error fetching doctor info:", error);
