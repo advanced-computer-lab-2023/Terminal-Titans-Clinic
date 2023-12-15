@@ -3707,6 +3707,12 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
         }
         for(var x in prescription.items){
             const medicine = await MedicineModel.findById(prescription.items[x].medicineId);
+            var cartQuantity = prescription.items[x].dosage;
+            if(medicine.Quantity<cartQuantity){
+                cartQuantity=medicine.Quantity;
+            }
+            if(cartQuantity==0)
+                continue;
             const cart =new CartItem({
                 userId:req.user._id,
                 medicineId:prescription.items[x].medicineId,
