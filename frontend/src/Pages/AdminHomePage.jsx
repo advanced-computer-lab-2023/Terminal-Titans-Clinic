@@ -1,208 +1,188 @@
-import * as React from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import CssBaseline from '@mui/material/CssBaseline';
-import Grid from '@mui/material/Grid';
-// StarIcon from '@mui/icons-material/StarBorder';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import GlobalStyles from '@mui/material/GlobalStyles';
-import Container from '@mui/material/Container';
-import '../Styles/adminHome.css';
-import { useNavigate } from "react-router-dom";
-import Nav from "../components/Admin-NavBar.js";
 
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { OverviewTotalCustomers } from '../overview/overview-total-customers';
+import { OverviewTotalSales } from '../overview/overview-total-sales';
+import { OverviewOrdersProgress } from '../overview/overview-orders-progress';
+import { OverviewSales } from '../overview/overview-sales';
+import { OverviewLatestOrders } from '../overview/overview-latest-orders';
+import { OverviewLatestMedicines } from '../overview/overview-latest-medicines';
+import { Box, Container, Unstable_Grid2 as Grid } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
+const Item = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  color: theme.palette.text.secondary,
+  height: '100%',
+}));
 
-const tiers = [
-  {
-    title: 'Adding Admins',
-    description: [
-      'Work load is getting too big? Add another admin now to help you!',
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Users List',
-    description: [
-      'Manage every user conveniently through this page.',
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'HealthPackages',
-    description: [
-      'View, add, update and delete Packages on the spot through here.'
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Doctor Applications',
-    description: [
-      'Manage Doctor Applications with a click of a button.',
-      'View, accept or reject Doctor Applications.'
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Pharm Applications',
-    description: [
-      'Manage Pharmacists Applications with a click of a button.',
-      'View, accept or reject Pharmacists Applications.'
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Sales Report',
-    description: [
-      "View the pharmacy's sales report month by month through here.",
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Medicines',
-    description: [
-      'View, filter and search for all medicines in the Pharmacy through here.',
-    ],
-    buttonText: 'Visit',
-    buttonVariant: 'contained',
-  },
-];
-function getLinkForTier(title) {
-  switch (title) {
-    case 'Users List':
-      return 'http://localhost:3000/Health-Plus/manageUsers';
-    case 'HealthPackages':
-      return 'http://localhost:3000/Health-Plus/managePackages';
-    case 'Doctor Applications':
-      return 'http://localhost:3000/Health-Plus/docApplicationList';
-    case 'Adding Admins':
-      return 'http://localhost:3000/Health-Plus/createAdmin';
-    case 'Pharm Applications':
-      return `http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}` ;
-    case 'Sales Report':
-      return `http://localhost:4000/Health-Plus/adminSalesReport?id=${sessionStorage.getItem('token')}`;
-          case 'Medicines':
-            return `http://localhost:4000/Health-Plus/adminAvailableMeds?id=${sessionStorage.getItem('token')}`;
-                default:
-      return '/';
-  }
-}
+const AdminHomePage = () => {
 
-
-
-
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
-
-export default function Pricing() {
   const navigate = useNavigate();
 
   return (
-        require("../Styles/adminHome.css"),
-    <ThemeProvider theme={defaultTheme}>
-      <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
-      <CssBaseline />
-      <Nav/>
-      {/* Hero unit */}
-      <Container disableGutters maxWidth="sm" component="main" sx={{ pt: 8, pb: 6 }}>
-        <Typography
-          component="h1"
-          variant="h4"
-          align="center"
-          color="text.primary"
-          gutterBottom
-        >
-              Your Admin Dashboard
-        </Typography>
-        <Typography variant="h5" align="center" color="text.secondary" component="p">
-        Manage the Clinic efficiently with our admin dashboard.
-        Manage users, health packages, doctor applications and more in one place. 
-        </Typography>
-      </Container>
-      {/* End hero unit */}
-      <Container maxWidth="md" component="main">
-        <Grid container spacing={5} alignItems="flex-end">
-              {tiers.map((tier) => (
-        <Grid
-          item
-          key={tier.title}
-          xs={12}
-          md={4}
-        >
-          <Card>
-            <CardHeader
-              title={tier.title}
-              subheader={tier.subheader}
-              titleTypographyProps={{ align: 'center' }}
-              subheaderTypographyProps={{
-                align: 'center',
-              }}
-              sx={{
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? theme.palette.grey[200]
-                    : theme.palette.grey[700],
-              }}
-            />
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'baseline',
-                  mb: 2,
-                }}
-              />
-              <ul   className='longBody'>
-                {tier.description.map((line) => (
-                  <Typography
-                    component="li"
-                    variant="subtitle1"
-                    align="center"
-                    key={line}
-                  >
-                    {line}
-                  </Typography>
-                ))}
-              </ul>
-            </CardContent>
-            <CardActions>
-              <Button
-                fullWidth
-                variant={tier.buttonVariant}
-                style={{ background:'black' }}
-                onClick={() => {
-                    window.location.href = getLinkForTier(tier.title);
-                  
-                }}
-                >
-              <Link
-                style={{ textDecoration: 'none', color: 'white' }}
-              >
-                {tier.buttonText}
-               </Link>
-              </Button>
-            </CardActions>
-           </Card>
-          </Grid>
-          ))}
+    require('../Styles/Admin.css'),
+    <>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
 
-        </Grid>
-      </Container>
-    </ThemeProvider>
+        }}
+      >
+        <Container maxWidth="xl">
+          <Grid container spacing={3}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={3}
+            >
+              <Item>
+                <OverviewTotalCustomers
+                  item
+                  positive={true}
+                  sx={{ height: '100%' }}
+                />
+              </Item>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={3}
+            >
+              <Item>
+                <OverviewOrdersProgress
+                  sx={{ height: '100%' }}
+                  value={75.5}
+                />
+              </Item>
+            </Grid>
+            <Grid
+              xs={12}
+              sm={6}
+              lg={3}
+            >
+              <Item>
+                <OverviewTotalSales
+                  sx={{ height: '100%' }}
+                  value="$15k"
+                />
+              </Item>
+            </Grid>
+
+            <Grid
+              xs={12}
+              lg={8}
+            >
+              <OverviewSales
+                salesType={'year'}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+
+            <Grid
+              xs={12}
+              md={6}
+              lg={4}
+            >
+              <OverviewSales
+                salesType={'week'}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+
+            <Grid
+              xs={12}
+              md={6}
+              lg={4}
+            >
+              <OverviewLatestMedicines
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+
+            <Grid
+              xs={12}
+              md={12}
+              lg={8}
+            >
+              <OverviewLatestOrders
+                orders={[
+                  {
+                    id: 'f69f88012978187a6c12897f',
+                    ref: 'DEV1049',
+                    amount: 30.5,
+                    customer: {
+                      name: 'Ekaterina Tankova'
+                    },
+                    createdAt: 1555016400000,
+                    status: 'pending'
+                  },
+                  {
+                    id: '9eaa1c7dd4433f413c308ce2',
+                    ref: 'DEV1048',
+                    amount: 25.1,
+                    customer: {
+                      name: 'Cao Yu'
+                    },
+                    createdAt: 1555016400000,
+                    status: 'delivered'
+                  },
+                  {
+                    id: '01a5230c811bd04996ce7c13',
+                    ref: 'DEV1047',
+                    amount: 10.99,
+                    customer: {
+                      name: 'Alexa Richardson'
+                    },
+                    createdAt: 1554930000000,
+                    status: 'refunded'
+                  },
+                  {
+                    id: '1f4e1bd0a87cea23cdb83d18',
+                    ref: 'DEV1046',
+                    amount: 96.43,
+                    customer: {
+                      name: 'Anje Keizer'
+                    },
+                    createdAt: 1554757200000,
+                    status: 'pending'
+                  },
+                  {
+                    id: '9f974f239d29ede969367103',
+                    ref: 'DEV1045',
+                    amount: 32.54,
+                    customer: {
+                      name: 'Clarke Gillebert'
+                    },
+                    createdAt: 1554670800000,
+                    status: 'delivered'
+                  },
+                  {
+                    id: 'ffc83c1560ec2f66a1c05596',
+                    ref: 'DEV1044',
+                    amount: 16.76,
+                    customer: {
+                      name: 'Adam Denisov'
+                    },
+                    createdAt: 1554670800000,
+                    status: 'delivered'
+                  }
+                ]}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+    </>
   );
-}
+};
+
+export default AdminHomePage;

@@ -11,10 +11,13 @@ export const OverviewTotalCustomers = (props) => {
   const [patientCount, setPatientCount] = useState([]);
 
   useEffect(() => {
-    fetchTotalPatients();
+    if(!positive)
+      fetchTotalPatientsDoctor();
+    else
+      fetchTotalPatientsAdmin();
   }, []);
 
-  const fetchTotalPatients = async () => {
+  const fetchTotalPatientsDoctor = async () => {
     const response = await axios.get('http://localhost:8000/doctor/getTotalPatients', {
       headers: {
         Authorization: 'Bearer ' + sessionStorage.getItem('token')
@@ -23,6 +26,16 @@ export const OverviewTotalCustomers = (props) => {
     console.log(response.data.patients);
     setPatientCount(response.data.patients);
   };
+
+  const fetchTotalPatientsAdmin = async () => {
+    let response = await axios.get('http://localhost:8000/admin/getAllUsers', {
+      headers: {
+        Authorization: 'Bearer ' + sessionStorage.getItem('token')
+      }
+    });
+    console.log(response);
+    setPatientCount(response.data.Result);
+  }
 
   return (
     <Card sx={sx}>

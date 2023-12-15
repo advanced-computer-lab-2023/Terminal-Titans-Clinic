@@ -44,7 +44,8 @@ import Notification from "./components/Notification";
 import AdminDocProfile from "./components/adminViewDocReq";
 import CreateAdmin from "./components/CreateAdmin";
 import ManagePackages from "./components/managePackages";
-import AllPresDoc from "./Pages/AllPresDoc.js";
+import AllPresDoc from "./Pages/AllPresDoc.js";import Temp from "./Pages/Temp";
+
 
 
 import Form from 'react-bootstrap/Form';
@@ -75,13 +76,13 @@ function App() {
           <Route path="/medicine" element={<MedsPage />} />
           <Route path="/medicine/:medicineId" element={<MedsPage />} />
 
-          <Route path="/admin" element={<AdminHome />} />
+          {/* <Route path="/admin" element={<AdminHome />} /> */}
+          <Route path="/admin" element={<Temp />} />
           <Route path="/docApplicationList" element={<ViewDocApplications />} /> 
           <Route path="/viewRegDocDoc" element={<AdminDocProfile />} /> 
           <Route path="/manageUsers" element={<AdminUserPage />} />
           <Route path="/managePackages" element={<ManagePackages />} />
           <Route path="/createAdmin" element={<CreateAdmin />} />
-          {/* <Route path="/admin" element={<AdminPage />} /> */}
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<PatientHome />} />

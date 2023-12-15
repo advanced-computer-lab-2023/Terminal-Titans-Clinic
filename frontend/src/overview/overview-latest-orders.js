@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
 import {
@@ -14,53 +15,31 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import { Scrollbar } from './scrollbar';
 import { SeverityPill } from './severity-pill';
 
 const statusMap = {
-  rescheduled: 'warning',
-  upcoming: 'info',
-  completed: 'success',
-  cancelled: 'error'
+  pending: 'warning',
+  delivered: 'success',
+  refunded: 'error'
 };
 
-export const OverviewLatestPatients = (props) => {
-  const { sx } = props;
-
-  const [patients, setPatients] = useState([]);
-
-  useEffect(() => {
-    getPatients();
-  }, []);
-
-  const getPatients = async () => {
-    const response = await axios.get(
-      `http://localhost:8000/doctor/getPatientsList2`,
-
-      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
-    );
-    if (response.status === 200) {
-      const patient = response.data.Result.splice(0, 6);
-      console.log(patient);
-      setPatients(patient);
-    }
-  }
+export const OverviewLatestOrders = (props) => {
+  const { orders = [], sx } = props;
 
   return (
     <Card sx={sx}>
-      <CardHeader title="Patient List" />
+      <CardHeader title="Latest Orders" />
       <Scrollbar sx={{ flexGrow: 1 }}>
         <Box sx={{ minWidth: 800 }}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>
-                  Name
+                  Order
                 </TableCell>
                 <TableCell>
-                  Gender
+                  Customer
                 </TableCell>
                 <TableCell sortDirection="desc">
                   Date
@@ -71,27 +50,26 @@ export const OverviewLatestPatients = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {patients.map((patient) => {
-                const date = new Date(patient.createdAt);
-                const createdAt = date.toLocaleDateString("en-US");
+              {orders.map((order) => {
+                const createdAt = format(order.createdAt, 'dd/MM/yyyy');
 
                 return (
                   <TableRow
                     hover
-                    key={patient.id}
+                    key={order.id}
                   >
                     <TableCell>
-                      {patient.Name}
+                      {order.ref}
                     </TableCell>
                     <TableCell>
-                      {patient.Gender}
+                      {order.customer.name}
                     </TableCell>
                     <TableCell>
                       {createdAt}
                     </TableCell>
                     <TableCell>
-                      <SeverityPill color={statusMap[patient.Status]}>
-                        {patient.Status}
+                      <SeverityPill color={statusMap[order.status]}>
+                        {order.status}
                       </SeverityPill>
                     </TableCell>
                   </TableRow>
@@ -112,7 +90,6 @@ export const OverviewLatestPatients = (props) => {
           )}
           size="small"
           variant="text"
-          onClick={() => { window.location.href = '/Health-Plus/viewMyPatientsList' }}
         >
           View all
         </Button>
@@ -121,6 +98,7 @@ export const OverviewLatestPatients = (props) => {
   );
 };
 
-OverviewLatestPatients.prototype = {
+OverviewLatestOrders.prototype = {
+  orders: PropTypes.array,
   sx: PropTypes.object
 };
