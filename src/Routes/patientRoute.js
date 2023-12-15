@@ -22,7 +22,7 @@ import transactionsModel from '../Models/transactionsModel.js';
 import notificationModel from '../Models/notificationModel.js';
 import nodemailer from 'nodemailer';
 import followupRequest from '../Models/followupRequest.js';
-import { Console } from 'console';
+import { Console, log } from 'console';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 
@@ -530,9 +530,9 @@ router.post('/getDoctors', protect, async (req, res) => {
         getDoctors = await Doctor.find({});
     }
     // console.log(getDoctors);
-    if (getDoctors.length == 0) {
-        return res.status(400).json({ message: "No doctors found " });
-    }
+    // if (getDoctors.length == 0) {
+    //     return res.status(400).json({ message: "No doctors found " });
+    // }
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
     if(myHealthStatus){
     const packId = myHealthStatus.healthPackageId;
@@ -559,7 +559,7 @@ router.post('/getDoctors', protect, async (req, res) => {
         console.log("here")
         var cur = allDoctors[x];
         var price = (allDoctors[x].HourlyRate * 1.1) * discount / 100;
-        result.sessionPrice = price;
+        result.sessionPrice = Math.round(price * 100) / 100;
         result.Name = allDoctors[x].Name;
         result.Email = allDoctors[x].Email;
         result.Affiliation = allDoctors[x].Affiliation;
@@ -1267,16 +1267,17 @@ router.post('/filterDoctors', async (req, res) => {
     let dTimeTemp = req.body.date;
     let dTime = new Date(dTimeTemp);
     dTime.setHours(dTime.getHours() + 2)
-    console.log(dTime)
+    
 
     var spcltyDocs = await Doctor.find({ Speciality: spclty })
     if (!spclty) {
         spcltyDocs = await Doctor.find({});
     }
-    const aptmnts = await appointmentModel.find({})
+    const aptmnts = await docAvailableSlotsModel.find({})
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
-    const packId = myHealthStatus.packageId;
     var discountP = 0;
+if(myHealthStatus){
+    const packId = myHealthStatus?.packageId;
 
     if (packId) {
         const allPackages = await healthPackageModel.find({ _id: packId });
@@ -1289,27 +1290,37 @@ router.post('/filterDoctors', async (req, res) => {
     else {
         discountP = 0;
     }
-    let discount = 100 - discountP;
+}
 
-    const Dr = spcltyDocs.filter((Dr) => {
+    let discount = 100 - discountP;
+    var Dr={};
+    if(dTimeTemp){
+     Dr = spcltyDocs.filter((Dr) => {
         for (let y in aptmnts) {
-            if (aptmnts[y].DoctorId == Dr._id) {
+            console,log(aptmnts[y].DoctorId)
+            console.log(Dr._id)
+            if (aptmnts[y].DoctorId.equals( Dr._id)) {
                 let start = aptmnts[y].Date;
                 let end = new Date(start);
                 end.setMinutes(start.getMinutes() + 30);
+               
                 if (dTime >= start && dTime < end)
-                    return false;
+                    return true;
             }
         }
-        return true
+        return false
     });
+}
+else{
+    Dr=spcltyDocs;
+}
     var final = []
     for (let x in Dr) {
         var result = {};
         console.log("here")
         var cur = Dr[x];
         var price = (Dr[x].HourlyRate * 1.1) * discount / 100;
-        result.sessionPrice = price;
+        result.sessionPrice = Math.round(price * 100) / 100;
         result.Name = Dr[x].Name;
         result.Email = Dr[x].Email;
         result.Affiliation = Dr[x].Affiliation;
@@ -1427,19 +1438,23 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
     const Dr = await Doctor.find({ _id: docId });
  
     let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
-    const packId = myHealthStatus.healthPackageId;
+   // const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
 
-    if (packId) {
-        const allPackages = await healthPackageModel.find({ _id: packId });
-        if (allPackages.length > 0)
-            discountP = allPackages[0].doctorDiscountInPercentage;
-        else
-            return (res.status(400).send({ error: "cant find package", success: false }));
-
-    }
-    else {
-        discountP = 0;
+    if(myHealthStatus){
+        const packId = myHealthStatus?.packageId;
+    
+        if (packId) {
+            const allPackages = await healthPackageModel.find({ _id: packId });
+            if (allPackages.length > 0)
+                discountP = allPackages[0].doctorDiscountInPercentage;
+            else
+                return (res.status(400).send({ error: "cant find package", success: false }));
+    
+        }
+        else {
+            discountP = 0;
+        }
     }
     let discount = 100 - discountP;
 

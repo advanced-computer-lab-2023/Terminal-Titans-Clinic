@@ -145,7 +145,7 @@ No</Button>
                         {aptmnts[curId]?.familyMember ?
                         <>
                          <label style={{display:'inline-block',width:'50%',fontSize:'18px'}}>Family Member:</label>
-                        <label style={{display:'inline-block',width:'50%',fontSize:'18px'}}>{aptmnts[curId]?.familyMember}</label> 
+                        <label style={{display:'inline-block',width:'50%',fontSize:'18px'}}>{aptmnts[curId]?.famMem}</label> 
                         <br></br> </>: <></>}
                         
                         <label style={{display:'inline-block',width:'50%',fontSize:'18px'}}>Appointment Date:</label>
@@ -297,7 +297,7 @@ No</Button>
                         <React.Fragment key={index}>
                          
                             <td>{aptmnt.Name}</td>
-                            <td>{aptmnt.familyMember?aptmnt.familyMember:'-'}</td>
+                            <td>{aptmnt.famMem?aptmnt.famMem:'-'}</td>
                             <td>{aptmnt.Date.substring(0,10)}</td>
                             <td>{aptmnt.Date.substring(11,16)}</td>
                             <td>{aptmnt.Status}</td>
