@@ -783,6 +783,56 @@ router.post('/getPrescriptionOfPatient/:id', protect, async (req, res) => {
         res.status(400).json({ message: err.message, success: false })
     }
 });
+router.post('/getAllPrescriptions', protect, async (req, res) => {
+    try {
+        console.log('a');
+        const doctor = await doctorModel.findById(req.user)
+        if (!doctor) {
+            res.status(500).json({ message: "You are not a doctor", success: false })
+        }
+        else {
+            if (doctor.employmentContract != "Accepted") {
+                return res.status(400).json({ message: "Contract not accepted", success: false })
+            }
+        }
+        console.log('b');
+        const prescriptions = await prescriptionModel.find({ DoctorId: req.user._id});
+        console.log('c');
+        // let result=[];
+        console.log(prescriptions);
+        var temp = prescriptions;
+        var final = [];
+        for (let x in temp) {///if you need the doctor's name in front end
+            var result = {}
+            const doc = await patientsModel.find({ _id: temp[x].PatientId })
+            console.log("pp" + doc.Name)
+            if (doc.length > 0)
+                result.Name = doc[0].Name;
+            result.Date = temp[x].Date;
+            result.status = temp[x].status;
+            result.id = temp[x].id;
+            result.medicine = []
+            for (let y in temp[x].items) {
+                const med = await MedicineModel.findById(temp[x].items[y].medicineId)
+                var medicine = {
+                    "Name": med.Name,
+                    "Dosage": temp[x].items[y].dosage
+                }
+                //console.log(medicine)
+
+                result.medicine.push(medicine);
+            }
+            final.push(result);
+
+        }
+        console.log(final)
+        res.status(200).json({ final, success: true });
+
+    }
+    catch (err) {
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
 
 //get a prescription with it's id in the params
 router.get('/getPrescription/:id', protect, async (req, res) => {
@@ -809,34 +859,7 @@ router.get('/getPrescription/:id', protect, async (req, res) => {
     }
 });
 
-router.get('/getAllPrescriptions', protect, async (req, res) => {
-    try {
-        const exists = await doctorModel.findById(req.user);
-        if (!exists) {
-            return res.status(500).json({
-                success: false,
-                message: "You are not a doctor"
-            });
-        }
-        else {
-            if (exists.employmentContract != "Accepted") {
-                return res.status(400).json({ message: "Contract not accepted", success: false })
-            }
-        }
-        const prescriptions = await prescriptionModel.find({ DoctorId: req.user._id });
-        res.status(200).json({
-            success: true,
-            prescriptions: prescriptions
-        });
-    }
-    catch (error) {
-        console.log(error);
-        res.status(500).json({
-            success: false,
-            message: "Internal error mate2refnash"
-        });
-    }
-});
+
 
 //requirement number 33
 router.get('/getPatientsList', protect, async (req, res) => {
@@ -1726,13 +1749,13 @@ router.post('/addOrDeleteMedFromPresc', protect, async (req, res) => {
         }
         if (action == "add") {
             //checking whether this drug is already in the list or not
-            const exists = prescription.items.find((item) => item.medicineId == medicineId);
-            if (exists) {
-                return res.status(400).json({
-                    success: false,
-                    message: "This medicine is already in the prescription"
-                });
-            }
+            //const exists = prescription.items.find((item) => item.medicineId == medicineId);
+            // if (exists) {
+            //     return res.status(400).json({
+            //         success: false,
+            //         message: "This medicine is already in the prescription"
+            //     });
+            // }
             if (!dosage)
                 dosage = 1;
             //I want to check if the medicineId is already in the items array, that contains sets of medicineId and dosage, in the prescription model
@@ -1741,7 +1764,7 @@ router.post('/addOrDeleteMedFromPresc', protect, async (req, res) => {
             let f = false;
             let items = prescription.items;
             if (items.length != 0)
-                for (x in items) {
+                for (var x in items) {
                     if (items[x].medicineId == medicineId) {
                         f = true;
 
@@ -1751,7 +1774,11 @@ router.post('/addOrDeleteMedFromPresc', protect, async (req, res) => {
                         break;
                     }
                 }
+            if(!f){
             prescription.items.push({ medicineId: medicineId, dosage: dosage });
+            await prescription.save();
+            }
+                return res.status(200).json({prescription:prescription, success: true });
         }
         else if (action == "delete") {
             prescription.items = prescription.items.filter((item) => item.medicineId != medicineId);
@@ -1813,9 +1840,12 @@ router.get('/generatePdf/:id', protect, async (req, res) => {
         prescriptionString += `Doctor Name: ${doctorName.Name}\n`;
         prescriptionString += `Date: ${prescription.Date}\n\n`;
         const medication = prescription.items;
+        let ind=1;
         for (let i in medication) {
             const medicine = await MedicineModel.findById(medication[i].medicineId);
-            prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
+        
+            prescriptionString += `${ind}. ${medicine.Name} - ${medication[i].dosage}\n`;
+            ind++;
         }
 
         // Add medication details

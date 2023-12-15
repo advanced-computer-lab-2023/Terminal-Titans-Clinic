@@ -37,14 +37,14 @@ import PatientRecord from "./components/PatientRecord";
 import AddPresc from "./Pages/AddPresc";
 import PackageCheckout from "./Pages/PackageCheckout";
 import FamilyMember from "./components/FamMember";
-import ViewDoctorInfo from "./Pages/ViewDoctorInfo.js";
+import ViewDoctorInfo from "./Pages/viewDoctorInfo.js";
 import ReschduleDoc from "./Pages/rescheduleDoc.js";
 import FollowUpDoc from "./Pages/followUpDoc.js";
 import Notification from "./components/Notification";
 import AdminDocProfile from "./components/adminViewDocReq";
 import CreateAdmin from "./components/CreateAdmin";
 import ManagePackages from "./components/managePackages";
-
+import AllPresDoc from "./Pages/AllPresDoc.js";
 
 
 import Form from 'react-bootstrap/Form';
@@ -129,6 +129,7 @@ function App() {
           <Route path="/acceptRejectFollowUp" element={<AcceptRejectFollowUp />} />
           <Route path="/reschduleDoc" element={<ReschduleDoc />} />
           <Route path="/followUpDoc" element={<FollowUpDoc />} />
+          <Route path="/allPresDoc" element={<AllPresDoc />} />
 
         </Routes>
       </Router>

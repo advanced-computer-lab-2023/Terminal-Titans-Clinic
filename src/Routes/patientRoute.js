@@ -3642,9 +3642,11 @@ router.get('/generatePdf/:id', protect,async(req,res)=>{
         prescriptionString += `Date: ${prescription.Date}\n\n`;
         const medication = prescription.items;
         prescriptionString += 'Medications:\n';
+        let ind=1;
         for (let i in medication) {
             const medicine = await MedicineModel.findById(medication[i].medicineId);
-            prescriptionString += `${i + 1}. ${medicine.Name} - ${medication[i].dosage}\n`;
+            prescriptionString += `${ind}. ${medicine.Name} - ${medication[i].dosage}\n`;
+            ind++;
         }
 
         // Add medication details
