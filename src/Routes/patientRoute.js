@@ -1425,13 +1425,8 @@ router.get('/selectDoctors/:id', protect, async (req, res) => {
     const pId = req.user._id;
     const docId = req.params.id;
     const Dr = await Doctor.find({ _id: docId });
-    const currPat = await patient.find({ _id: pId })
-
-    if (currPat.length < 1) {
-        return (res.status(400).send({ error: "cant find patient", success: false }));
-
-    }
-    let myHealthStatus = await healthPackageStatus.findOne({ patientId: currPat.id, status: 'Subscribed' });
+ 
+    let myHealthStatus = await healthPackageStatus.findOne({ patientId: exists._id, status: 'Subscribed' });
     const packId = myHealthStatus.healthPackageId;
     var discountP = 0;
 
