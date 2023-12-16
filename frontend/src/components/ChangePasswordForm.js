@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import validator from 'validator'
 import axios from 'axios';
 import Button from '@mui/material/Button';
-
+import Alert from '@mui/material/Alert';
 
 function ChangePasswordForm() {
     const [oldPassword, setoldPassword] = useState('');
@@ -17,7 +17,7 @@ function ChangePasswordForm() {
       })) {
         setErrorMessagePass('Is Strong Password')
       } else {
-        setErrorMessagePass('Password has to be 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number ')
+        setErrorMessagePass('Password has to be 8 characters long with at least 1 lowercase, 1 uppercase and 1 number ')
       }
     }
     const changePassword =async  (event) => {
@@ -53,6 +53,8 @@ function ChangePasswordForm() {
       }).then((response) => response.json()).then(data => {
         if (data.success ) {
           alert("Password Changed Successfully")
+          //iwant to refresh page
+          window.location.reload();
         }
         else{
           alert(data.message)
@@ -86,10 +88,8 @@ function ChangePasswordForm() {
               type="password"
               value={password}
              onChange={(e) => validatePass(e.target.value)}></input> <br />
-              {errorMessagePass === '' ? null :
-                <h5 style={{
-                  color: 'red',
-                }}>{errorMessagePass}</h5>}
+              {errorMessagePass===''? null : errorMessagePass === 'Is Strong Password' ? <Alert severity="success">{errorMessagePass}</Alert> :
+                <Alert severity="error">{errorMessagePass}</Alert>}
                <br />
             <Button
               fullWidth

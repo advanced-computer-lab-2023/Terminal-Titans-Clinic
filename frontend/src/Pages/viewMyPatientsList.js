@@ -64,22 +64,22 @@ const getPatientName= async () => {
     return (
         <div>
             <DoctorNavBar/>
-            <div   style={{ width: "100% ",backgroundColor:'black' }}>
+            {/* <div   style={{ width: "100% ",backgroundColor:'black' }}>
            
            <h1 style={{color:'white', textAlign:'center'}}>Patients List </h1>
-           </div>
+           </div> */}
     {/* <TextField id="patName" label="Patient's Name" variant="outlined" size="small" sx={{ paddingRight: 1 }}
     value={name}
     onChange={(e) => setName(e.target.value)}/>
    
     <Button variant="dark"  onClick={(event) => { getPatientName() }} size="sm">Search</Button> */}
-    <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
-    <InputGroup className="mb-1" style={{width:'30%', height:"10%"}}>
+    <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between', height:'50px', marginTop:'10px'}}>
+    <InputGroup className="mb-1" >
         
         <Form.Control
           id="searchInput"
           type="search"
-          placeholder="Search"
+          placeholder="Search by Name"
           aria-label="Text input for search"
           value={name}
           size="small"
@@ -106,6 +106,12 @@ const getPatientName= async () => {
 <br></br>
         <Table striped bordered hover>
             <thead>
+            <tr>
+                  
+                  <th colSpan={6} style={{ fontSize: '24px' }}>Patients List</th>
+                 
+
+            </tr>
                 <tr>
                    
                     <th>Name</th>

@@ -47,20 +47,20 @@ const ViewEmploymentContract = () => {
     return (
       
         <div style={{height:'80vh'}}>
-            <div   style={{ width: "100% ",backgroundColor:'black' }}>
+            
            
-        <h1 style={{color:'white', textAlign:'center'}}>Employment Contract</h1>
-        </div>
+       
+       
       
                 
                     
-                    <div className="form-group" >
+                    <div  style={{marginLeft:'150px',marginRight:'150px', marginTop:'30px'}}>
                     <div>
-       
+                    <h1 style={{}}>Employment Contract</h1>
       
         <h3>This Employment Agreement ("Agreement") is entered into between Terminal Clinic ("Employer") and {name} ("Employee") effective upon acceptance of this contract, and shall continue until terminated by either party with a written notice period of 30 days.</h3>
-         
-          
+         <br></br>
+          <br></br>
           <h2>Terms of Employment:</h2>
           <h5>The Employer agrees to engage the services of {name} as an employee.</h5>
           <h5>The Employee shall provide medical services at Terminal Clinic.</h5>
@@ -73,7 +73,10 @@ const ViewEmploymentContract = () => {
           <h5>By clicking the Accept button below, you agree to the terms of this contract.</h5>
         {/* Buttons for Accept and Reject */}
         <div style={{textAlign:'right', paddingRight:'5px'}}>
-        <Button variant="dark" style={{ width: '30%' }} onClick={() => accept()}>
+        <Button variant="primary" style={{ width: '30%',marginRight:'10px' }} onClick={() =>  {window.location.pathname = `/Health-Plus/`;}}>
+          Decline
+        </Button>
+        <Button variant="primary" style={{ width: '30%' }} onClick={() => accept()}>
           Accept Contract
         </Button>
         </div>

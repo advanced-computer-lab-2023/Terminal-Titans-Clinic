@@ -217,12 +217,9 @@ console.log(error);
   return (
     <div>
      <PatientNavBar/>
-      <div   style={{ width: "100% ",backgroundColor:'black' }}>
-           
-           <h1 style={{color:'white', textAlign:'center'}}>Doctors List </h1>
-           </div>
-      <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
-      <InputGroup className="mb-1" style={{width:'30%', height:"10%"}}>
+      
+      <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between', height:'50px', marginTop:'10px'}}>
+      <InputGroup className="mb-1" style={{width:'50%'}}>
       <Form.Control
        id="docName"
        onChange={(e) => setName(e.target.value)}        
@@ -254,7 +251,7 @@ console.log(error);
        </InputGroup>
 
 
-      <Button variant="dark"  style={{ marginRight: '100px' }}  onClick={handleClick} size="sm">
+      <Button variant="outline-dark"  style={{ marginRight: '50px' }}  onClick={handleClick} >
       <FilterListIcon />
         Filter
       </Button>
@@ -308,6 +305,12 @@ console.log(error);
 
       <Table striped bordered hover>
         <thead>
+        <tr>
+                  
+                  <th colSpan={6} style={{ fontSize: '24px' }}>Doctors List</th>
+                 
+
+            </tr>
           <tr>
             <th>Name</th>
             <th>Speciality</th>

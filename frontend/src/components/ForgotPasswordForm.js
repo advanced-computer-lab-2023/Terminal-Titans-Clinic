@@ -1,10 +1,10 @@
 // import React from "react";
-import "../Styles/LoginForm.css";
+import "../Styles/forgotPass.css";
 import React, { useState } from 'react';
 import validator from 'validator'
-
+import Alert from '@mui/material/Alert';
 //var x=1;
-
+import { Link } from 'react-router-dom';
 
 function ForgotPasswordForm() {
   const [x, setX] = useState(1);
@@ -22,7 +22,7 @@ function ForgotPasswordForm() {
     })) {
       setErrorMessagePass('Is Strong Password')
     } else {
-      setErrorMessagePass('Password has to be 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number ')
+      setErrorMessagePass('Password has to be 8 characters long with at least 1 lowercase, 1 uppercase and 1 number ')
     }
   }
   const validateEmail = (value) => {
@@ -55,6 +55,7 @@ function ForgotPasswordForm() {
           }
           else{
             alert(data.message)
+
           }          
         })
         .catch((error) => {
@@ -93,6 +94,10 @@ function ForgotPasswordForm() {
       });
 
   };
+  const cancel = (event) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    window.location.pathname = `/Health-Plus/`;
+  }
   const forgotPassword = (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
 
@@ -114,6 +119,8 @@ function ForgotPasswordForm() {
       if (data.success ) {
         alert("Password Changed Successfully")
         //redirect to home page
+        window.location.pathname = `/Health-Plus/`;
+
         
       }
       else{
@@ -128,13 +135,14 @@ function ForgotPasswordForm() {
   };
   if (x === 1) {
     return (
-
+      <div>
+<div className="background"></div>
       <div style={{ float: 'center', paddingTop: '122px' }}>
 
         <div id="login-form">
           {/* <h1>Sign up</h1> */}
           <form>
-            <h5>Enter the email address associated with your account and we'll send you an OTP</h5>
+            <h5>Enter your email for OTP</h5>
             <br></br>
             <label htmlFor="email">Email:</label>
             <input
@@ -142,22 +150,23 @@ function ForgotPasswordForm() {
               value={email}
               onChange={(e) => validateEmail(e.target.value)}></input> <br />
             {errorMessageEmail === '' ? null :
-              <span style={{
-                color: 'red',
-              }}>{errorMessageEmail}</span>}
-
-
-            <button type="submit" onClick={sendOtp}>Register</button>
+            <Alert severity="error">{errorMessageEmail}</Alert>
+             }
+ <button type="submit" style={{width:'49%',marginRight:'2%'}} onClick={cancel}>Cancel</button>
+              <button type="submit" style={{width:'49%'}} onClick={sendOtp}>Get OTP</button>
 
           </form>
         </div>
 
+      </div>
       </div>
     );
   }
   else {
     if (x === 2) {
       return (
+        <div>
+        <div className="background"></div>
         <div style={{ float: 'center', paddingTop: '122px' }}>
 
           <div id="login-form">
@@ -169,17 +178,24 @@ function ForgotPasswordForm() {
               <input
                 type="text"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}></input> <br />
-              <button type="submit" onClick={verifyOtp}>verify</button>
+                onChange={(e) => setOtp(e.target.value)}></input> 
+                <Link onClick={sendOtp} variant="body2" style={{ float: 'right' }}>
+                  {"Resend OTP?"}
+                </Link><br/><br/>
+                <button type="submit" style={{width:'49%',marginRight:'2%'}} onClick={cancel}>Cancel</button>
+              <button type="submit" style={{width:'49%'}} onClick={verifyOtp}>Verify</button>
 
             </form>
           </div>
+        </div>
         </div>
       );
 
     }
     else {
       return (
+        <div>
+        <div className="background"></div>
         <div style={{ float: 'center', paddingTop: '122px' }}>
 
           <div id="login-form">
@@ -192,14 +208,16 @@ function ForgotPasswordForm() {
                 type="password"
                 value={password}
                onChange={(e) => validatePass(e.target.value)}></input> <br />
-                {errorMessagePass === '' ? null :
-                  <h5 style={{
-                    color: 'red',
-                  }}>{errorMessagePass}</h5>}
+                
+                
+                   {errorMessagePass===''? null : errorMessagePass === 'Is Strong Password' ? <Alert severity="success">{errorMessagePass}</Alert> :
+                <Alert severity="error">{errorMessagePass}</Alert>}
                  <br />
-              <button type="submit" onClick={forgotPassword}>Submit</button>
-
+              
+              <button type="submit" style={{width:'49%',marginRight:'2%'}} onClick={cancel}>Cancel</button>
+              <button type="submit" style={{width:'49%'}} onClick={forgotPassword}>Submit</button>
             </form>
+          </div>
           </div>
         </div>
       );
