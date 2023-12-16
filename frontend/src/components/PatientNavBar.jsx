@@ -46,7 +46,7 @@ export function PatientNavBar() {
   }
 
   function goToNotification() {
-    window.location.href = '/Health-Plus/notifications';
+    window.location.href = '/Health-Plus/notifications/patient';
   }
   function goBack(){
       

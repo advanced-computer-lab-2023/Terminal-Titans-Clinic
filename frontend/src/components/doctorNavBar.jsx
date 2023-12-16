@@ -50,7 +50,7 @@ console.log(location.pathname)
   }
 
   function goToNotification() {
-    window.location.href = '/Health-Plus/notifications';
+    window.location.href = '/Health-Plus/notifications/Doctor';
   }
 
   function connectToWs() {
