@@ -218,7 +218,7 @@ const AdminHomePage = () => {
                         Doctors Applications
                       </Button>
 
-                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => window.location.replace(`http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}`)}>
+                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => window.location.href(`http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}`)}>
                         Pharmacists Applications
                       </Button>
                     </div>
