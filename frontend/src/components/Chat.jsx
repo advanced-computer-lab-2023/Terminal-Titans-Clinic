@@ -4,7 +4,7 @@ import { set, uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
 import { io } from 'socket.io-client';
-import { useNavigate, createSearchParams } from "react-router-dom";
+import { useNavigate, createSearchParams, useParams } from "react-router-dom";
 import Peer from "simple-peer"
 import chat from '../Styles/Chat.css';
 import { useLocation } from 'react-router-dom';
@@ -36,12 +36,11 @@ export default function Chat() {
     const divUnderMessages = useRef();
     const navigate = useNavigate();
     const location = useLocation();
-    const params = new URLSearchParams(window.location.search);
-    const url = window.location.href;
-    const token = url.split('/chat/')[1];
+    const params = new useParams();
     // console.log(chatId)
     //const token = params.get('token');
     // const token = new window.URLSearchParams("token");
+    console.log(token);
     sessionStorage.setItem("token", token);
 
 

@@ -85,7 +85,7 @@ console.log(location.pathname)
   }
 
   function goToChat() {
-    window.location.href = `chat/${sessionStorage.getItem('token')}`;
+    window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
   }
     function goBack(){
       
