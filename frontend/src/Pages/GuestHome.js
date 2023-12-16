@@ -44,7 +44,7 @@ const DoctorHome = () => {
         </Carousel.Item>
         <Carousel.Item>
           <div className='blackScreen'></div>
-          <img src={require('../Assets/doctorHome2.png')} alt="First slide" className="myImg" />
+          <img src={require('../Assets/pharmacy.jpeg')} alt="First slide" className="myImg" />
           <Carousel.Caption>
             <h2 className="captionText">Pharmacy</h2>
             <h4 className="captionText">Fast, one-day delivery for your essential medicines! Browse our range of prescription and over-the-counter medications, all delivered straight to your doorstep.</h4>
