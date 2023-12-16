@@ -107,8 +107,12 @@ function ManagePackages() {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")
         }
       });
-
-      setPackageList(response.data.packages);
+      const packagesWithId = response.data.packages.map(packageItem => ({
+        ...packageItem,
+        id: packageItem._id
+      }));
+  
+      setPackageList(packagesWithId);
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while fetching health packages: ' + error.message);
@@ -159,11 +163,12 @@ function ManagePackages() {
   const handleEdit = (packageItem) => {
     setEditPackage(packageItem);
     setEditedPackage({
+      id: packageItem.id, // Add this line to store the ID
       packageType: packageItem.packageType,
       subscriptionFees: packageItem.subsriptionFeesInEGP.toString(),
       doctorDiscount: packageItem.doctorDiscountInPercentage.toString(),
       medicineDiscount: packageItem.medicinDiscountInPercentage.toString(),
-      familyDiscount: packageItem.familyDiscountInPercentage.toString(),
+      familyDiscount: packageItem.familyDiscountInPercentage.toString()
     });
   };
 
@@ -172,16 +177,19 @@ function ManagePackages() {
   };
 
   const handleSaveEdit = async () => {
+    debugger;
     // Extract values from the editedPackage state
     const {
+      id, // Add this line to extract the ID
       packageType,
       subscriptionFees,
       doctorDiscount,
       medicineDiscount,
       familyDiscount,
     } = editedPackage;
-
+  
     const updatedPackage = {
+      id, // Add this line to include the ID in the request payload
       healthPackage: {
         packageType,
         subsriptionFeesInEGP: parseFloat(subscriptionFees),
@@ -190,16 +198,16 @@ function ManagePackages() {
         familyDiscountInPercentage: parseFloat(familyDiscount),
       }
     };
-
+  
     try {
       const response = await axios.put('http://localhost:8000/admin/updateHealthPackage', updatedPackage, {
         headers: {
           Authorization: 'Bearer ' + sessionStorage.getItem("token")
         }
       });
-
+  
       const data = response.data;
-
+  
       if (data.success) {
         alert('Health package updated successfully.');
         fetchHealthPackages();
