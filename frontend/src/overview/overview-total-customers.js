@@ -28,13 +28,13 @@ export const OverviewTotalCustomers = (props) => {
   };
 
   const fetchTotalPatientsAdmin = async () => {
-    let response = await axios.get('http://localhost:8000/admin/getAllUsers', {
+    let response = await axios.get('http://localhost:8000/admin/getAllUsers/0', {
       headers: {
         Authorization: 'Bearer ' + sessionStorage.getItem('token')
       }
     });
     console.log(response);
-    setPatientCount(response.data.Result);
+    setPatientCount(response.data.Result.length);
   }
 
   return (

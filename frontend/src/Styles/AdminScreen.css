@@ -10,6 +10,10 @@
 
 }
 
+.homePage{
+    cursor: pointer;
+}
+
 
 label{
     padding: 1%;
@@ -40,3 +44,6 @@ input{
     background: #8080805e!important;
 }
   
+.css-1e6y48t-MuiButtonBase-root-MuiButton-root{
+    color: black !important;
+}

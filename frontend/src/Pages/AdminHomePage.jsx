@@ -6,9 +6,18 @@ import { OverviewTotalCustomers } from '../overview/overview-total-customers';
 import { OverviewTotalSales } from '../overview/overview-total-sales';
 import { OverviewOrdersProgress } from '../overview/overview-orders-progress';
 import { OverviewSales } from '../overview/overview-sales';
-import { OverviewLatestOrders } from '../overview/overview-latest-orders';
+import { OverviewLatestUsers } from '../overview/overview-latest-users';
 import { OverviewLatestMedicines } from '../overview/overview-latest-medicines';
 import { Box, Container, Unstable_Grid2 as Grid } from '@mui/material';
+import ArrowDownIcon from '@heroicons/react/24/solid/ArrowDownIcon';
+import { Button } from '@mui/material';
+import ArrowUpIcon from '@heroicons/react/24/solid/ArrowUpIcon';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
+import { Avatar, Card, CardContent, Stack, SvgIcon, Typography } from '@mui/material';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PeopleIcon from '@mui/icons-material/People';
+import AdminNavBar from '../components/Admin-NavBar';
 import { styled } from '@mui/material/styles';
 
 const Item = styled(Box)(({ theme }) => ({
@@ -26,6 +35,7 @@ const AdminHomePage = () => {
   return (
     require('../Styles/Admin.css'),
     <>
+      <AdminNavBar />
       <Box
         component="main"
         sx={{
@@ -111,71 +121,158 @@ const AdminHomePage = () => {
               md={12}
               lg={8}
             >
-              <OverviewLatestOrders
-                orders={[
-                  {
-                    id: 'f69f88012978187a6c12897f',
-                    ref: 'DEV1049',
-                    amount: 30.5,
-                    customer: {
-                      name: 'Ekaterina Tankova'
-                    },
-                    createdAt: 1555016400000,
-                    status: 'pending'
-                  },
-                  {
-                    id: '9eaa1c7dd4433f413c308ce2',
-                    ref: 'DEV1048',
-                    amount: 25.1,
-                    customer: {
-                      name: 'Cao Yu'
-                    },
-                    createdAt: 1555016400000,
-                    status: 'delivered'
-                  },
-                  {
-                    id: '01a5230c811bd04996ce7c13',
-                    ref: 'DEV1047',
-                    amount: 10.99,
-                    customer: {
-                      name: 'Alexa Richardson'
-                    },
-                    createdAt: 1554930000000,
-                    status: 'refunded'
-                  },
-                  {
-                    id: '1f4e1bd0a87cea23cdb83d18',
-                    ref: 'DEV1046',
-                    amount: 96.43,
-                    customer: {
-                      name: 'Anje Keizer'
-                    },
-                    createdAt: 1554757200000,
-                    status: 'pending'
-                  },
-                  {
-                    id: '9f974f239d29ede969367103',
-                    ref: 'DEV1045',
-                    amount: 32.54,
-                    customer: {
-                      name: 'Clarke Gillebert'
-                    },
-                    createdAt: 1554670800000,
-                    status: 'delivered'
-                  },
-                  {
-                    id: 'ffc83c1560ec2f66a1c05596',
-                    ref: 'DEV1044',
-                    amount: 16.76,
-                    customer: {
-                      name: 'Adam Denisov'
-                    },
-                    createdAt: 1554670800000,
-                    status: 'delivered'
-                  }
-                ]}
+              <OverviewLatestUsers
                 sx={{ height: '100%' }}
               />
+            </Grid>
+
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={4}
+            >
+              <Item>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Stack
+                      alignItems="flex-start"
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                    >
+                      <Stack spacing={1}>
+                        <Typography
+                          color="text.secondary"
+                          variant="overline"
+                        >
+                          Add Admin
+                        </Typography>
+                        <Typography variant="p">
+                          Work load is getting too big? Add another admin to help you out!
+                        </Typography>
+                      </Stack>
+                      <Avatar
+                        sx={{
+                          backgroundColor: 'success.main',
+                          height: 56,
+                          width: 56
+                        }}
+                      >
+                        <SvgIcon>
+                          <AdminPanelSettingsIcon />
+                        </SvgIcon>
+                      </Avatar>
+                    </Stack>
+
+                    <Button variant="contained" style={{ width: '100%' }} className='flex text-center mt-4' color='success' onClick={() => navigate('/createAdmin')}>
+                      Add Admin
+                    </Button>
+
+                  </CardContent>
+                </Card>
+              </Item>
+            </Grid>
+
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={4}
+            >
+              <Item>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Stack
+                      alignItems="flex-start"
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                    >
+                      <Stack spacing={1}>
+                        <Typography
+                          color="text.secondary"
+                          variant="overline"
+                        >
+                          Review Applications
+                        </Typography>
+                        <Typography variant="p">
+                          Review applications from doctors and pharmacists who want to join your clinic.
+                        </Typography>
+                      </Stack>
+                      <Avatar
+                        sx={{
+                          backgroundColor: 'error.main',
+                          height: 56,
+                          width: 56
+                        }}
+                      >
+                        <SvgIcon>
+                          <PeopleIcon />
+                        </SvgIcon>
+                      </Avatar>
+                    </Stack>
+
+                    <div className='flex justify-content-center' style={{ gap: '2rem' }}>
+                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => navigate('/docApplicationList')}>
+                        Doctors Applications
+                      </Button>
+
+                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => window.location.replace(`http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}`)}>
+                        Pharmacists Applications
+                      </Button>
+                    </div>
+
+                  </CardContent>
+                </Card>
+              </Item>
+            </Grid>
+
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={4}
+            >
+              <Item>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Stack
+                      alignItems="flex-start"
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                    >
+                      <Stack spacing={1}>
+                        <Typography
+                          color="text.secondary"
+                          variant="overline"
+                        >
+                          Health Packages
+                        </Typography>
+                        <Typography variant="p">
+                          Manage health packages and their prices.
+                        </Typography>
+                      </Stack>
+                      <Avatar
+                        sx={{
+                          backgroundColor: 'primary.main',
+                          height: 56,
+                          width: 56
+                        }}
+                      >
+                        <SvgIcon>
+                          <HealthAndSafetyIcon />
+                        </SvgIcon>
+                      </Avatar>
+                    </Stack>
+
+                    <Button variant="contained" style={{ width: '100%' }} className='flex text-center mt-4' color='primary' onClick={navigate('/managePackages')}>
+                      Manage Health Packages
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Item>
             </Grid>
           </Grid>
         </Container>
