@@ -675,7 +675,7 @@ router.get('/filterMedical/:MedicalUse', protect, async (req, res) => {
 
 });
 
-router.get('/getAllUsers', protect, async (req, res) => {
+router.get('/getAllUsers/:id', protect, async (req, res) => {
   try {
     if (req.user.__t !== 'Admin') {
       return res.status(500).json({
@@ -683,8 +683,12 @@ router.get('/getAllUsers', protect, async (req, res) => {
         message: "Not authorized"
       });
     }
-    const users = await User.find({ __t: { $ne: 'Admin' } });
-    res.status(200).json({ Result: users.length, success: true });
+    let users = {}
+    if (req.params.id == 0)
+      users = await User.find({ __t: { $ne: 'Admin' } });
+    else
+      users = await User.find({ _id: { $ne: req.user._id } });
+    res.status(200).json({ Result: users, success: true });
   }
 
   catch (error) {

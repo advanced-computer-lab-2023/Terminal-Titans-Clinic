@@ -50,49 +50,40 @@ export default function Pricing() {
         elevation={0}
         sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
       >
-         <Toolbar sx={{ flexWrap: 'wrap' }}>
-          {location.pathname!=='/admin'?
-           <Button
-           // hena link el chatting
-           style={{ color: 'black' }}
-           onClick={() => { navigate(-1) }}
-                      sx={{ my: 1, mx: 0 }}
-                      size="small"
-         >
-             <ArrowBackIosIcon />
-           
-         </Button>
-         
-            :null}
+        <Toolbar sx={{ flexWrap: 'wrap' }}>
+          {location.pathname !== '/admin' ?
+            <Button
+              // hena link el chatting
+              style={{ color: 'black' }}
+              onClick={() => { navigate(-1) }}
+              sx={{ my: 1, mx: 0 }}
+              size="small"
+            >
+              <ArrowBackIosIcon />
+
+            </Button>
+
+            : null}
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Health Plus+
+            <span className='homePage' onClick={goToHome}>Health Plus+</span>
           </Typography>
           <nav>
 
-            <Link>
-              <Button
-                style={{ color: 'black' , backgroundColor: 'rgb(220, 220, 220)'}}
-                onClick={() => { goToHome() }}
-                sx={{ my: 1, mx: 1.5 }}
-                >
-                Home Page
-              </Button>
-            </Link>
+
             <Button
               variant="button"
-              style={{ color: 'black' , backgroundColor: 'rgb(220, 220, 220)'}}
-              color="text.primary"
+              style={{ color: 'black !important', backgroundColor: 'rgb(220, 220, 220)' }}
               onClick={() => { setModalShow(true) }}
               sx={{ my: 1, mx: 1.5 }}
             >
               Change Password
             </Button>
+            <Button style={{ backgroundColor: 'rgb(220, 220, 220)' }} onClick={signoutButtonFunc}>Sign Out</Button>
           </nav>
 
-          <Button style={{ backgroundColor: 'rgb(220, 220, 220)'}} onClick={signoutButtonFunc}>Sign Out</Button>
         </Toolbar>
       </AppBar>
-      </div>
+    </div >
     // </ThemeProvider>
   );
 }
@@ -167,11 +158,11 @@ function MyVerticallyCenteredModal(props) {
           type="password"
           value={password}
           onChange={(e) => validatePass(e.target.value)}></input> <br />
-        {errorMessagePass && <p className={errorMessagePass !== 'Is Strong Password'?'error-msg':''}>{errorMessagePass}</p>}
+        {errorMessagePass && <p className={errorMessagePass !== 'Is Strong Password' ? 'error-msg' : ''}>{errorMessagePass}</p>}
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onHide}>Close</Button>
-        <Button variant="success" className={errorMessagePass !== 'Is Strong Password'?'fail-button':'success-button'} onClick={changePassword} disabled={errorMessagePass !== 'Is Strong Password'} style={{}} >Update Password</Button>
+        <Button variant="success" className={errorMessagePass !== 'Is Strong Password' ? 'fail-button' : 'success-button'} onClick={changePassword} disabled={errorMessagePass !== 'Is Strong Password'} style={{}} >Update Password</Button>
       </Modal.Footer>
     </Modal>
   );
