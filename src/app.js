@@ -202,6 +202,7 @@ wss.on('connection', async (connection, req) => {
 		// }
 		if (recipient && (text || file)) {
 			console.log('message', messageData);
+			console.log('Anaa hennnaaa',connection.userId);
 			const messageDoc = await Message.create({
 				sender: connection.userId,
 				recipient,
