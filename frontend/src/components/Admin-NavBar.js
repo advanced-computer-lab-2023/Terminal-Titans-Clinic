@@ -118,7 +118,7 @@ function MyVerticallyCenteredModal(props) {
       if (data.success) {
         alert("Password Changed Successfully")
         sessionStorage.removeItem('token');
-        window.location.href = 'http://localhost:3000/Health-Plus/admin';
+        window.location.href = 'http://localhost:3000/Health-Plus';
       }
       else {
         alert(data.message)
