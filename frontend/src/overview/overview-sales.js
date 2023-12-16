@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import ArrowPathIcon from '@heroicons/react/24/solid/ArrowPathIcon';
 import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useState } from 'react';
 import {
   Button,
@@ -64,35 +66,132 @@ export const optionsYear = {
   },
 };
 
-export const labelsWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-export const dataWeek = {
-  labels: labelsWeek,
-  datasets: [
-    {
-      data: labelsWeek.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+export const labelsWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+export const fetchDataWeek = async () => {
+  let response = await axios.get('http://localhost:7000/Admin/totalSalesReportWeek', {
+    headers: {
+      Authorization: 'Bearer ' + sessionStorage.getItem('token')
     }
-  ],
-};
+  });
+  console.log(response.data.Result.totalSales);
+  let res = []
+  for (let i = 0; i < response.data.Result.totalSales.length; i++) {
+    res[i] = response.data.Result.totalSales[i]
+  }
+  return res;
+}
 
 export const labelsYear = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-export const dataYear = {
-  labels: labelsYear,
-  datasets: [
-    {
-      data: labelsYear.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+export const fetchDataYear = async () => {
+  let temp = []
+  for (let i = 1; i < 13; i++) {
+    try {
+      let response = await axios.get('http://localhost:7000/Admin/totalSalesReport/' + i, {
+        headers: {
+          Authorization: 'Bearer ' + sessionStorage.getItem('token')
+        }
+      });
+      console.log(response.data.Result.totalSales);
+      temp[i - 1] = response.data.Result.totalSales;
     }
-  ],
-};
+    catch (err) {
+      temp[i - 1] = 0;
+    }
+  }
+  return temp;
+}
+
+
 
 export let OverviewSales = (props) => {
   const { sx, salesType } = props;
 
+  const [dataYear, setDataYear] = useState({
+    labels: labelsYear,
+    datasets: [
+      {
+        data: [], // Initially set an empty array
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      }
+    ],
+  });
+
+  const [dataWeek, setDataWeek] = useState({
+    labels: labelsWeek,
+    datasets: [
+      {
+        data: [0, 0, 0, 0, 0, 0, 0],
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      }
+    ],
+  });
+
   useEffect(() => {
-    console.log('salesType', salesType);
-  }, []);
+    const fetchDataAndSetDataYear = async () => {
+      const result = await fetchDataYear();
+      setDataYear(prevData => ({
+        ...prevData,
+        datasets: [{
+          ...prevData.datasets[0],
+          data: result,
+        }],
+      }));
+    };
+
+    fetchDataAndSetDataYear();
+
+    const fetchDataAndSetDataWeek = async () => {
+      const result = await fetchDataWeek();
+      setDataWeek(prevData => ({
+        ...prevData,
+        datasets: [{
+          ...prevData.datasets[0],
+          data: result,
+        }],
+      }));
+    }
+
+    fetchDataAndSetDataWeek();
+  }, []); // Run only once on component mount
+
+  // useEffect(() => {
+  //   console.log('salesType', salesType);
+  //   // if (salesType == 'year') {
+  //   //   fetchDataYear();
+  //   // }
+  //   // else {
+  //   //   fetchDataWeek();
+  //   // }
+  // }, []);
+
+  // const fetchDataYear = async () => {
+  //   let temp = []
+  //   for (let i = 1; i < 13; i++) {
+  //     try {
+  //       let response = await axios.get('http://localhost:7000/Admin/totalSalesReport/' + i, {
+  //         headers: {
+  //           Authorization: 'Bearer ' + sessionStorage.getItem('token')
+  //         }
+  //       });
+  //       console.log(response.data.Result.totalSales);
+  //       temp[i - 1] = response.data.Result.totalSales;
+  //     }
+  //     catch (err) {
+  //       temp[i - 1] = 0;
+  //     }
+  //   }
+  //   setDataYear(temp)
+  // }
+
+  // const fetchDataWeek = async () => {
+  //   let response = await axios.get('http://localhost:7000/Admin/totalSalesReportWeek', {
+  //     headers: {
+  //       Authorization: 'Bearer ' + sessionStorage.getItem('token')
+  //     }
+  //   });
+  //   console.log(response);
+  //   setDataWeek(response.data.Result.totalSales);
+  // }
 
   return (
     <Card sx={sx}

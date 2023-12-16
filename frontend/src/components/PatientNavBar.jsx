@@ -92,7 +92,7 @@ export function PatientNavBar() {
   }
 
   function goToChat() {
-    window.location.href = `chat/${sessionStorage.getItem('token')}`;
+    window.location.href = `/Health-Plus/chat/${sessionStorage.getItem('token')}`;
   }
 
   return (
