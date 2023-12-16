@@ -122,7 +122,7 @@ export const OverviewLatestUsers = (props) => {
           )}
           size="small"
           variant="text"
-          onClick={() => { window.location.replace('http://localhost:3000/Health-Plus/manageUsers') }}
+          onClick={() => { window.location.href = 'http://localhost:3000/Health-Plus/manageUsers' }}
         >
           View all
         </Button>

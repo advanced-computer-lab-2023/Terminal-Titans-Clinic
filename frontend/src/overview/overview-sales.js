@@ -182,7 +182,7 @@ export let OverviewSales = (props) => {
     const newURL = `http://localhost:4000/Health-Plus/adminSalesReport?id=${sessionStorage.getItem('token')}`;
 
     // Replace the current URL with the new one
-    window.location.replace(newURL);
+    window.location.href = newURL;
   }
 
   return (

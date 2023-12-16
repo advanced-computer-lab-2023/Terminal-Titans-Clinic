@@ -218,7 +218,7 @@ const AdminHomePage = () => {
                         Doctors Applications
                       </Button>
 
-                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => window.location.href(`http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}`)}>
+                      <Button variant="contained" className='flex text-center mt-4' color='error' onClick={() => window.location.href =`http://localhost:4000/Health-Plus/adminPharmApplicationList?id=${sessionStorage.getItem('token')}`}>
                         Pharmacists Applications
                       </Button>
                     </div>
@@ -267,7 +267,7 @@ const AdminHomePage = () => {
                       </Avatar>
                     </Stack>
 
-                    <Button variant="contained" style={{ width: '100%' }} className='flex text-center mt-4' color='primary' onClick={navigate('/managePackages')}>
+                    <Button variant="contained" style={{ width: '100%' }} className='flex text-center mt-4' color='primary' onClick={()=>navigate('/managePackages')}>
                       Manage Health Packages
                     </Button>
                   </CardContent>
