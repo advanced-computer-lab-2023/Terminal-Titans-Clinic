@@ -5,14 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { Carousel } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { OverviewTotalCustomers } from '../overview/overview-total-doctors';
-import { OverviewTotalProfit } from '../overview/overview-total-profitPat';
+import { OverviewTotalProfit } from '../overview/overview-total-med';
 import { OverviewLatestPatients } from '../overview/overview-latest-doctors';
 import { Container, Grid, Box } from '@mui/material';
 import { Card, CardContent, CardMedia, Typography } from '@mui/material';
 import { CardActions } from '@mui/material';
 import { Paper } from '@mui/material';
 import style from '../Styles/DoctorHome.css';
-import { PatientNavBar } from './PatientNavBar.jsx';
+import { GuestNavBar } from '../components/guestNavBar';
 
 
 
@@ -27,9 +27,10 @@ const DoctorHome = () => {
 
   const followUpDoc = () => navigate('/acceptRejectFollowUp');
   const prescription = () => navigate('/allPresDoc');
+
   return (
     <>
-    <PatientNavBar/>
+    <GuestNavBar/>
       <Carousel fade={true}>
         <Carousel.Item>
           <div className='blackScreen'></div>
@@ -38,7 +39,7 @@ const DoctorHome = () => {
             <h2 className="captionText">View Doctors List</h2>
             <h4 className="captionText">View our  skilled doctors and their specialized fields.
       Book appointments effortlessly at competitive prices.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }} onClick={goToViewDoctorList}>View Doctors</Button>
+            {/* <Button className="navButton" style={{ minWidth: "150px" }} onClick={goToViewDoctorList}>View Doctors</Button> */}
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -47,7 +48,7 @@ const DoctorHome = () => {
           <Carousel.Caption>
             <h2 className="captionText">View Appointments List</h2>
             <h4 className="captionText">Check your upcoming appointments and manage your schedule.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }} onClick={viewAppointments}>View Appointments</Button>
+            {/* <Button className="navButton" style={{ minWidth: "150px" }} onClick={viewAppointments}>View Appointments</Button> */}
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -56,7 +57,7 @@ const DoctorHome = () => {
           <Carousel.Caption>
             <h2 className="captionText"> Health Packages Offers</h2>
             <h4 className="captionText">Discover various health packages tailored to your needs from here.Get comprehensive health checkups and insights for a healthier life</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }} onClick={healthPackages}>View Offers</Button>
+            {/* <Button className="navButton" style={{ minWidth: "150px" }} onClick={healthPackages}>View Offers</Button> */}
           </Carousel.Caption>
         </Carousel.Item>
       </Carousel>

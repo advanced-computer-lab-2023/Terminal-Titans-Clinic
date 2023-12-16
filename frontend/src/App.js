@@ -61,6 +61,7 @@ import MedPharm from './Pages/MedPagePharm.js'
 import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
 import Reschdule from "./Pages/Reschedule.js";
 import FollowUp from "./Pages/FollowUp.js";
+import GuestHome from "./Pages/GuestHome.js";
 
 
 function App() {
@@ -85,7 +86,7 @@ function App() {
           <Route path="/createAdmin" element={<CreateAdmin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/patientHome" element={<PatientHome />} />
+          <Route path="/patientHome" element={<Patient />} />
           <Route path="/doctorHome" element={<Doctor />} />
           <Route path="/notifications" element={<Notification />} />
 
@@ -108,7 +109,7 @@ function App() {
           <Route path="/adminPharm" element={<AdminPharmPage />} />
           <Route path="/meeting" element={<Room />} />
           <Route path="/chat/:token" element={<Chat />} />
-          <Route path="/" element={<SignIn />} />
+          <Route path="/" element={<GuestHome />} />
           <Route path="/viewMyProfile/:id" element={<ViewMyProfile />} />
           <Route path="/appointmentCheckout" element={<AppointmentCheckout />} />
           <Route path="/patientRecord" element={<PatientRecord />} />
@@ -131,6 +132,8 @@ function App() {
           <Route path="/reschduleDoc" element={<ReschduleDoc />} />
           <Route path="/followUpDoc" element={<FollowUpDoc />} />
           <Route path="/allPresDoc" element={<AllPresDoc />} />
+
+          <Route path="/signIn" element={<SignIn />} />
 
         </Routes>
       </Router>
