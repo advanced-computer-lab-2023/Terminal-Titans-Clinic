@@ -167,18 +167,16 @@ export default function ShowAvailableSlots() {
     return (
         <div>
             <PatientNavBar/>
-            <div style={{backgroundColor:'black'}}>
-            <h1 style={{textAlign:'center',color:'white'}}>Book Appointment</h1>
-            </div>
+           
             <div style={{display:'inline'}}>
-            <div style={{display:'flex'}}>
-            <h4 style={{marginRight:'10px'}}>Step one: Choose the patient:   </h4>
+            <div style={{display:'flex', marginTop:'10px'}}>
+            <h4 style={{marginRight:'10px', marginTop:'10px'}}>Step one: Choose the patient:   </h4>
             <Box sx={{ minWidth: 220 }}>
             <FormControl fullWidth >
          <InputLabel id="demo-simple-select-label">Patient</InputLabel>
         <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
+             labelId="demo-simple-select-standard-label"
+             id="demo-simple-select-standard"
             value={FamMemId}
             label="Patient"
             

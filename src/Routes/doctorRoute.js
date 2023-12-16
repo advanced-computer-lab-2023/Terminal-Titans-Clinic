@@ -991,10 +991,10 @@ router.get('/getPatientsList2', protect, async (req, res) => {
         }
 
         console.log(result)
-        if (result.length == 0) {
-            res.status(400).json({ message: "No patient found", success: false })
-        }
-        else
+        // if (result.length == 0) {
+        //     res.status(400).json({ message: "No patient found", success: false })
+        // }
+        // else
             res.status(200).json({ Result: result, success: true })
     } catch (err) {
         console.error(err.message)
@@ -1249,7 +1249,40 @@ router.post('/addavailableslots', protect, async (req, res) => {
             Date: startDate,
         });
         availableSlots.save();
-        return res.status(200).json({ Result: availableSlots, success: true })
+        const appointments = await appointmentModel.find({ DoctorId: req.user._id, Status: "upcoming" });
+        var slots = await docAvailableSlots.find({ DoctorId: req.user._id });
+        console.log(slots);
+        var result = {};
+        for (var x in slots) {
+            var date = slots[x].Date;
+            const temp = date.toISOString();
+            const dateKey = temp.substring(0, 10);
+    
+            if (result[dateKey]) {
+                result[dateKey].push(date);
+            }
+            else {
+                result[dateKey] = [date];
+            }
+        }
+    
+        for (var x in appointments) {
+            var date = appointments[x].Date;
+            const day = date.getDate() + 1;
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const dateKey = year + "-" + month + "-" + day;
+    
+            if (result[dateKey]) {
+                result[dateKey].push(date);
+            }
+            else {
+                result[dateKey] = [date];
+            }
+        }
+        console.log(result);
+        return res.status(200).json(result);
+       // return res.status(200).json({ Result: availableSlots, success: true })
     }
 
     catch (error) {

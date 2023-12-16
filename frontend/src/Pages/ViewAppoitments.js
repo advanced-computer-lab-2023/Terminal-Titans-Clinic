@@ -221,11 +221,8 @@ No</Button>
     return (
         <div>
           <PatientNavBar/>
-    <div   style={{ width: "100% ",backgroundColor:'black' }}>
-           
-           <h1 style={{color:'white', textAlign:'center'}}>Appointments List </h1>
-           </div>
-    <Button variant="outline-dark" style={{ float: 'right' }} onClick={handleClick}>
+   
+          <Button variant="outline-dark" style={{ float: 'right' }} onClick={handleClick}>
       <FilterListIcon />
       Filter
     </Button>
@@ -281,6 +278,13 @@ No</Button>
 <br></br>
         <Table striped bordered hover >
             <thead >
+            
+                <tr>
+                  
+                    <th colSpan={6} style={{ fontSize: '24px' }}>Appointment List</th>
+                   
+
+              </tr>
               <tr>
                 <th>Doctor Name</th>
                 <th>Family Member</th>
