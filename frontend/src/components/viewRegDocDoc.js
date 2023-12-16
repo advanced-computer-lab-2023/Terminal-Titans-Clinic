@@ -3,6 +3,8 @@ import axios from 'axios';
 import DocumentCard from './DocumentCard';
 import { useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
+import Nav from "../components/Admin-NavBar.js";
+
 
 
 
@@ -76,8 +78,8 @@ const rejectDoctor = async (username) => {
   console.log(user);
 
   return (
-    <div>
     
+    <div>
 
   <div>
 
