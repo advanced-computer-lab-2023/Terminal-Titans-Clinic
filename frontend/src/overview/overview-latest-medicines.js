@@ -178,7 +178,7 @@ export const OverviewLatestMedicines = (props) => {
                     )}
                     size="small"
                     variant="text"
-                    onClick={() => { window.location.replace(`http://localhost:4000/Health-Plus/adminAvailableMeds?id=${sessionStorage.getItem('token')}`) }}
+                    onClick={() => { window.location.href = `http://localhost:4000/Health-Plus/adminAvailableMeds?id=${sessionStorage.getItem('token')}` }}
                 >
                     View all
                 </Button>

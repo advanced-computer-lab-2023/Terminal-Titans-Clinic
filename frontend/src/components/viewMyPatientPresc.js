@@ -232,10 +232,10 @@ useEffect(()=>{
                 
                 </DownloadIcon>
                   </Button>:null}
-               
+               {currPresc.status==='not filled'?
                   <Button variant="dark" style={{ width: '45%' }} onClick={() => {  window.location.href = `/Health-Plus/addPresc?Id=${currPresc.id}`; }}>
                     Edit Prescription
-                  </Button>
+                  </Button>:null}
                 </div>
                     <div className="form-group">
                        

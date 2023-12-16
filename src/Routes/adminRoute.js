@@ -183,7 +183,6 @@ router.post('/addHealthPackage', protect, async (req, res) => {
 
 //requirement number 10
 router.put('/updateHealthPackage', protect, async (req, res) => {
-  const packageType = req.body.healthPackage.packageType;
   try {
     const exist = await Admin.findById(req.user);
     if (!exist) {
@@ -192,7 +191,7 @@ router.put('/updateHealthPackage', protect, async (req, res) => {
         message: "You are not an admin"
       });
     }
-    const existingPackage = await HealthPackage.findOne({ packageType: packageType });
+    const existingPackage = await HealthPackage.findById(req.body.id);
     let newPackage = req.body.healthPackage
     if (existingPackage) {
       await HealthPackage.findByIdAndUpdate(existingPackage._id, newPackage);

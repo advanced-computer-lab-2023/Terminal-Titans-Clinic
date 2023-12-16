@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import Button from '@mui/material/Button';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 
 export default function Chat() {
@@ -276,8 +277,20 @@ export default function Chat() {
             </div>
             <div className="bg-white w-1/3 flex flex-col">
                 <div className="flex-grow">
+                    <div style={{display:'flex'}}>
+                {/* <Button
+              // hena link el chatting
+              style={{ color: 'black' }}
+              onClick={() => { navigate(-1) }}
+              sx={{ my: 1, mx: 0,marginRight:'-30px' }}
+              size="small"
+            >
+              <ArrowBackIosIcon />
+
+            </Button> */}
                     <div onClick={goToHome} className="logo">
                         <Logo />
+                    </div>
                     </div>
                     {Object.keys(onlinePeople).map(userId => (
                         <Contact

@@ -221,7 +221,14 @@ router.get('/getWalletAmount', protect, async (req, res) => {
     result.Amount = exists.Wallet;
     return res.status(200).json(result);
 })
+router.get('/getNmberOfMed', async (req, res) => {
 
+//    const amount=MedicineModel.estimatedDocumentCount()
+const amount=await MedicineModel.countDocuments();
+    var result = {};
+    result.Amount = amount;
+    return res.status(200).json(result);
+});
 router.post('/addRegFamilyMembyNum', protect, async (req, res) => {
     const exist = patientModel.findOne(req.user);
     if (!exist) {
@@ -3772,5 +3779,60 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
         console.error('Error getting prescription', error.message);
     }
 });
+router.get('/getTotalDoctors', async (req, res) => {
+    try {
+       
+      
 
+        //const patients = await appointmentModel.distinct('PatientId', { DoctorId: req.user._id });
+const doctors=await doctorModel.find();
+        res.status(200).json({
+            success: true,
+            patients: doctors.length
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal error"
+        });
+    }
+});
+router.get('/getDoctorsList2', async (req, res) => {
+    try {
+      
+
+       
+
+        let result = []
+
+        
+            //const hasSameId=false
+            const doctors = await doctorModel.find();
+            for (var i in doctors) {
+                let pat = {
+                    "Name": doctors[i].Name,
+                    "Education": doctors[i].Education,
+                    "Affiliation": doctors[i].Affiliation,
+                    "Speciality": doctors[i].Speciality,
+                    "id": doctors[i]._id,
+                    
+                }
+                result.push(pat);
+            }
+           
+        
+
+       
+        // if (result.length == 0) {
+        //     res.status(400).json({ message: "No patient found", success: false })
+        // }
+        // else
+            res.status(200).json({ Result: result, success: true })
+    } catch (err) {
+        console.error(err.message)
+        res.status(400).json({ message: err.message, success: false })
+    }
+});
 export default router;

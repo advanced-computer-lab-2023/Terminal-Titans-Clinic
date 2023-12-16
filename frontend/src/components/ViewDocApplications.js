@@ -68,22 +68,28 @@ function ViewDocApplications() {
 
     return (
         <div>
-        <Nav/>
-        <div>
-          <div style={{ width: "100%", padding: '10px' }}>
-            <h1 style={{ color: 'white', textAlign: 'center',backgroundColor: 'black',borderRadius:'15px' }}>Requested Doctors List </h1>
+          <Nav />
+          <div>
+            <div style={{ width: "100%", padding: '10px' }}>
+              <h1 style={{ color: 'white', textAlign: 'center', backgroundColor: 'black', borderRadius: '15px' }}>Requested Doctors List </h1>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+              {doctors.length === 0 ? (
+                <div style={{ width: '100%', textAlign: 'center', marginTop: '50px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', padding: '20px', borderRadius: '8px' }}>
+                  <h3>No doctor requests at the moment</h3>
+                </div>
+              ) : (
+                doctors.map((doctor, index) => (
+                  <DoctorCard
+                    key={index}
+                    doctor={doctor}
+                    onAccept={acceptDoctor}
+                    onReject={rejectDoctor}
+                  />
+                ))
+              )}
+            </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-            {doctors.map((doctor, index) => (
-              <DoctorCard
-                key={index}
-                doctor={doctor}
-                onAccept={acceptDoctor}
-                onReject={rejectDoctor}
-              />
-            ))}
-          </div>
-        </div>
         </div>
       );
 

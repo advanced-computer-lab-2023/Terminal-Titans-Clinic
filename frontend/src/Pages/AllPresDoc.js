@@ -176,10 +176,10 @@ const   AllPresDoc = () => {
                 Download PDF
                 
                   </Button>:null}
-               
+               {prescriptions[curId]?.status==='not filled'?
                   <Button variant="dark" style={{ width: '47%' }} onClick={() => {  window.location.href = `/Health-Plus/addPresc?Id=${prescriptions[curId]?.id}`; }}>
                     Edit Prescription
-                  </Button>
+                  </Button>:null}
                   </div>
 
                 </form>
