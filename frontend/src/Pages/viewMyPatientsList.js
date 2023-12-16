@@ -124,7 +124,8 @@ const getPatientName= async () => {
                 </tr>
             </thead>
             <tbody>
-                {patients.map((patient, index) => (
+                {patients.map((patient, index) => 
+                (  (checked===false || (checked && patient.upcoming)) ?
                     <tr>
                         <React.Fragment key={index}>
                           
@@ -139,7 +140,7 @@ const getPatientName= async () => {
                               </Button>
                               </td>
                               </React.Fragment>
-                    </tr>
+                    </tr> : null
                 ))}
             </tbody>
         </Table >

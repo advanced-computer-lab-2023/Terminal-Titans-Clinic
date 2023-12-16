@@ -24,6 +24,7 @@ const DoctorHome = () => {
   const addAvailableTimeSlots = () => navigate('/addAvailableSlots');
 
   const followUpDoc = () => navigate('/acceptRejectFollowUp');
+  const prescription = () => navigate('/allPresDoc');
 
   return (
     <>
@@ -130,7 +131,7 @@ const DoctorHome = () => {
                     </Typography>
                   </CardContent>
                   <CardActions className=''>
-                    <Button size="small" className='w-100'>View Perscriptions</Button>
+                    <Button size="small" className='w-100'onClick={prescription}>View Perscriptions</Button>
                   </CardActions>
                 </Card>
               </Grid>

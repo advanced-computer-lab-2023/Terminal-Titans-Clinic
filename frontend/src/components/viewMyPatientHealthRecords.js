@@ -75,6 +75,14 @@ function arrayBufferToBase64(buffer) {
        { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
    ).then(() => {
     setUpload('true');
+    // const data = response.data;
+    //         console.log(data)
+    //         setUserHealthRecords(data.Result.healthDoc)
+    //         console.log(data.Result.healthDoc)
+    //         if(data.Result.healthDoc.length>0){
+    //             const src=`data:application/pdf;base64,${arrayBufferToBase64(data.Result.healthDoc[0].data)}`
+    //             setCurDoc(src)
+    //         }
 
   }).catch((err) => alert(err.message));
      // if (response.status === 200) {
@@ -149,9 +157,12 @@ useEffect(()=>{
       </div>
       <div style={{width: "80%"}}>
         <div style={{ }}>
+          {userHealthRecords.length===0?<Typography> No Health Records</Typography>:
+          <div>
       <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthRecords.length} page={index+1} onChange={handleChange} />
       <Typography>Showing: Document {index+1}</Typography>
-
+                </div>
+      }
       <div >
       <iframe src={curDoc}  width="800" height="600"></iframe>
    </div>

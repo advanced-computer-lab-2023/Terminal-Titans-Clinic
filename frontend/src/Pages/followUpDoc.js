@@ -69,13 +69,13 @@ export default function FollowUpDoc() {
         var valMonth=dateTemp.getMonth()+1;
         const valYear=dateTemp.getFullYear();
         
-        const keyDate=valYear+"-"+valMonth+"-"+valDay;
 
         if(valMonth<10)
             valMonth="0"+valMonth;
         if(valDay<10)
             valDay="0"+valDay;
-     
+            const keyDate=valYear+"-"+valMonth+"-"+valDay;
+
         var allSlots = new Array(48).fill(true);
         if(freeSlots[keyDate]){
             freeSlots[keyDate].forEach(element => {
@@ -142,8 +142,8 @@ export default function FollowUpDoc() {
     return (
         <div>
           <DoctorNavBar/>
-            <div style={{backgroundColor:'black'}}>
-            <h1 style={{textAlign:'center',color:'white'}}>Choose Date for Followup</h1>
+            <div style={{}}>
+            <h1 style={{}}>Choose Date for Followup</h1>
             </div>
         <div style={{display:'flex',height:'10%'}}>
         <div style={{width:'50%'}}>

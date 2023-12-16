@@ -217,15 +217,18 @@ const   AllPresDoc = () => {
     return (
         <div>
           <PatientNavBar/>
-    <div   style={{ width: "100% ",backgroundColor:'black' }}>
-           
-           <h1 style={{color:'white', textAlign:'center'}}>Prescriptions List </h1>
-           </div>
+    
    
     
 
         <Table striped bordered hover >
             <thead >
+            <tr>
+                  
+                  <th colSpan={6} style={{ fontSize: '24px' }}>Prescription List</th>
+                 
+
+            </tr>
               <tr>
                 <th>Patient Name</th>
                 

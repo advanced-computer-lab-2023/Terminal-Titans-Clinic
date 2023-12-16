@@ -417,9 +417,25 @@ router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
     var slots = await docAvailableSlots.find({ DoctorId: req.params.id });
     console.log("359")
     var result = {};
+    var app=await appointmentModel.find({PatientId:exists._id,Status:"upcoming"})
     for (var x in slots) {
         var date = slots[x].Date;
-        
+        //check if date is in app
+        var flag=true;
+        if(app){
+            //app is list of appointments
+            for(var y in app){
+                console.log(app[y].Date)
+                console.log(date)
+                console.log(app[y].Date.toISOString()==date.toISOString())
+                if(app[y].Date.toISOString()==date.toISOString()){
+                    flag=false;
+                    break;
+                }   
+            }
+        }
+        if(flag){
+
         const temp=date.toISOString();
         const dateKey=temp.substring(0,10);
 
@@ -429,6 +445,7 @@ router.get('/getAllFreeSlots/:id', protect, async (req, res) => {
         else {
             result[dateKey] = [date];
         }
+    }
     }
 
     console.log("done");
@@ -442,12 +459,30 @@ router.get('/getAllFreeSlots2/:id', protect, async (req, res) => {
     }
     //const appointments = await appointmentModel.find({ DoctorId: req.user._id ,Status:"upcoming"});
     console.log("357");
-    var app=await appointmentModel.findById(req.params.id);
-    var slots = await docAvailableSlots.find({ DoctorId: app.DoctorId });
+    var appoint=await appointmentModel.findById(req.params.id);
+    var slots = await docAvailableSlots.find({ DoctorId: appoint.DoctorId });
+    const app=await appointmentModel.find({PatientId:exists._id,Status:"upcoming"})
     console.log("359")
     var result = {};
     for (var x in slots) {
+        var flag=true;
         var date = slots[x].Date;
+        
+        if(app){
+            //app is list of appointments
+            for(var y in app){
+                console.log(app[y].Date)
+                console.log(date)
+                console.log(app[y].Date.toISOString==date.toISOString)
+
+                if(app[y].Date.toISOString()==date.toISOString()){
+                    flag=false;
+                    break;
+                }   
+            }
+        }
+        if(flag){
+
         const temp=date.toISOString();
         const dateKey=temp.substring(0,10);
 
@@ -457,6 +492,7 @@ router.get('/getAllFreeSlots2/:id', protect, async (req, res) => {
         else {
             result[dateKey] = [date];
         }
+    }
     }
 
     console.log("done");
@@ -892,20 +928,47 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const doc = await doctorModel.findById(Did);
 
     var date = appointment.Date;
-    const temp=date.toISOString()
-    date=new Date(temp);
-    console.log(date);
-    //const maxdate = date.setHours(date.getHours() - 24);
-    const maxdate=date;
-    const currdate = new Date();
-    console.log(currdate);
-    console.log(maxdate);
+    const tempDate=date.toISOString()
+    //split date and time
+    // let localDate = date.toLocaleString();
+    // date=new Date(tempDate);
+    // console.log(date);
+    // const maxdate = localDate.setHours(localDate.getHours() - 24);
+    // //const maxdate=date;
+    // let localDateCur = new Date();
+    // const currdate = localDateCur.toLocaleString();
+    // currdate=currdate.setHours(currdate.getHours() + 22);
+    // currdate=currdate.toISOString();
+    // console.log(currdate);
+    // console.log(maxdate);
+    const dateFromDB = new Date(tempDate);
 
+// Get the current time
+var currentTime = new Date();
+currentTime.setHours(currentTime.getHours() + 2);
 
+// Calculate the time difference in milliseconds
+const timeDifference = dateFromDB-currentTime ;
+
+// Define milliseconds in 24 hours
+const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
+    giveDoctorMoney(req, res, doc, -appointment.Price / 1.1);
+console.log(timeDifference)
+console.log(currentTime)
+console.log(dateFromDB)
+    if (timeDifference > millisecondsIn24Hours) {
+
+        patient.Wallet = patient.Wallet + appointment.Price;
+
+       
+            await patientModel.findByIdAndUpdate(Pid, patient);
+            console.log('you have recieved your refund successfully');
+    }
+           
     const DmailResponse = await mailSender(
         doc.Email,
         "cancelled:appointment",
-        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${temp}<p>`
+        `<p>Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${tempDate}<p>`
 
     );
     if (DmailResponse) {
@@ -920,7 +983,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const mailResponse = await mailSender(
         patient.Email,
         "cancelled:appointment",
-        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${temp}<p>`
+        `<p>It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${tempDate}<p>`
 
     );
     if (mailResponse) {
@@ -933,7 +996,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const DnewNotification = new notificationModel({
         userId: Did,
-        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${temp}`,
+        Message: `Patient:  ${patient.Name} cancelled his appointment which was supposed to be on the following date: ${tempDate}`,
         type: "Appointment",
     });
 
@@ -941,77 +1004,45 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
 
     const newNotification = new notificationModel({
         userId: Pid,
-        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${temp}`,
+        Message: `It is confirmed. You cancelled your appointment with doctor: ${doc.Name} which was supposed to be on the following date: ${tempDate}`,
         type: "Appointment",
     });
 
     await newNotification.save();
     console.log('noticationsent');
 
+    
 
+    const temp=await appointmentModel.find({PatientId:Pid});
+    var final = [];
+    for (let x in temp) {///if you need the patient's name in front end
+        var result = {}
+        result.id=temp[x]._id;
+        const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
+        if (doctor && doctor.length > 0)
+            result.Name = doctor[0].Name;
+        result.Date = temp[x].Date;
+        result.Status = temp[x].Status;
+        if (temp[x].FamilyMemId) {
+            const famNam = await familyMemberModel.findOne({ _id: temp[x].FamilyMemId });
+            result.famMem = famNam.Name;
+        }
 
-    if (currdate < maxdate) {
+        final.push(result);
 
-        giveDoctorMoney(req, res, doc, -appointment.Price / 1.1);
-
-
-
-        patient.Wallet = patient.Wallet + appointment.Price;
-
-        try {
-            await patientModel.findByIdAndUpdate(Pid, patient);
-            console.log('you have recieved your refund successfully');
-            const temp=await appointmentModel.find({PatientId:Pid});
-            var final = [];
-            for (let x in temp) {///if you need the patient's name in front end
-                var result = {}
-                result.id=temp[x]._id;
-                const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-                if (doctor && doctor.length > 0)
-                    result.Name = doctor[0].Name;
-                result.Date = temp[x].Date;
-                result.Status = temp[x].Status;
-                if (temp[x].FamilyMemId) {
-                    const famNam = await familyMemberModel.findOne({ _id: temp[x].FamilyMemId });
-                    result.famMem = famNam.Name;
-                }
-        
-                final.push(result);
-        
-            }
-            console.log(final);
+    }
+    console.log(final);
             res.status(200).json(final);
 
 
             //return res.status(200).json({ appointment, message: "appointment is cancelled successfully and you have recieved a refund", success: true });
 
-        } catch (e) {
-            console.error('Error recieving your refund:', e.message);
-            return res.status(400).send({ error: e.message });
-        }
+      
 
 
-    }
-    else {
-        var final = [];
-        const temp=await appointmentModel.find({PatientId:Pid});
-        for (let x in temp) {///if you need the patient's name in front end
-            var result = {}
-            result.id=temp[x]._id;
-            const doctor = await doctorModel.find({ _id: temp[x].DoctorId })
-            if (doctor && doctor.length > 0)
-                result.Name = doctor[0].Name;
-            result.Date = temp[x].Date;
-            result.Status = temp[x].Status;
-            if (temp[x].FamilyMemId) {
-                const famNam = await familyMemberModel.findOne({ _id: temp[x].FamilyMemId });
-                result.famMem = famNam.Name;
-            }
-        
-            final.push(result);
-        }
-            res.status(200).json(final);
-    }
+    
+  
+    
         //return res.status(200).json({ appointment, message: "appointment is cancelled successfully, however, you did not recieve a refund", success: true });
     
 
@@ -2266,10 +2297,18 @@ const calculateFees = (fees, discount) => {
 };
 
 const giveDoctorMoney = async (req, res, doctor, fees) => {
-    doctor.Wallet = doctor.Wallet + fees;
-
+    const newWallet = doctor.Wallet + fees;
+console.log(doctor.Wallet)
+console.log(doctor.Name)
+console.log(doctor._id)
     try {
         await doctorModel.findByIdAndUpdate(doctor._id, doctor);
+        const updatedDoctor = await doctorModel.findOneAndUpdate({ _id: doctor._id },
+            {
+                Wallet: newWallet,
+                
+            });
+            console.log(updatedDoctor.Wallet)
         console.log('Money transferred to Doctor successfully');
     } catch (e) {
         console.error('Error transferring money to Doctor:', e.message);

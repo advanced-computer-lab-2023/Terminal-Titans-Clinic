@@ -120,10 +120,13 @@ showDoc(userHealthHistoryPDF[value-1],value-1)
       </List>
       </div>
       <div style={{width: "80%"}}>
-     
+     {userHealthHistoryPDF.length+userHealthHistoryIMG.length===0 ? <Typography>No Documents</Typography>:
+     <div>
       <Pagination style={{ display:'flex',  marginLeft: '300px' }} count={userHealthHistoryPDF.length+userHealthHistoryIMG.length} page={index+1} onChange={handleChange} />
       <Typography>Showing: Document {index+1}</Typography>
 
+      </div>
+}
       <div >
       <div >
       <iframe src={curDoc}  width="800" height="600"></iframe>

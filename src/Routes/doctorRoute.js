@@ -1386,10 +1386,11 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
         return (res.status(400).send({ error: "You are not available during this slot", success: false }));
     }
     await docAvailableSlots.deleteMany({ DoctorId: DID, Date: newdate });
+    const oldDate=await appointmentModel.findById(appId);
     console.log(appId);
     const availableSlots = new docAvailableSlots({
         DoctorId: req.user._id,
-        Date: aptmnt.Date,
+        Date: oldDate.Date,
     });
     availableSlots.save();
 
@@ -1446,7 +1447,7 @@ router.put('/rescheduleAppointment/:_id', protect, async (req, res) => {
     const newNotification = new notificationModel({
         userId: Pid,
         Message: `Your appointment with doctor: ${doc.Name} is rescheduled to be on the following date: ${newdate}`,
-
+        type: "Appointment",
     });
 
     await newNotification.save();
@@ -1478,7 +1479,31 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     });
     availableSlots.save();
 
+  
+    const refund = result.Price;
+    const doctorfees = refund / 1.1
 
+    console.log('noticationsent');
+
+    doc.Wallet = doc.Wallet - doctorfees;
+
+    try {
+        await doctorModel.findByIdAndUpdate(DID, doc);
+        console.log('Money transferred to Doctor successfully');
+    } catch (e) {
+        console.log('Error transferring money to Doctor:', e.message);
+        return res.status(400).send({ error: e.message });
+    }
+    //const pre = patient.Wallet
+    //console.log(pre);
+    patient.Wallet = patient.Wallet + refund;
+    try {
+        await patientsModel.findByIdAndUpdate(Pid, patient);
+        console.log('Money transferred to patient successfully');
+    } catch (e) {
+        console.log('Error transferring money to patient:', e.message);
+        return res.status(400).send({ error: e.message });
+    }
     const DmailResponse = await mailSender(
         doc.Email,
         "cancelled:appointment",
@@ -1511,7 +1536,7 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const DnewNotification = new notificationModel({
         userId: DID,
         Message: `It is confirmed. You cancelled your appointment with Patient: ${patient.Name} which was supposed to be on the following date: ${date.toISOString()}`,
-
+        type: "Cancel Appointment",
     });
 
     await DnewNotification.save();
@@ -1519,34 +1544,10 @@ router.put('/cancelAppointment/:_id', protect, async (req, res) => {
     const newNotification = new notificationModel({
         userId: Pid,
         Message: `Doctor: ${doc.Name} cancelled your appointment which was supposed to be on the following date: ${date.toISOString()}`,
-
+        type: "Cancel Appointment",
     });
-
     await newNotification.save();
-    const refund = result.Price;
-    const doctorfees = refund / 1.1
-
-    console.log('noticationsent');
-
-    doc.Wallet = doc.Wallet - doctorfees;
-
-    try {
-        await doctorModel.findByIdAndUpdate(DID, doc);
-        console.log('Money transferred to Doctor successfully');
-    } catch (e) {
-        console.log('Error transferring money to Doctor:', e.message);
-        return res.status(400).send({ error: e.message });
-    }
-    //const pre = patient.Wallet
-    //console.log(pre);
-    patient.Wallet = patient.Wallet + refund;
-    try {
-        await patientsModel.findByIdAndUpdate(Pid, patient);
-        console.log('Money transferred to patient successfully');
-    } catch (e) {
-        console.log('Error transferring money to patient:', e.message);
-        return res.status(400).send({ error: e.message });
-    }
+   
     // const aft = patient.Wallet
     //console.log(aft)
     const temp = await appointmentModel.find({ DoctorId: req.user._id });
@@ -1735,7 +1736,7 @@ router.post('/addrecord/:PatientId', upload.single('file'), protect, async (req,
                 },
                 PatientId: patientID
             });
-            newrecord.save();
+            await newrecord.save();
             res.status(200).json({
                 success: true,
                 message: "record added successfully"
@@ -2348,10 +2349,9 @@ router.get('/getAllFreeSlots', protect, async (req, res) => {
 
     for (var x in appointments) {
         var date = appointments[x].Date;
-        const day = date.getDate() + 1;
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const dateKey = year + "-" + month + "-" + day;
+        const temp = date.toISOString();
+        const dateKey = temp.substring(0, 10);
+       
 
         if (result[dateKey]) {
             result[dateKey].push(date);

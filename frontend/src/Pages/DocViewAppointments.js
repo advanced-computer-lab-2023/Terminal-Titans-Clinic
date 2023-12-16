@@ -129,10 +129,12 @@ const cancelfunc=async()=>{
     <h4>Are you sure you want to cancel this Appointment?</h4>
 <br></br>
 
-<Button variant="dark" style={{ width: '48%',marginRight:'4%',marginTop:'4%' }} onClick={cancelfunc}>
+<div>
+<Button variant="dark" style={{ width: '47%',marginRight:'4%',marginTop:'4%' }} onClick={cancelfunc}>
 Yes</Button>
-<Button variant="dark" style={{ width: '48%' ,marginTop:'4%'}} onClick={() => {setisCancel(false) }}>
+<Button variant="dark" style={{ width: '47%' ,marginTop:'4%'}} onClick={() => {setisCancel(false) }}>
 No</Button>
+</div>
     </Modal.Body>
   </Modal>
     );
@@ -211,12 +213,21 @@ No</Button>
     }
 
  
-  const resetFilter = (event) => {
+  const resetFilter =async (event) => {
     setStartDate('');
     setEndDate('');
     setStatus('');
     handleClick(event);
-    getAptmnts();
+    const response = await axios.post(
+      `http://localhost:8000/doctor/getAppointment`,
+      { startDate:'', endDate:'', status:'' },
+      { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+    );
+    if (response.status === 200) {
+      const aptmnts = response.data;
+      console.log(endDate);
+      setAptmnts(aptmnts);
+    }
   }
   const saveFilter = (event) => {
     getAptmnts();
