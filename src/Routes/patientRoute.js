@@ -3746,7 +3746,7 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
     }
     try {
         await CartItem.deleteMany({ userId: patient._id });
-
+        var quantityflag=false;
         const prescription = await prescriptionsModel.findById(req.params.id);
         if (!prescription) {
             return res.status(400).json({ message: "Prescription not found", success: false })
@@ -3754,26 +3754,37 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
         for(var x in prescription.items){
             const medicine = await MedicineModel.findById(prescription.items[x].medicineId);
             var cartQuantity = prescription.items[x].dosage;
+            console.log(medicine.Quantity);
+            console.log(cartQuantity);
             if(medicine.Quantity<cartQuantity){
                 cartQuantity=medicine.Quantity;
+                quantityflag=true;
             }
+            console.log(cartQuantity)
             if(cartQuantity==0)
                 continue;
+            
             const cart =new CartItem({
                 userId:req.user._id,
                 medicineId:prescription.items[x].medicineId,
-                quantity:prescription.items[x].dosage,
+                quantity:cartQuantity,
                 price:medicine.Price
             });
-            cart.save();
+           await cart.save();
         }
-
+        var curCart=await CartItem.find({userId:req.user._id});
+        console.log(curCart)
+        if(curCart.length==0)
+        return res.status(200).json({flag:1, message: "No items in cart", success: true })
+   
         // await prescriptionsModel.findByIdAndUpdate(req.params.id)
         const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id:req.params.id },
             {
                 InCart: true,
             });
-        return res.status(200).json({ Result: updatedPres, success: true });
+        if(quantityflag)
+        return res.status(200).json({ flag:2,message: "Unfortunatly some items were not available at the desired qunatity. yor cart has been updatted accprding to current availability", success: true })    
+        return res.status(200).json({flag:3, Result: updatedPres, success: true });
     }
     catch (error) {
         console.error('Error getting prescription', error.message);

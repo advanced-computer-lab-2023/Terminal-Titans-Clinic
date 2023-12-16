@@ -98,10 +98,20 @@ const [allNames,setAllNames]=useState([]);
       { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
     );
     if (response.status === 200) {
+      console.log(response)
+      if(response.data.flag==3)
       window.location.href = `http://localhost:4000/checkout?sessid=${sessionStorage.getItem('token')}`
 
+    
+    if(response.data.flag==2){
+      alert("Unfortunatly some items were not available at the desired qunatity. your cart has been updated according to current availability")
+      window.location.href = `http://localhost:4000/checkout?sessid=${sessionStorage.getItem('token')}`
+    }
+    if(response.data.flag==1){
+      alert("these items are not currently available ")
     }
     }
+  }
     function arrayBufferToBase64(buffer) {
       let binary = '';
       const bytes = new Uint8Array(buffer);
@@ -146,12 +156,42 @@ const StyledPopperDiv = styled('div')(
     margin: 0.25rem 0;
   `,
 );
-const resetFilter = (event) => {
+const resetFilter = async(event) => {
   setStartDate('');
   setEndDate('');
   setStatus('');
+  setName('');
   handleClick(event);
-  getPres();
+  setEnable(false);
+  const response = await axios.post(
+    `http://localhost:8000/patient/filterPrescriptions`,
+    { startDate:'', endDate:'', status:'',Name:'' },
+    { headers: { Authorization: 'Bearer ' + sessionStorage.getItem("token") } }
+  );
+  if (response.status === 200) {
+    const data = response.data;
+    console.log(data)
+    setPrescriptions(data.final);
+    if(data.final.length>0){
+      setCurPres(data.final[0]);
+      
+    await axios.get(`http://localhost:8000/patient/generatePdf/${data.final[0].id}`, {
+      headers: {
+        Authorization: 'Bearer ' + sessionStorage.getItem("token")//the token is a variable which holds the token
+      }
+    }).then(
+      (res) => {
+          const data = res.data;
+          console.log(data.data.data)
+          const src=`data:application/pdf;base64,${arrayBufferToBase64(data.data.data)}`
+          setCurDoc(src)
+          setEnable(true);
+          
+
+      }
+    );
+    }
+  }
 }
 const saveFilter = (event) => {
   getPres();
@@ -345,10 +385,10 @@ useEffect(()=>{
                 
                 </DownloadIcon>
                   </Button>:null}
-               
+               {currPresc.status=='not filled'?
                   <Button variant="dark" style={{ width: '45%' }} onClick={() => { buyPres(currPresc.id) }}>
                     Buy Prescription
-                  </Button>
+                  </Button>:null}
                 </div>
                     <div className="form-group">
                        
