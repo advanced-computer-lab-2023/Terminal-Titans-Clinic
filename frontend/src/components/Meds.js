@@ -168,15 +168,6 @@ const Meds = ({ medicines }) => {
                     <div style={{display:"flex", marginTop:"0%"}}>
                   
                     <input type="text"  style={{width:'100px', border:"0px"}} value="Dosage:" readOnly />
-                   
-                      {/* <NumberInput
-                        style={{ width: '50%' }}
-                        aria-label="Demo number input"
-                        placeholder="Enter Dosage…"
-                        value={value}
-                        onChange={(event, val) => setValue(val)}
-                        min={1} max={99}
-                      /> */}
                          <select
         className="presc_select"
         value={value}

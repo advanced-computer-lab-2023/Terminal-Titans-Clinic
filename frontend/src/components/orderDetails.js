@@ -97,35 +97,6 @@ console.log(cart)
   )
   
   return <div>{elements}</div>;
-  // return (
-
-
-  //   <div>
-
-  //   {cart.medicineInfo.map((medicine) => (
-  //    <div> 
-  //   <div className="cartitem">
-  //     <div className="cart_image">
-  //     {medicine.Picture && medicine.Picture.data && medicine.Picture.contentType && (
-  //                       <img
-  //                           src={`data:${medicine.Picture.contentType};base64,${arrayBufferToBase64(medicine.Picture.data.data)}`}
-  //                           alt={medicine.Name}
-  //                       />
-  //                   )}
-  //     </div>
-
-  //       <p>{medicine.Name}</p>
-
-  //     <p className="Cart_price">${medicine.Price}</p>
-
-  //     {setIndex(index+1)}
-  //     {index}
-  //     </div>
-
-  //   </div>
-  //    ))}
-  //    </div>
-  // );
 };
 export { total };
 export default OrderDetails;
