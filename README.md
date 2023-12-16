@@ -670,8 +670,7 @@ GET /patient/getDoctorNames
 
 # Test cases
 
-#### To view the test cases of the system press [here]
-(https://drive.google.com/drive/folders/1l31CJEQ2Rwgt3zlSpMCXJYjGRxxz2JnL?usp=drive_link)
+#### To view the test cases of the system press [here](https://drive.google.com/drive/folders/1l31CJEQ2Rwgt3zlSpMCXJYjGRxxz2JnL?usp=drive_link)
 
 # Contributing
 
