@@ -46,8 +46,8 @@ const DoctorHome = () => {
           <div className='blackScreen'></div>
           <img src={require('../Assets/doctorHome2.png')} alt="First slide" className="myImg" />
           <Carousel.Caption>
-            <h2 className="captionText">View Appointments List</h2>
-            <h4 className="captionText">Check your upcoming appointments and manage your schedule.</h4>
+            <h2 className="captionText">Pharmacy</h2>
+            <h4 className="captionText">Fast, one-day delivery for your essential medicines! Browse our range of prescription and over-the-counter medications, all delivered straight to your doorstep.</h4>
             {/* <Button className="navButton" style={{ minWidth: "150px" }} onClick={viewAppointments}>View Appointments</Button> */}
           </Carousel.Caption>
         </Carousel.Item>
