@@ -31,6 +31,13 @@ limit line length to the width of the screen to have better readability
 
 #### 5- File Organisation
 Organize files logically and group related functionalities together.
+
+# Screenshots
+
+#### To view the images of the system press [here]
+(https://drive.google.com/drive/folders/1tx0hdi5ZB3V_JJmpOWaSMMvsaFt4zUj9?usp=drive_link)
+
+
 # Tech/Frameworks Used
 
 Our web application is built using the MERN stack, incorporating various technologies and frameworks to provide a powerful and modern development environment.
@@ -662,6 +669,10 @@ GET /patient/getDoctorNames
 | ---|--|:-------------------------------- |
 | `id `|`ObjectId `| retrieves all the data inside a prescription|
 
+# Test cases
+
+#### To view the test cases of the system press [here]
+(https://drive.google.com/drive/folders/1l31CJEQ2Rwgt3zlSpMCXJYjGRxxz2JnL?usp=drive_link)
 
 # Contributing
 
