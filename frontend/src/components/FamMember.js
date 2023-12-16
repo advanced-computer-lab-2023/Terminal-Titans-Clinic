@@ -263,7 +263,7 @@ function FamilyMember() {
               onChange={(e) => setNationalID(e.target.value)}
             />
 
-            <TextField
+            {/* <TextField
               error={errGender}
               label="Gender"
               variant="outlined"
@@ -271,8 +271,21 @@ function FamilyMember() {
               margin="normal"
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-            />
-
+            /> */}
+        <FormControl fullWidth margin="normal" variant="outlined" error={errRelation}>
+              <InputLabel id="relation-label">Gender</InputLabel>
+              <Select
+                labelId="relation-label"
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                label="Gender"
+              >
+                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
             <FormControl fullWidth margin="normal" variant="outlined" error={errRelation}>
               <InputLabel id="relation-label">Relation</InputLabel>
               <Select

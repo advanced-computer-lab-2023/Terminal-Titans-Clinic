@@ -51,9 +51,9 @@ const DoctorHome = () => {
           <div className='blackScreen'></div>
           <img src={require('../Assets/doctorHome3.png')} alt="First slide" className="myImg" />
           <Carousel.Caption>
-            <h2 className="captionText">Follow-up Requests</h2>
-            <h4 className="captionText">Review and respond to follow-up requests from your patients.</h4>
-            <Button className="navButton" style={{ minWidth: "150px" }} onClick={followUpDoc}>Handle Requests</Button>
+          <h2 className="captionText">View All prescriptions</h2>
+            <h4 className="captionText">Update a patient's prescription before it is submitted to the pharmacy.</h4>
+            <Button className="navButton" style={{ minWidth: "150px" }} onClick={prescription}>View Prescriptions</Button>
           </Carousel.Caption>
         </Carousel.Item>
       </Carousel>
@@ -90,7 +90,7 @@ const DoctorHome = () => {
           </Container>
         </Paper>
 
-        <Paper elevation={3} sx={{ py: 8, marginTop: 3 }}>
+        {/* <Paper elevation={3} sx={{ py: 8, marginTop: 3 }}>
           <Container>
             <Grid container rowGap={3}>
 
@@ -113,9 +113,9 @@ const DoctorHome = () => {
                     <Button size="small" className='w-100' onClick={addAvailableTimeSlots}>Add Available Time Slots</Button>
                   </CardActions>
                 </Card>
-              </Grid>
+              </Grid> */}
 
-              <Grid xs={12} md={6} className='flex justify-content-center' sx={{minHeight: 350}}>
+              {/* <Grid xs={12} md={6} className='flex justify-content-center' sx={{minHeight: 350}}>
                 <Card sx={{ maxWidth: 345 }} className='flex justify-content-between flex-column'>
                   <CardMedia
                     sx={{ height: 140 }}
@@ -134,10 +134,10 @@ const DoctorHome = () => {
                     <Button size="small" className='w-100'onClick={prescription}>View Perscriptions</Button>
                   </CardActions>
                 </Card>
-              </Grid>
-            </Grid>
+              </Grid> */}
+            {/* </Grid>
           </Container>
-        </Paper>
+        </Paper> */}
       </Box>
 
     </>
