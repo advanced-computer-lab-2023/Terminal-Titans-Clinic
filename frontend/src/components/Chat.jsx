@@ -112,7 +112,7 @@ export default function Chat() {
             for (let i = 0; i < response.data.Result.length; i++) {
                 for (let j = 0; j < peopleArray.length; j++) {
                     if (response.data.Result[i]._id == peopleArray[j].userId) {
-                        onlinePeople[response.data.Result[i]._id] = [response.data.Result[i].Username,response.data.Result[i].__t];
+                        onlinePeople[response.data.Result[i]._id] = [response.data.Result[i].Username, response.data.Result[i].__t];
                     }
                 }
             }
@@ -175,9 +175,11 @@ export default function Chat() {
         } else if ('text' in messageData) {
             console.log(messageData.sender.toString());
             console.log(selectedUserId);
+            console.log(sessionStorage.getItem('selectedUserId'));
+            console.log(messageData.sender.toString() == sessionStorage.getItem('selectedUserId'));
             console.log(messageData.sender.toString() == selectedUserId);
-            if (messageData.sender.toString() == selectedUserId) {
-            setMessages(prev => ([...prev, { ...messageData }]));
+            if (messageData.sender.toString() == sessionStorage.getItem('selectedUserId')) {
+                setMessages(prev => ([...prev, { ...messageData }]));
             }
         }
     }
@@ -283,7 +285,11 @@ export default function Chat() {
                             id={userId}
                             online={true}
                             username={onlinePeople[userId][0]}
-                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(onlinePeople[userId][0]); setSelectedUserType(onlinePeople[userId][1]);console.log(userId); }}
+                            onClick={() => {
+                                setSelectedUserId(userId); setSelectedUserName(onlinePeople[userId][0]);
+                                setSelectedUserType(onlinePeople[userId][1]); console.log(selectedUserId);
+                                sessionStorage.setItem('selectedUserId', userId);
+                            }}
                             selected={userId === selectedUserId}
                             inChat={true}
                         />
@@ -294,7 +300,12 @@ export default function Chat() {
                             id={userId}
                             online={false}
                             username={offlinePeople[userId].Username}
-                            onClick={() => { setSelectedUserId(userId); setSelectedUserName(offlinePeople[userId]?.Username); setSelectedUserType(offlinePeople[userId]?.__t);console.log(userId); }}
+                            onClick={() => {
+                                setSelectedUserId(userId); setSelectedUserName(offlinePeople[userId]?.Username);
+                                setSelectedUserType(offlinePeople[userId]?.__t); console.log(userId);
+                                sessionStorage.setItem('selectedUserId', userId);
+                                console.log(selectedUserId);
+                            }}
                             selected={userId === selectedUserId}
                             inChat={true} />
                     ))}

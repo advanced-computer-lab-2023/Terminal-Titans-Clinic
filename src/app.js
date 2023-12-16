@@ -204,6 +204,7 @@ wss.on('connection', async (connection, req) => {
 			console.log('message', messageData);
 			console.log('Anaa hennnaaa',connection.userId);
 			const messageDoc = await Message.create({
+				senderUsername: connection.username,
 				sender: connection.userId,
 				recipient,
 				text,
