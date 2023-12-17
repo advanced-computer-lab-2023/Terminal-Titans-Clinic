@@ -364,6 +364,32 @@ router.post('/getAppointment', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
+    //i want to loop over appointments if an apponitments has time equal now set to cmpleted
+    const appointments = await appointmentModel.find({ PatientId: req.user._id,Status:"upcoming" });
+    var final = []
+    for (let x in appointments) {
+       //check if appointments[x].Date==now Date()
+       const dateFromDB = new Date(appointments[x].Date);
+
+// Get the current time
+var currentTime = new Date();
+currentTime.setHours(currentTime.getHours() + 2);
+
+// Calculate the time difference in milliseconds
+const timeDifference = dateFromDB-currentTime ;
+
+// Define milliseconds in 24 hours
+
+console.log(timeDifference)
+console.log(currentTime)
+console.log(dateFromDB)
+    if (timeDifference < 0) {
+        appointments[x].Status = "completed";
+        await appointments[x].save();
+    }
+}
+
+
 
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
