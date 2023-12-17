@@ -104,26 +104,25 @@ function AdminUserPage() {
             <Grid container>
 
             <Grid item  >
-  <Card style={{ width: '100%', height: '100%' }}>
+            <Card style={{ width: '100%', height: '100%' }}>
         <CardHeader title="User List" />
         <Divider />
-
         <Scrollbar sx={{ flexGrow: 1 }}>
-          <Box sx={{ minWidth: 800 }}>
+          <Box sx={{ }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>User Type</TableCell>
-                  <TableCell>Action</TableCell>
+                  <TableCell align="center">Name</TableCell>
+                  <TableCell align="center">User Type</TableCell>
+                  <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {userList.map((user, index) => (
                   <TableRow hover key={index}>
-                    <TableCell>{user.Username}</TableCell>
-                    <TableCell>{user.__t}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{user.Username}</TableCell>
+                    <TableCell align="center">{user.__t}</TableCell>
+                    <TableCell align="center">
                       <IconButton
                         endIcon={(
                           <SvgIcon fontSize="small">
@@ -131,7 +130,7 @@ function AdminUserPage() {
                           </SvgIcon>
                         )}
                         onClick={() => openUserInfoPopup(user)}
-                        style={{ backgroundColor: 'black',fontSize:'medium', color: 'white', borderRadius: '5px', padding: '6px' }}
+                        style={{ backgroundColor: 'black', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }}
                       >
                         View User Info
                       </IconButton>

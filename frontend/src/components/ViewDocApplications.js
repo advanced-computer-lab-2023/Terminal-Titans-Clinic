@@ -90,61 +90,61 @@ const getDoctors = async () => {
             <Grid container>
 
             <Grid item  >
-  <Card style={{ width: '100%', height: '100%' }}>
+            <Card style={{ width: '100%', height: '100%' }}>
         <CardHeader title="Doctor Applications Table" />
         <Divider />
 
-          <Scrollbar sx={{ flexGrow: 1 }}>
-            <Box sx={{ minWidth: 800 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Date of Birth</TableCell>
-                    <TableCell>Hourly Rate</TableCell>
-                    <TableCell>Affiliation</TableCell>
-                    <TableCell>Education</TableCell>
-                    <TableCell>Speciality</TableCell>
-                    <TableCell></TableCell>
+        <Scrollbar sx={{ flexGrow: 1 }}>
+          <Box sx={{ minWidth: 800 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Name</TableCell>
+                  <TableCell align="center">Email</TableCell>
+                  <TableCell align="center">Date of Birth</TableCell>
+                  <TableCell align="center">Hourly Rate</TableCell>
+                  <TableCell align="center">Affiliation</TableCell>
+                  <TableCell align="center">Education</TableCell>
+                  <TableCell align="center">Speciality</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {doctors.map((doctor, index) => (
+                  <TableRow hover key={index}>
+                    <TableCell align="center">{doctor.Name}</TableCell>
+                    <TableCell align="center">{doctor.Email}</TableCell>
+                    <TableCell align="center">{doctor.DateOfBirth?.substring(0, 10)}</TableCell>
+                    <TableCell align="center">{doctor.HourlyRate}</TableCell>
+                    <TableCell align="center">{doctor.Affiliation}</TableCell>
+                    <TableCell align="center">{doctor.Education}</TableCell>
+                    <TableCell align="center">{doctor.Speciality}</TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        endIcon={(
+                          <SvgIcon fontSize="small">
+                            <ArrowRightIcon />
+                          </SvgIcon>
+                        )}
+                        onClick={() => window.location.href = `/Health-Plus/viewRegDocDoc?Id=${doctor._id}`}
+                        style={{ backgroundColor: 'black', width: '98%', margin: '2%', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }}
+                      >
+                        View Doc
+                      </IconButton>
+                      <IconButton style={{ backgroundColor: '#198754', width: '48%', margin: '1%', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }} variant="success" onClick={() => acceptDoctor(doctor.Username)}>
+                        Accept
+                      </IconButton>
+                      <IconButton style={{ backgroundColor: '#dc3545', width: '48%', margin: '1%', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }} variant="success" onClick={() => rejectDoctor(doctor.Username)}>
+                        Reject
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {doctors.map((doctor, index) => (
-                    <TableRow hover key={index}>
-                      <TableCell>{doctor.Name}</TableCell>
-                      <TableCell>{doctor.Email}</TableCell>
-                      <TableCell>{doctor.DateOfBirth?.substring(0,10)}</TableCell>
-                      <TableCell>{doctor.HourlyRate}</TableCell>
-                      <TableCell>{doctor.Affiliation}</TableCell>
-                      <TableCell>{doctor.Education}</TableCell>
-                      <TableCell>{doctor.Speciality}</TableCell>
-                      <TableCell>
-                        <IconButton
-                          endIcon={(
-                            <SvgIcon fontSize="small">
-                              <ArrowRightIcon />
-                            </SvgIcon>
-                          )}
-                          onClick={() => window.location.href = `/Health-Plus/viewRegDocDoc?Id=${doctor._id}`}
-                          style={{ backgroundColor: 'black', width:'98%', margin:'2%',fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }}
-                        >
-                          View Doc
-                        </IconButton>
-                        <IconButton style={{ backgroundColor: '#198754', width:'48%',margin:'1%', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }}variant="success"  onClick={() => acceptDoctor(doctor.Username)}>
-                          Accept
-                        </IconButton>
-                        <IconButton style={{ backgroundColor: '#dc3545', width:'48%',margin:'1%', fontSize: 'medium', color: 'white', borderRadius: '5px', padding: '6px' }}variant="success"  onClick={() => rejectDoctor(doctor.Username)}>
-                          Reject
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Scrollbar>
-          </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </Scrollbar>
+      </Card>
                   
                   
                 
