@@ -50,7 +50,6 @@ const rejectDoctor = async (username) => {
 }
 
 const getDoctors = async () => {
-    debugger
     await axios(
         {
             method: 'get',
@@ -78,6 +77,7 @@ const getDoctors = async () => {
       <div style={{ width: '100%', padding: '10px' }}>
         <h1 style={{ color: 'white', textAlign: 'center', backgroundColor: 'black', borderRadius: '15px' }}>Manage Requested Doctors</h1>
       </div>
+
           
       <Box
         component="main"
@@ -85,16 +85,21 @@ const getDoctors = async () => {
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}
       >
+        {doctors.length === 0 ? (
+                    <Paper sx={{ width: '80%', textAlign: 'center', mt: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', p: 2, borderRadius: '8px' }}>
+                      <h3>No doctor requests at the moment</h3>
+                    </Paper>
+                  ) : (
         <Paper elevation={0} sx={{}}>
-        <Container>
+          <Container>
             <Grid container>
-
-            <Grid item  >
-            <Card style={{ width: '100%', height: '100%' }}>
-        <CardHeader title="Doctor Applications Table" />
-        <Divider />
-
-        <Scrollbar sx={{ flexGrow: 1 }}>
+              <Grid item>
+                <Card style={{ width: '100%', height: '100%' }}>
+                  <CardHeader title="Doctor Applications Table" />
+                  <Divider />
+  
+                  
+                    <Scrollbar sx={{ flexGrow: 1 }}>
           <Box sx={{ minWidth: 800 }}>
             <Table>
               <TableHead>
@@ -144,17 +149,14 @@ const getDoctors = async () => {
             </Table>
           </Box>
         </Scrollbar>
-      </Card>
-                  
-                  
-                
-                  </Grid>
-                        </Grid> 
-                      </Container>
-        </Paper>
-      </Box>
-    </div>
-  );
+    </Card>
+  </Grid>
+</Grid>
+</Container>
+</Paper>
+      )}
+</Box>
+</div>);
 };
 
 export default ViewDocApplications;

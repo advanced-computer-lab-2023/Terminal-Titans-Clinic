@@ -99,6 +99,11 @@ function AdminUserPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}
       >
+         {userList.length === 0 ? (
+                    <Paper sx={{ width: '80%', textAlign: 'center', mt: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', p: 2, borderRadius: '8px' }}>
+                      <h3>No users registered at the moment</h3>
+                    </Paper>
+                  ) : (
       <Paper elevation={0} sx={{ }}>
           <Container>
             <Grid container>
@@ -108,7 +113,7 @@ function AdminUserPage() {
         <CardHeader title="User List" />
         <Divider />
         <Scrollbar sx={{ flexGrow: 1 }}>
-          <Box sx={{ }}>
+          <Box sx={{ minWidth: 800 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -152,6 +157,7 @@ function AdminUserPage() {
             </Grid> 
           </Container>
         </Paper>
+        )}
         </Box>
 
       
