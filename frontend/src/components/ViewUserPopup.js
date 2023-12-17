@@ -30,7 +30,7 @@ const UserInfoPopup = ({ user, onClose }) => {
             <h1>Patient Information</h1>
             {createInput('Name', `Name: ${user.Name}`)}
             {createInput('Email', `Email: ${user.Email}`)}
-            {createInput('DateOfBirth', `Date of Birth: ${user.DateOfBirth}`)}
+            {createInput('DateOfBirth', `Date of Birth: ${user.DateOfBirth?.substring(0,10)}`)}
             {createInput('Gender', `Gender: ${user.Gender}`)}
             {createInput('Mobile', `Mobile: ${user.Mobile}`)}
             {createInput('EmergencyName', `Emergency Contact Name: ${user.EmergencyName}`)}

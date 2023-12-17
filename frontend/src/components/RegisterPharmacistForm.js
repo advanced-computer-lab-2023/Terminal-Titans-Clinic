@@ -1,23 +1,57 @@
-// import React from "react";
-import "../Styles/LoginForm.css";
-import validator from 'validator'
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import { useState, useEffect } from 'react';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import Alert from '@mui/material/Alert';
 import axios from 'axios';
+import { styled } from '@mui/material/styles';
+import '../Styles/SignUp.css';
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 function PharmacyRegistrationForm() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [hourlyRate, setHourlyRate] = useState('');
-  const [affiliation, setAffiliation] = useState('');
-  const [education, setEducation] = useState('');
-  const [iD, setID] = useState('');
-  const [degree, setDegree] = useState('');
-  const [license, setLicense] = useState('');
-  // const [speciality, setSpeciality] = useState('');
+  const [isUsernameInvalid, setIsUsernameInvalid] = React.useState(false);
+  const [isFirstNameInvalid, setIsFirstNameInvalid] = React.useState(false);
+  const [isLastNameInvalid, setIsLastNameInvalid] = React.useState(false);
+  const [isEmailInvalid, setIsEmailInvalid] = React.useState(false);
+  const [isPasswordInvalid, setIsPasswordInvalid] = React.useState(false);
+  const [isDateInValid, setIsDateInValid] = React.useState(false);
+  const [isAffiliationInvalid, setisAffiliationInvalid] = React.useState(false);
+  const [isHourlyRateInvalid, setIsHourlyRateInvalid] = React.useState(false);
+  const [isEducationInvalid, setIsEducationInvalid] = React.useState(false);
+
+  const [userName, setUserName] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [dateOfBirth, setDateOfBirth] = React.useState('');
+  const [affiliation, setAffiliation] = React.useState('');
+  const [hourlyRate, setHourlyRate] = React.useState('');
+  const [education, setEducation] = React.useState('');
+  const [iD, setID] = React.useState('');
+  const [degree, setDegree] = React.useState('');
+  const [license, setLicense] = React.useState('');
+
+  const [errorMessage, setErrorMessage] = React.useState('');
 
   const [file1, setFile1] = useState(null);
   const [binaryData1, setBinaryData1] = useState(null);
@@ -29,14 +63,17 @@ function PharmacyRegistrationForm() {
   const [binaryData3, setBinaryData3] = useState(null);
 
   const handleFile1Change = (e) => {
+    document.getElementById('idBtn').style.backgroundColor = '#4caf50';
     setFile1(e.target.files[0]);
   };
 
   const handleFile2Change = (e) => {
+    document.getElementById('degreeBtn').style.backgroundColor = '#4caf50';
     setFile2(e.target.files[0]);
   };
 
   const handleFile3Change = (e) => {
+    document.getElementById('licBtn').style.backgroundColor = '#4caf50';
     setFile3(e.target.files[0]);
   };
 
@@ -76,216 +113,283 @@ function PharmacyRegistrationForm() {
     }
   }, [file3]);
 
+  const handleChangeUserName = (event) => {
+    const name = event.target.value;
+    setUserName(name)
+  };
 
-  const [errorMessagePass, setErrorMessagePass] = useState('')
-  const [errorMessageEmail, setErrorMessageEmail] = useState('')
+  const handleChangeFirstName = (event) => {
+    const name = event.target.value;
+    setFirstName(name)
+  };
+
+  const handleChangeLastName = (event) => {
+    const name = event.target.value;
+    setLastName(name)
+  };
+
+  const handleChangeEmail = (event) => {
+    const email = event.target.value;
+    setEmail(email)
+  };
+
+  const handleChangePassword = (event) => {
+    const password = event.target.value;
+    setPassword(password)
+  };
+
+  const handleChangeDateOfBirth = (event) => {
+    console.log(event.$d);
+    const dateOfBirth = event.$d;
+    setDateOfBirth(dateOfBirth)
+  };
 
 
 
-  // const specialityOptions = [
-  //   { value: 'pediatrician' , label: 'pediatrician' },
-  //   { value: 'cardiologist', label: 'cardiologist'},
-  //   { value: 'neurologist',   label: 'neurologist'   },
-  //   { value: 'dermatologist' , label: 'dermatologist' },
-  // ];
+  const handleChangeHourlyRate = (event) => {
+    const hourlyRate = event.target.value;
+    setHourlyRate(hourlyRate)
+  };
 
-  const validatePass = (value) => {
-    setPassword(value);
-    if (value !== '' && validator.isStrongPassword(value, {
-      minLength: 8, minLowercase: 1,
-      minUppercase: 1, minNumbers: 1, minSymbols: 0
-    })) {
-      setErrorMessagePass('Is Strong Password')
-    } else {
+  const handleChangeAffiliation = (event) => {
+    const affiliation = event.target.value;
+    setAffiliation(affiliation)
+  };
 
-      setErrorMessagePass('Password has to be 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number ')
+  const handleChangeEducation = (event) => {
+    const education = event.target.value;
+    setEducation(education)
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsUsernameInvalid(false);
+    setIsFirstNameInvalid(false);
+    setIsLastNameInvalid(false);
+    setIsEmailInvalid(false);
+    setIsPasswordInvalid(false);
+    setIsDateInValid(false);
+    setisAffiliationInvalid(false);
+    setIsHourlyRateInvalid(false);
+    setIsEducationInvalid(false);
+    setErrorMessage('');
+    let flag = true;
+    let message = ''
+    if (userName === '') {
+      setIsUsernameInvalid(true);
+      flag = false;
+    }
+    if (firstName === '') {
+      setIsFirstNameInvalid(true);
+      flag = false;
+    }
+    if (lastName === '') {
+      setIsLastNameInvalid(true);
+      flag = false;
+    }
+    if (email === '') {
+      setIsEmailInvalid(true);
+      flag = false;
+    }
+    if (password === '') {
+      setIsPasswordInvalid(true);
+      flag = false;
+    }
+    if (dateOfBirth === '') {
+      setIsDateInValid(true);
+      flag = false;
+    }
+    if (affiliation === '') {
+      setisAffiliationInvalid(true);
+      flag = false;
+    }
+    if (hourlyRate === '') {
+      setIsHourlyRateInvalid(true);
+      flag = false;
+    }
+    if (education === '') {
+      setIsEducationInvalid(true);
+      flag = false;
+    }
+    if (flag) {
+      const formData = new FormData();
+      // Create a JSON object with the username and password
+      formData.append('username', userName);
+      formData.append('password', password);
+      formData.append('dateOfBirth', dateOfBirth);
+      formData.append('name', firstName + ' ' + lastName);
+      formData.append('email', email);
+      formData.append('hourlyRate', hourlyRate);
+      formData.append('affiliation', affiliation);
+      formData.append('education', education);
+      formData.append('ID', iD)
+      formData.append('Degree', degree);
+      formData.append('License', license);
+      try {
+        let response = await axios.post('http://localhost:8000/security/pharmacist', formData).then((response) => {
+          console.log(response.data);
+          if (response.data.success) {
+            // go to page patient
+            window.location.href = "http://localhost:3000/Health-Plus/signIn";
+          }
+          else {
+            setErrorMessage(response.data.message)
+          }
+        })
+      } catch (err) {
+        setErrorMessage(err.response.data.message)
+      }
+    }else{
+      setErrorMessage('Please fill all the required fields')
     }
   }
-  const validateEmail = (value) => {
-    setEmail(value);
-    if (validator.isEmail(value)) {
-      setErrorMessageEmail('')
-    } else {
-
-      setErrorMessageEmail('Enter a valid email')
-    }
-  }
-
-  // const handleSpecialityChange = (event) => {
-  //   console.log(`Option selected:`, event.target.value);
-  //   const selectedValue = event.target.value;
-  //   setSpeciality(selectedValue);
-  // };
 
 
-  const handleRegister = (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-    const formData = new FormData();
-    // Create a JSON object with the username and password
-    // const data = { username, password ,name,email,dateOfBirth,hourlyRate,affiliation,education,speciality,iD,degree,license };
-    formData.append('username', username);
-    formData.append('password', password);
-    formData.append('dateOfBirth', dateOfBirth);
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('hourlyRate', hourlyRate);
-    formData.append('affiliation', affiliation);
-    formData.append('education', education);
-    formData.append('ID', iD)
-    formData.append('Degree', degree);
-    formData.append('License', license);
-
-    // formData.append('speciality', speciality);
-    // Make a POST request to your backend register route
-    axios.post('http://localhost:8000/security/pharmacist', formData).then((response) => {
-      console.log(response);
-      alert("success "+response.data.success)
-    }
-    )
-      .catch(error => {
-        console.log(error);
-        console.log(error.message);
-        if(error?.response?.data?.message)
-          alert(error?.response?.data?.message);
-        else
-          alert(error.message);
-      });
-  }
   return (
-    <div>
-      <div id="login-form">
-        <h1>Sign up</h1>
-        <form>
-          <label htmlFor="name">name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="given-name"
+            name="username"
+            required
+            fullWidth
+            id="username"
+            label="User Name"
+            isInvalid={false}
+            error={isUsernameInvalid}
+            onChange={handleChangeUserName}
           />
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="given-name"
+            name="firstName"
+            required
+            fullWidth
+            id="firstName"
+            label="First Name"
+            error={isFirstNameInvalid}
+            onChange={handleChangeFirstName}
           />
-          <label htmlFor="password">Password:</label>
-          <input
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            id="lastName"
+            label="Last Name"
+            name="lastName"
+            autoComplete="family-name"
+            error={isLastNameInvalid}
+            onChange={handleChangeLastName}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            error={isEmailInvalid}
+            onChange={handleChangeEmail}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            name="password"
+            label="Password"
             type="password"
-            value={password}
-            onChange={(e) => validatePass(e.target.value)}></input> <br />
-          {errorMessagePass === '' ? null :
-            <span style={{
-              color: 'red',
-            }}>{errorMessagePass}</span>}
-          <br />
-          <label htmlFor="email">Email:</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => validateEmail(e.target.value)}></input> <br />
-          {errorMessageEmail === '' ? null :
-            <span style={{
-              color: 'red',
-            }}>{errorMessageEmail}</span>}
-          <label htmlFor="dateOfBirth">Date of Birth:</label>
-          <input
-            type="Date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
+            id="password"
+            autoComplete="new-password"
+            error={isPasswordInvalid}
+            onChange={handleChangePassword}
           />
-          <label htmlFor="hourlyRate">Hourly Rate</label>
-          <input
-            type="number"
-            value={hourlyRate}
-            onChange={(e) => setHourlyRate(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker required fullWidth id="dateOfBirth" name="dateOfBirth" error={isDateInValid} onChange={handleChangeDateOfBirth} />
+          </LocalizationProvider>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            id="hourlyRate"
+            label="Hourly Rate"
+            name="hourlyRate"
+            type="number"  // Change type from 'number' to 'text'
+            inputMode="numeric"  // Set input mode to 'numeric'
+            pattern="[0-9]*"  // Set a pattern to only allow numeric input
+            error={isHourlyRateInvalid}
+            onChange={handleChangeHourlyRate}
           />
-          <label htmlFor="affiliation">Affiliation (hospital) :</label>
-          <input
-            type="text"
-            value={affiliation}
-            onChange={(e) => setAffiliation(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            name="affiliation"
+            label="Affiliation"
+            id="affiliation"
+            error={isAffiliationInvalid}
+            onChange={handleChangeAffiliation}
           />
-          <label htmlFor="education">Educational Background:</label>
-          <input
-            type="text"
-            value={education}
-            onChange={(e) => setEducation(e.target.value)}
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            id="education"
+            label="Educational Background"
+            name="education"
+            type="text"  // Change type from 'number' to 'text'
+            error={isEducationInvalid}
+            onChange={handleChangeEducation}
           />
-          {/* <label htmlFor="speciality">Speciality: </label>
-         <select name="speciality" id="speciality">
-            <option value="speciality 1">speciality 1</option>
-            <option value="speciality 2">speciality 2</option>
-            <option value="speciality 3">speciality 3</option>
-            <option value="speciality 4">speciality 4</option>
-            </select>   
-        <input
-        type="text"
-        value={education}
-        onChange={(e) => setEducation(e.target.value)}
-        /> */}
-
-          {/* <label htmlFor="speciality">Speciality: </label>
-      <select
-        options={specialityOptions}
-        onChange={handleSpecialityChange}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} fullWidth id='idBtn'>
+            Upload ID
+            <VisuallyHiddenInput type="file" onChange={handleFile1Change} />
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} fullWidth id='degreeBtn'>
+            Upload Degree
+            <VisuallyHiddenInput type="file" onChange={handleFile2Change} />
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} fullWidth id='licBtn'>
+            Upload License
+            <VisuallyHiddenInput type="file" onChange={handleFile3Change} />
+          </Button>
+        </Grid>
+      </Grid>
+      {errorMessage == '' ? '' :
+        <Alert severity="error" className='mt-2'>{errorMessage}!</Alert>
+      }
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
       >
-        {specialityOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            
-          </option>
-        ))}
-      </select>
-      <ul>
-        <li key={speciality}>
-          {specialityOptions.find((option) => option === speciality)}
-        </li>
-      </ul> */}
-
-
-          {/* <label htmlFor="speciality"> Speciality:</label>
-          <select onChange={handleSpecialityChange}>
-        
-            <option value="speciality1">speciality1</option>
-            <option value="speciality2">speciality2</option>
-            <option value="speciality3">speciality3</option>
-
-          </select> */}
-
-          <label htmlFor="ID">ID:</label>
-          <input type="file" name="ID" accept=".jpg , .png , .pdf" onChange={handleFile1Change} />
-          {/* <input
-            type="file"
-            name="ID"
-            accept=".jpg , .png , .pdf"
-            onChange={(e) => setID(URL.createObjectURL(e.target.files[0]))}
-        /> */}
-          <label htmlFor="degree">Medical Degree:</label>
-          <input type="file" name="Degree" accept=".jpg , .png , .pdf" onChange={handleFile2Change} />
-
-          {/* <input
-            type="file"
-            name="Degree"
-            accept=".jpg , .png , .pdf"
-            onChange={(e) => setDegree(URL.createObjectURL(e.target.files[0]))}
-          /> */}
-
-
-          <label htmlFor="license">License:</label>
-          <input type="file" name="License" accept=".jpg , .png , .pdf" onChange={handleFile3Change} />
-          {/* <input
-            type="file"
-            name="License"
-            accept=".jpg , .png , .pdf"
-            onChange={(e) => setLicense(URL.createObjectURL(e.target.files[0]))}
-          /> */}
-
-
-          <button type="submit" onClick={handleRegister}>Register</button>
-
-        </form>
-      </div>
-
-    </div>
+        Sign Up
+      </Button>
+      <Grid container justifyContent="flex-end">
+        <Grid item>
+          <Link href="http://localhost:3000/Health-Plus/signIn" variant="body2">
+            Already have an account? Sign in
+          </Link>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

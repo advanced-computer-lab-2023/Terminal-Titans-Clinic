@@ -97,7 +97,7 @@ const rejectDoctor = async (username) => {
                 
 
                 <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value='Date of birth' readOnly />
-                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.DateOfBirth} disabled />
+                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.DateOfBirth?.substring(0,10)} disabled />
 
                 <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value='Email' readOnly />
                 <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Email} disabled/>
