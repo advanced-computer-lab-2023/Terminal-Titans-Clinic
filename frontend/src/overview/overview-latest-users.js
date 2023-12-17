@@ -92,7 +92,7 @@ export const OverviewLatestUsers = (props) => {
                     key={user.id}
                   >
                     <TableCell>
-                      {user.Name}
+                      {user.Name} {index}
                     </TableCell>
                     <TableCell>
                       {user.Username}

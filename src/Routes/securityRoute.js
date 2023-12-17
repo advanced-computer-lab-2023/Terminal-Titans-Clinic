@@ -24,7 +24,7 @@ router.post('/patient', upload.single('history'), async (req, res) => {
     if (!req.body.username || !req.body.dateOfBirth || !req.body.password
         || !req.body.name || !req.body.email || !req.body.mobile
         || !req.body.first || !req.body.last || !req.body.emergencyNumber || !req.body.gender || !req.body.emergencyRel) {
-      //  console.log(req);
+        //  console.log(req);
         return res.status(400).json({ message: 'You have to complete all the fields', success: false })
 
     }
@@ -39,9 +39,9 @@ router.post('/patient', upload.single('history'), async (req, res) => {
     unqiueUser = await userModel.find({ Email: req.body.email });
     if (unqiueUser.length > 0)
         return res.status(400).json({ message: 'email has to be unique', success: false })
-        unqiueUser = await userModel.find({ Mobile: req.body.mobile });
-        if (unqiueUser.length > 0)
-            return res.status(400).json({ message: 'Mobile num has to be unique', success: false })
+    unqiueUser = await userModel.find({ Mobile: req.body.mobile });
+    if (unqiueUser.length > 0)
+        return res.status(400).json({ message: 'Mobile num has to be unique', success: false })
 
     // if (!validator.validate(req.body.email))
     //     return res.status(400).json({ message: 'Please enter a valid email', success: false })
@@ -135,8 +135,8 @@ router.post('/doctor', upload.fields([{ name: "ID" }, { name: "Degree" }, { name
 
         newDoctor.save();
 
-
-        return res.status(200).json({ message: "You have registered", success: true, newDoctor })
+        let token = generateToken(newDoctor._id);
+        return res.status(200).json({ message: "You have registered", success: true, newDoctor, token })
     }
     catch (error) {
         return res.status(400).json({ message: error.message, success: false })
@@ -195,8 +195,8 @@ router.post('/pharmacist', upload.fields([{ name: "ID" }, { name: "Degree" }, { 
 
         newPharmacist.save();
 
-
-        return res.status(200).json({ message: "You have registered", success: true, newPharmacist })
+        let token = generateToken(newPharmacist._id);
+        return res.status(200).json({ message: "You have registered", success: true, newPharmacist, token })
     }
     catch (error) {
         return res.status(400).json({ message: error.message, success: false })
@@ -222,16 +222,16 @@ router.post('/login', async (req, res) => {
         if (user?.__t === 'RequestedDoctor') {
             return res.status(400).json({ message: 'Please wait for admin approval', success: false })
         }
-        if(user?.__t === 'ReqPharmacist'){
+        if (user?.__t === 'ReqPharmacist') {
             return res.status(400).json({ message: 'Please wait for admin approval', success: false })
         }
 
-      //  console.log(user);
+        //  console.log(user);
         console.log(username);
         console.log(password);
         if (user && (await bcrypt.compare(password, user.Password))) {
             // generate token
-            if(user.__t=='Doctor'){
+            if (user.__t == 'Doctor') {
                 return res.status(200).json({
                     Result:
                     {
@@ -239,7 +239,7 @@ router.post('/login', async (req, res) => {
                         name: user.Name,
                         email: user.Email,
                         type: user.__t,
-                        employmentContract:user.employmentContract,
+                        employmentContract: user.employmentContract,
                         token: generateToken(user._id)
                     },
                     success: true
@@ -286,17 +286,17 @@ const generateToken = (id) => {
         expiresIn: '30d',
     })
 }
-router.post('/changePassword',protect, async(req,res)=>{
+router.post('/changePassword', protect, async (req, res) => {
     //const oldPass=req.user.Password;
-    const oldPassEntered=req.body.oldPassword;
-    const newPass=req.body.password;
-    try{
-    const user=await userModel.findOne({_id:req.user._id});
-    const oldPass=user.Password;    
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPass, salt)
-    console.log(oldPassEntered)
-   
+    const oldPassEntered = req.body.oldPassword;
+    const newPass = req.body.password;
+    try {
+        const user = await userModel.findOne({ _id: req.user._id });
+        const oldPass = user.Password;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPass, salt)
+        console.log(oldPassEntered)
+
         const isMatch = await bcrypt.compare(oldPassEntered, oldPass);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid password', success: false })
@@ -374,24 +374,24 @@ router.post('/verifyOTP', async (req, res) => {
     }
 
 })
-router.post('/forgotPassword',async (req, res) => {
-    const  email  = req.body.email
+router.post('/forgotPassword', async (req, res) => {
+    const email = req.body.email
     let user = await userModel.findOne({ Email: email })
     if (!user) {
         return res.status(400).json({ message: 'Email not found', success: false })
     }
-    try{
-    const newPass=req.body.password;
-    
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt)
+    try {
+        const newPass = req.body.password;
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
         console.log(hashedPassword)
-    const updatedUser = await userModel.findOneAndUpdate({ _id: user._id },
-        {
-            Password: hashedPassword,
-        });
+        const updatedUser = await userModel.findOneAndUpdate({ _id: user._id },
+            {
+                Password: hashedPassword,
+            });
         console.log(updatedUser)
-        
+
         res.status(200).json({ Result: updatedUser, success: true })
     } catch (error) {
         res.status(400).json({ message: 'Error changing password', success: false })

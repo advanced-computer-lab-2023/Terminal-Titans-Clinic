@@ -62,6 +62,7 @@ import AcceptRejectFollowUp from "./Pages/DocFollowUpRequests.js";
 import Reschdule from "./Pages/Reschedule.js";
 import FollowUp from "./Pages/FollowUp.js";
 import GuestHome from "./Pages/GuestHome.js";
+import SignUp from './components/SignUp';
 
 
 function App() {
@@ -83,7 +84,8 @@ function App() {
           <Route path="/manageUsers" element={<AdminUserPage />} />
           <Route path="/managePackages" element={<ManagePackages />} />
           <Route path="/createAdmin" element={<CreateAdmin />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<SignUp />} />
+
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patientHome" element={<Patient />} />
           <Route path="/doctorHome" element={<Doctor />} />
