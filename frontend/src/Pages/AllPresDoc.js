@@ -28,8 +28,8 @@ import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
 import { styled as styled2 } from '@mui/material/styles';
-import { styled as styled3 } from '@mui/material/styles';
-import {PatientNavBar} from '../components/PatientNavBar.jsx';
+import {DoctorNavBar} from '../components/doctorNavBar';
+
 
 
 
@@ -216,8 +216,7 @@ const   AllPresDoc = () => {
 
     return (
         <div>
-          <PatientNavBar/>
-    
+          <DoctorNavBar></DoctorNavBar>    
    
     
 
