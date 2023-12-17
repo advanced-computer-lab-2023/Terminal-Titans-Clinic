@@ -1400,7 +1400,8 @@ else{
     res.status(200).json({ Result: final, success: true });
 })
 
-router.post('/filterPrescriptions', async (req, res) => {
+router.post('/filterPrescriptions', protect,async (req, res) => {
+    console.log("kioak")
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
@@ -1410,21 +1411,24 @@ router.post('/filterPrescriptions', async (req, res) => {
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
     if (startDate > endDate)
         return (res.status(400).send({ error: "please enter valid dates", success: false }));
-
+    console.log(exists)
     let presDate;
     presDate = await prescriptionsModel.find({
+        PatientId: req.user._id,
         Date: {
             $gte: startDate,
             $lte: endDate
         }, 
-        PatientId: exists._id
+       
     });
-
+    console.log(presDate)
+    console.log("ppppppkjhh")
     var id = await doctorModel.find({ Name: req.body.Name });
     // var id=await prescriptionsModel.find({DoctorId: req.body.DoctorId,PatientId:pId})
     const status = req.body.status;
     // presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
-    var presStatus = await prescriptionsModel.find({ status: status, PatientId: exists._id });
+    var presStatus = await prescriptionsModel.find({ status: status, PatientId: req.user._id });
+    console.log(presStatus)
     if (!req.body.Name) {
         var id = await doctorModel.find({});
     }
@@ -1435,7 +1439,7 @@ router.post('/filterPrescriptions', async (req, res) => {
     //      presDate = await prescriptionsModel.find({PatientId:pId});
     // }
     if (!req.body.status) {
-        var presStatus = await prescriptionsModel.find({ PatientId:exists._id });
+         presStatus = await prescriptionsModel.find({ PatientId:req.user._id });
     }
     var temp = presDate.filter((pres) => {
         var flag1 = false;
@@ -1459,7 +1463,7 @@ router.post('/filterPrescriptions', async (req, res) => {
     for (let x in temp) {///if you need the doctor's name in front end
         var result = {}
         const doc = await Doctor.find({ _id: temp[x].DoctorId })
-        console.log("pp"+doc.Name)
+        //console.log("pp"+doc.Name)
         if (doc.length > 0)
             result.Name = doc[0].Name;
         //result.prescriptionDoc=temp[x].prescriptionDoc;
@@ -1474,14 +1478,14 @@ router.post('/filterPrescriptions', async (req, res) => {
             "Name":med.Name,
             "Dosage":temp[x].items[y].dosage
         }
-        console.log(medicine)
+      //  console.log(medicine)
 
         result.medicine.push(medicine);
       }
         final.push(result);
 
     }
-    console.log(final)
+   // console.log(final)
     res.status(200).json({ final, success: true });
 
 
