@@ -226,19 +226,19 @@ function DoctorRegistrationForm() {
     }
     let mySpec = ''
     if (speciality === 1) {
-      mySpec = 'speciality 1'
+      mySpec = 'speciality1'
     }
     else if (speciality === 2) {
-      mySpec = 'speciality 2'
+      mySpec = 'speciality2'
     }
     else if (speciality === 3) {
-      mySpec = 'speciality 3'
+      mySpec = 'speciality3'
     }
     else if (speciality === 4) {
-      mySpec = 'speciality 4'
+      mySpec = 'speciality4'
     }
     else if (speciality === 5) {
-      mySpec = 'speciality 5'
+      mySpec = 'speciality5'
     }
     else {
       mySpec = ''
