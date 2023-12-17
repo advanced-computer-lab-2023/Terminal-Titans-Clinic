@@ -3,6 +3,7 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
+import validator from 'validator'
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
@@ -147,9 +148,12 @@ function RegistrationForm() {
             setIsEmailInvalid(true);
             flag = false;
         }
-        if (password === '') {
-            setIsPasswordInvalid(true);
-            flag = false;
+        if (password === '' || !validator.isStrongPassword(password, {
+          minLength: 8, minLowercase: 1,
+          minUppercase: 1, minNumbers: 1, minSymbols: 0
+        })) {
+          setIsPasswordInvalid(true);
+          flag = false;
         }
         if (dateOfBirth === '') {
             setIsDateInValid(true);

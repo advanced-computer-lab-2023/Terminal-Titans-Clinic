@@ -6,6 +6,7 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import validator from 'validator'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -191,7 +192,10 @@ function PharmacyRegistrationForm() {
       setIsEmailInvalid(true);
       flag = false;
     }
-    if (password === '') {
+    if (password === '' || !validator.isStrongPassword(password, {
+      minLength: 8, minLowercase: 1,
+      minUppercase: 1, minNumbers: 1, minSymbols: 0
+    })) {
       setIsPasswordInvalid(true);
       flag = false;
     }
@@ -239,7 +243,7 @@ function PharmacyRegistrationForm() {
       } catch (err) {
         setErrorMessage(err.response.data.message)
       }
-    }else{
+    } else {
       setErrorMessage('Please fill all the required fields')
     }
   }
