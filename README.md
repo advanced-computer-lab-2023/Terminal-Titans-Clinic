@@ -31,6 +31,12 @@ limit line length to the width of the screen to have better readability
 
 #### 5- File Organisation
 Organize files logically and group related functionalities together.
+
+# Screenshots
+
+#### To view the images of the system press [here](https://drive.google.com/drive/folders/1tx0hdi5ZB3V_JJmpOWaSMMvsaFt4zUj9?usp=drive_link)
+
+
 # Tech/Frameworks Used
 
 Our web application is built using the MERN stack, incorporating various technologies and frameworks to provide a powerful and modern development environment.
@@ -125,17 +131,17 @@ Easily add your medical history and delete from it if needed .
 - **Remove User Accounts:**
    Admins can remove doctors or patients from the system.
 
-- **Pharmacist Onboarding:**
+- **Doctor Onboarding:**
    View information uploaded by doctors applying to join the platform.
 
-- **Approve/Reject Pharmacist Request:**
-   Admins can accept or reject pharmacist registration requests.
+- **Approve/Reject Doctor Request:**
+   Admins can accept or reject doctor registration requests.
 
-- **View Pharmacist Information:**
-   Access detailed information about registered doctors.
+- **View all users Information:**
+   View basic information about registered users.
 
-- **View Patient Information:**
-   View basic information about registered patients.
+- **View, add, edit and delete Health Care Packages:**
+    Admins can add, edit, delete and view the Health Care Packages on the System.
 
 
 
@@ -513,69 +519,86 @@ npm start
 
   ### Admin
 
-#### Accept Doctor
+#### Add Health Package..
 
 ```http
-  POST /admin/DoctorAcceptance/${username}
+  POST /admin/addHealthPackage
 ```
+| Body|Type|Description                       |
+| ---|--|:-------------------------------- |
+| `healthPackage`|`HealthPackage`| Adds a new health package to the system |
 
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `Username` | `String` | **Required**. The username of the Doctor |
-
-#### Reject Docotor
+#### Update Health Package..
 
 ```http
-  GET /admin/DoctorRejection/${username}
+  PUT /admin/updateHealthPackage
 ```
+| Body|Type|Description                       |
+| ---|--|:-------------------------------- |
+| `id-healthPackage`|`String-HealthPackage`| updates the health package with the id in the body |
 
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `Username` | `String` | **Required**. The username of the Docotor |
-
-#### Get all requested pharmacists
+#### Delete Health Package..
 
 ```http
-  GET /admin/fetchReqDoctors
+  DELETE /admin/deleteHealthPackage
 ```
+| Body|Type|Description                       |
+| ---|--|:-------------------------------- |
+| `packageType`|`String`| deletes the health package with the specified type in the body |
 
-| Description                       |
-|  :-------------------------------- |
-|  gets a list of all the requested pharmacists |
-
-
-#### Create Admin
+#### Add a new admin..
 
 ```http
   POST /admin/createAdmin
 ```
-
 | Body|Type|Description                       |
 | ---|--|:-------------------------------- |
 | `Username - Password`|`String - String`| Adds a new admin to the system with the given username and password |
 
-
-
-#### Delete Admin
+#### Get all Doctor Applications..
 
 ```http
-  POST /admin/DeleteAdmin/${Username}
+  GET /admin/fetchReqDoctors
 ```
+| Description                       |
+|  :-------------------------------- |
+|  gets a list of all the requested doctors |
 
-| Query|Type|Description                       |
-| ---|--|:-------------------------------- |
-| `Username `|`String `| Deletes the admin with the given username from the system |
-
-
-#### Get doctor by username 
+#### Accept a certain doctor's application..
 
 ```http
-  POST /admin/getDoctor
+  POST /admin/DoctorAcceptance/${username}
 ```
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `username` | `String` | **Required**. The username of the doctor |
 
-| Body|Type|Description                       |
-| ---|--|:-------------------------------- |
-| `username `|`String `| Gets the doctor by his username |
+#### Reject a certain doctor's application..
+
+```http
+  DELETE /admin/DoctorRejection/${username}
+```
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `username` | `String` | **Required**. The username of the doctor |
+
+#### Fetch All Users..
+
+```http
+  GET /admin/fetchUsers
+```
+| Description                       |
+|  :-------------------------------- |
+|  gets a list of all users registered in the system |
+
+#### Deletes a User..
+
+```http
+  DELETE /admin/deleteUser/${username}
+```
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `username` | `String` | **Required**. The username of the doctor to be deleted|
 
 
 
@@ -645,6 +668,9 @@ GET /patient/getDoctorNames
 | ---|--|:-------------------------------- |
 | `id `|`ObjectId `| retrieves all the data inside a prescription|
 
+# Test cases
+
+#### To view the test cases of the system press [here](https://drive.google.com/drive/folders/1l31CJEQ2Rwgt3zlSpMCXJYjGRxxz2JnL?usp=drive_link)
 
 # Contributing
 

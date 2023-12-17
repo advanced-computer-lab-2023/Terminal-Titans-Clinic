@@ -3,6 +3,8 @@ import axios from 'axios';
 import DocumentCard from './DocumentCard';
 import { useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
+import Nav from "../components/Admin-NavBar.js";
+
 
 
 
@@ -76,8 +78,8 @@ const rejectDoctor = async (username) => {
   console.log(user);
 
   return (
-    <div>
     
+    <div>
 
   <div>
 
@@ -95,7 +97,7 @@ const rejectDoctor = async (username) => {
                 
 
                 <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value='Date of birth' readOnly />
-                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.DateOfBirth} disabled />
+                <input type="text" id="DateOfBirth"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.DateOfBirth?.substring(0,10)} disabled />
 
                 <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value='Email' readOnly />
                 <input type="text" id="Email"  style={{width: "50%", border:"0px",padding:'8px'}} value={user.Email} disabled/>

@@ -150,6 +150,26 @@ console.log(location.pathname)
               variant="button"
               color="text.primary"
               // hena link el chatting
+              onClick={() => { navigate('/acceptRejectFollowUp') }}
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              Follow up requests
+            </Button>
+            <Button
+              className='navButton'
+              variant="button"
+              color="text.primary"
+              // hena link el chatting
+              onClick={() => { navigate('/addAvailableSlots') }}
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              Add Time Slot
+            </Button>
+            <Button
+              className='navButton'
+              variant="button"
+              color="text.primary"
+              // hena link el chatting
               onClick={() => { goToChat() }}
               sx={{ my: 1, mx: 1.5 }}
             >
