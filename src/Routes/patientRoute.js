@@ -364,6 +364,32 @@ router.post('/getAppointment', protect, async (req, res) => {
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
     }
+    //i want to loop over appointments if an apponitments has time equal now set to cmpleted
+    const appointments = await appointmentModel.find({ PatientId: req.user._id,Status:"upcoming" });
+    var final = []
+    for (let x in appointments) {
+       //check if appointments[x].Date==now Date()
+       const dateFromDB = new Date(appointments[x].Date);
+
+// Get the current time
+var currentTime = new Date();
+currentTime.setHours(currentTime.getHours() + 2);
+
+// Calculate the time difference in milliseconds
+const timeDifference = dateFromDB-currentTime ;
+
+// Define milliseconds in 24 hours
+
+console.log(timeDifference)
+console.log(currentTime)
+console.log(dateFromDB)
+    if (timeDifference < 0) {
+        appointments[x].Status = "completed";
+        await appointments[x].save();
+    }
+}
+
+
 
     const startDate = req.body.startDate || new Date('1000-01-01T00:00:00.000Z');
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
@@ -1374,7 +1400,8 @@ else{
     res.status(200).json({ Result: final, success: true });
 })
 
-router.post('/filterPrescriptions', async (req, res) => {
+router.post('/filterPrescriptions', protect,async (req, res) => {
+    console.log("kioak")
     let exists = await patientModel.findOne(req.user);
     if (!exists) {
         return res.status(400).json({ message: "Patient not found", success: false })
@@ -1384,21 +1411,24 @@ router.post('/filterPrescriptions', async (req, res) => {
     const endDate = req.body.endDate || new Date('3000-12-31T00:00:00.000Z');
     if (startDate > endDate)
         return (res.status(400).send({ error: "please enter valid dates", success: false }));
-
+    console.log(exists)
     let presDate;
     presDate = await prescriptionsModel.find({
+        PatientId: req.user._id,
         Date: {
             $gte: startDate,
             $lte: endDate
         }, 
-        PatientId: exists._id
+       
     });
-
+    console.log(presDate)
+    console.log("ppppppkjhh")
     var id = await doctorModel.find({ Name: req.body.Name });
     // var id=await prescriptionsModel.find({DoctorId: req.body.DoctorId,PatientId:pId})
     const status = req.body.status;
     // presDate = await prescriptionsModel.find({Date: date,PatientId:pId});
-    var presStatus = await prescriptionsModel.find({ status: status, PatientId: exists._id });
+    var presStatus = await prescriptionsModel.find({ status: status, PatientId: req.user._id });
+    console.log(presStatus)
     if (!req.body.Name) {
         var id = await doctorModel.find({});
     }
@@ -1409,7 +1439,7 @@ router.post('/filterPrescriptions', async (req, res) => {
     //      presDate = await prescriptionsModel.find({PatientId:pId});
     // }
     if (!req.body.status) {
-        var presStatus = await prescriptionsModel.find({ PatientId:exists._id });
+         presStatus = await prescriptionsModel.find({ PatientId:req.user._id });
     }
     var temp = presDate.filter((pres) => {
         var flag1 = false;
@@ -1433,7 +1463,7 @@ router.post('/filterPrescriptions', async (req, res) => {
     for (let x in temp) {///if you need the doctor's name in front end
         var result = {}
         const doc = await Doctor.find({ _id: temp[x].DoctorId })
-        console.log("pp"+doc.Name)
+        //console.log("pp"+doc.Name)
         if (doc.length > 0)
             result.Name = doc[0].Name;
         //result.prescriptionDoc=temp[x].prescriptionDoc;
@@ -1448,14 +1478,14 @@ router.post('/filterPrescriptions', async (req, res) => {
             "Name":med.Name,
             "Dosage":temp[x].items[y].dosage
         }
-        console.log(medicine)
+      //  console.log(medicine)
 
         result.medicine.push(medicine);
       }
         final.push(result);
 
     }
-    console.log(final)
+   // console.log(final)
     res.status(200).json({ final, success: true });
 
 
@@ -3746,7 +3776,7 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
     }
     try {
         await CartItem.deleteMany({ userId: patient._id });
-
+        var quantityflag=false;
         const prescription = await prescriptionsModel.findById(req.params.id);
         if (!prescription) {
             return res.status(400).json({ message: "Prescription not found", success: false })
@@ -3754,26 +3784,37 @@ router.post('/buyPrescription/:id', protect, async (req, res) => {
         for(var x in prescription.items){
             const medicine = await MedicineModel.findById(prescription.items[x].medicineId);
             var cartQuantity = prescription.items[x].dosage;
+            console.log(medicine.Quantity);
+            console.log(cartQuantity);
             if(medicine.Quantity<cartQuantity){
                 cartQuantity=medicine.Quantity;
+                quantityflag=true;
             }
+            console.log(cartQuantity)
             if(cartQuantity==0)
                 continue;
+            
             const cart =new CartItem({
                 userId:req.user._id,
                 medicineId:prescription.items[x].medicineId,
-                quantity:prescription.items[x].dosage,
+                quantity:cartQuantity,
                 price:medicine.Price
             });
-            cart.save();
+           await cart.save();
         }
-
+        var curCart=await CartItem.find({userId:req.user._id});
+        console.log(curCart)
+        if(curCart.length==0)
+        return res.status(200).json({flag:1, message: "No items in cart", success: true })
+   
         // await prescriptionsModel.findByIdAndUpdate(req.params.id)
         const updatedPres = await prescriptionsModel.findOneAndUpdate({ _id:req.params.id },
             {
                 InCart: true,
             });
-        return res.status(200).json({ Result: updatedPres, success: true });
+        if(quantityflag)
+        return res.status(200).json({ flag:2,message: "Unfortunatly some items were not available at the desired qunatity. yor cart has been updatted accprding to current availability", success: true })    
+        return res.status(200).json({flag:3, Result: updatedPres, success: true });
     }
     catch (error) {
         console.error('Error getting prescription', error.message);

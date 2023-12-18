@@ -9,6 +9,7 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -32,6 +33,8 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
+
+  const [errorMessage, setErrorMessage] = React.useState('');
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -42,37 +45,36 @@ export default function SignIn() {
     }
 
     axios.post('http://localhost:8000/security/login', res).then((response) => {
-            console.log(response);
-            if (response.data.success) {
-                sessionStorage.setItem('token', response.data.Result.token);
-                if (response.data.Result.type === 'Admin') {
-                    // go to admin page
-                    window.location.pathname= '/Health-Plus/admin'
-                }
-                else if (response.data.Result.type === 'Doctor') {
-                  if(response.data.Result.employmentContract=='Accepted')
-                    // go to doctor page
-                   window.location.pathname= '/Health-Plus/doctorHome'
-                   else
-                   window.location.pathname='/Health-Plus/EmploymentContract'
-                }
-                else if (response.data.Result.type === 'Pharmacist') {
-                  window.location.href = `http://localhost:4000/Health-Plus/pharmacistScreen?id=${sessionStorage.getItem('token')}`
+      console.log(response);
+      if (response.data.success) {
+        sessionStorage.setItem('token', response.data.Result.token);
+        if (response.data.Result.type === 'Admin') {
+          // go to admin page
+          window.location.pathname = '/Health-Plus/admin'
+        }
+        else if (response.data.Result.type === 'Doctor') {
+          if (response.data.Result.employmentContract == 'Accepted')
+            // go to doctor page
+            window.location.pathname = '/Health-Plus/doctorHome'
+          else
+            window.location.pathname = '/Health-Plus/EmploymentContract'
+        }
+        else if (response.data.Result.type === 'Pharmacist') {
+          window.location.href = `http://localhost:4000/Health-Plus/pharmacistScreen?id=${sessionStorage.getItem('token')}`
 
-                }
-                else {
-                    // go to patient page
-                    window.location.pathname= '/Health-Plus/patientHome'
-                }
-            }
-            else {
-                alert(response.data.message);
-
-            }
-        }).catch((error) => {
-            console.log(error);
-            alert(error.response.data.message);
-        });
+        }
+        else {
+          // go to patient page
+          window.location.pathname = '/Health-Plus/patientHome'
+        }
+      }
+      else {
+        setErrorMessage(response.data.message);
+      }
+    }).catch((error) => {
+      console.log(error);
+      setErrorMessage(error.response.data.message);
+    });
   };
 
   return (
@@ -114,7 +116,11 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
             />
-            
+
+            {errorMessage == '' ? '' :
+              <Alert severity="error" className='mt-2'>{errorMessage}!</Alert>
+            }
+
             <Button
               type="submit"
               fullWidth

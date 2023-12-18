@@ -50,7 +50,7 @@ console.log(location.pathname)
   }
 
   function goToNotification() {
-    window.location.href = '/Health-Plus/notifications';
+    window.location.href = '/Health-Plus/notifications/Doctor';
   }
 
   function connectToWs() {
@@ -145,6 +145,26 @@ console.log(location.pathname)
             >
               Other Informations
             </Link> */}
+            <Button
+              className='navButton'
+              variant="button"
+              color="text.primary"
+              // hena link el chatting
+              onClick={() => { navigate('/acceptRejectFollowUp') }}
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              Follow up requests
+            </Button>
+            <Button
+              className='navButton'
+              variant="button"
+              color="text.primary"
+              // hena link el chatting
+              onClick={() => { navigate('/addAvailableSlots') }}
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              Add Time Slot
+            </Button>
             <Button
               className='navButton'
               variant="button"

@@ -1651,6 +1651,29 @@ router.post('/getAppointment', protect, async (req, res) => {
             return res.status(400).json({ message: "Contract not accepted", success: false })
         }
     }
+    const appointments = await appointmentModel.find({ DoctorId: req.user._id,Status:"upcoming" });
+    for (let x in appointments) {
+       //check if appointments[x].Date==now Date()
+       const dateFromDB = new Date(appointments[x].Date);
+
+// Get the current time
+var currentTime = new Date();
+currentTime.setHours(currentTime.getHours() + 2);
+
+// Calculate the time difference in milliseconds
+const timeDifference = dateFromDB-currentTime ;
+
+// Define milliseconds in 24 hours
+
+console.log(timeDifference)
+console.log(currentTime)
+console.log(dateFromDB)
+    if (timeDifference < 0) {
+        appointments[x].Status = "completed";
+        await appointments[x].save();
+    }
+}
+
     console.log(req.body.startDate)
     console.log(req.body.endDate)
 

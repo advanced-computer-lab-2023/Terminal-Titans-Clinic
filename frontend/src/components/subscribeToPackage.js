@@ -45,7 +45,7 @@ const PackagesTab = () => {
           if(!data)
           window.location.href = `/Health-Plus/PackageCheckout?packageId=${id}&famMemId=${famMemId}`;
           else
-          alert("You are already subscribed to a package");
+          alert("This patient is already subscribed to a package");
           
         } catch (error) {
           console.error('Error fetching data:', error);

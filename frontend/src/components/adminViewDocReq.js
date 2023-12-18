@@ -16,6 +16,8 @@ import ViewDocProfile from './DocProfileInfoComponent';
 import ChangePasswordForm from './ChangePasswordForm';
 import ViewDocTransactions from './DocTransactions';
 import AcceptRejectDoctor from './viewRegDocDoc';
+import Nav from "../components/Admin-NavBar.js";
+
 
 
 const drawerWidth = 260;
@@ -29,6 +31,8 @@ const [show, setShow] = useState(0);
   // Remove this const when copying and pasting into your project.
 
   return (
+    <div>
+      <Nav/>
     <Box sx={{display: 'grid' }}>
     <Box
         position = 'inherit'
@@ -40,6 +44,7 @@ const [show, setShow] = useState(0);
         
         
     </Box>
+  </div>
   );
 }
 

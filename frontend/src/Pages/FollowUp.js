@@ -142,7 +142,7 @@ export default function FollowUp() {
         <div>
             <PatientNavBar/>
             <div style={{}}>
-            <h1 style={{}}>Choose Date to reschedule</h1>
+            <h1 style={{}}>Choose Date to schedule follow up</h1>
             </div>
         <div style={{display:'flex',height:'10%'}}>
         <div style={{width:'50%'}}>

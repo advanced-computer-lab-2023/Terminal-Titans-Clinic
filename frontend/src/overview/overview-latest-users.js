@@ -75,9 +75,11 @@ export const OverviewLatestUsers = (props) => {
             <TableBody>
               {userList.map((user,index) => {
                 const inputDate = new Date(user.createdAt);
-                if(user.__t !='patient' && user.__t != 'Admin' && user.__t !='Doctor' && user.__t !='Pharmacist' && index < 6){
+                if(user.__t !='patient' && user.__t != 'Admin' && user.__t !='Doctor' && user.__t !='Pharmacist'){
                   return null;
                 }
+                if(index > 5)
+                  return null;
                 const day = String(inputDate.getDate()).padStart(2, '0');
                 const month = String(inputDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
                 const year = inputDate.getFullYear();
@@ -90,7 +92,7 @@ export const OverviewLatestUsers = (props) => {
                     key={user.id}
                   >
                     <TableCell>
-                      {user.Name}
+                      {user.Name} {index}
                     </TableCell>
                     <TableCell>
                       {user.Username}

@@ -1,258 +1,435 @@
-// import React from "react";
-import React, { useState, useEffect } from 'react';
-import "../Styles/LoginForm.css";
+import * as React from 'react';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
 import validator from 'validator'
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import Container from '@mui/material/Container';
+import Alert from '@mui/material/Alert';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Divider from '@mui/material/Divider';
 import axios from 'axios';
-// import * as fs from 'fs';
-// import { type } from "os";
-// import { Binary } from "mongodb";
+import '../Styles/SignUp.css';
 
 function RegistrationForm() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  
+  const [isUsernameInvalid, setIsUsernameInvalid] = React.useState(false);
+    const [isFirstNameInvalid, setIsFirstNameInvalid] = React.useState(false);
+    const [isLastNameInvalid, setIsLastNameInvalid] = React.useState(false);
+    const [isEmailInvalid, setIsEmailInvalid] = React.useState(false);
+    const [isPasswordInvalid, setIsPasswordInvalid] = React.useState(false);
+    const [isDateInValid, setIsDateInValid] = React.useState(false);
+    const [isGenderInvalid, setIsGenderInvalid] = React.useState(false);
+    const [isPhoneNumberInvalid, setIsPhoneNumberInvalid] = React.useState(false);
+    const [isEmergencyFirstNameInvalid, setIsEmergencyFirstNameInvalid] = React.useState(false);
+    const [isEmergencyLastNameInvalid, setIsEmergencyLastNameInvalid] = React.useState(false);
+    const [isEmergencyNumberInvalid, setIsEmergencyNumberInvalid] = React.useState(false);
+    const [isFamilyRelationshipInvalid, setIsFamilyRelationshipInvalid] = React.useState(false);
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [mobile, setMobileNumber] = useState('');
-  const [emergencyNumber, setEmergencyNumber] = useState('');
-  const [first, setEmergencyFirtName] = useState('');
-  const [last, setEmergencyLastName] = useState('');
-  const [gender, setGender] = useState('');
-  const [emergencyRel, setEmergencyRelation] = useState('');
+    const [userName, setUserName] = React.useState('');
+    const [firstName, setFirstName] = React.useState('');
+    const [lastName, setLastName] = React.useState('');
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [dateOfBirth, setDateOfBirth] = React.useState('');
+    const [phoneNumber, setPhoneNumber] = React.useState('');
+    const [gender, setGender] = React.useState('');
+    const [emergencyFirstName, setEmergencyFirstName] = React.useState('');
+    const [emergencyLastName, setEmergencyLastName] = React.useState('');
+    const [emergencyNumber, setEmergencyNumber] = React.useState('');
+    const [familyRelationship, setFamilyRelationship] = React.useState('');
+    const [errorMessage, setErrorMessage] = React.useState('');
 
-  const [history, setHistory] = useState('');
+    const handleChangeUserName = (event) => {
+        const name = event.target.value;
+        setUserName(name)
+    };
 
-  const [errorMessagePass, setErrorMessagePass] = useState('')
-  const [errorMessageEmail, setErrorMessageEmail] = useState('')
+    const handleChangeFirstName = (event) => {
+        const name = event.target.value;
+        setFirstName(name)
+    };
 
+    const handleChangeLastName = (event) => {
+        const name = event.target.value;
+        setLastName(name)
+    };
 
-  const [file, setFile] = useState(null);
-  const [binaryData, setBinaryData] = useState(null);
+    const handleChangeEmail = (event) => {
+        const email = event.target.value;
+        setEmail(email)
+    };
 
+    const handleChangePassword = (event) => {
+        const password = event.target.value;
+        setPassword(password)
+    };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
+    const handleChangeDateOfBirth = (event) => {
+        console.log(event.$d);
+        const dateOfBirth = event.$d;
+        setDateOfBirth(dateOfBirth)
+    };
 
+    const handleChangePhoneNumber = (event) => {
+        const phoneNumber = event.target.value;
+        setPhoneNumber(phoneNumber)
+    };
 
-  useEffect(() => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const binaryString = e.target.result;
-        setBinaryData(binaryString);
-      };
-      reader.readAsBinaryString(file);
-      setHistory(file);
-    }
-  }, [file]);
+    const handleChangeEmergencyFirstName = (event) => {
+        const name = event.target.value;
+        setEmergencyFirstName(name)
+    };
 
-  const validatePass = (value) => {
-    setPassword(value);
-    if (value !== '' && validator.isStrongPassword(value, {
-      minLength: 8, minLowercase: 1,
-      minUppercase: 1, minNumbers: 1, minSymbols: 0
-    })) {
-      setErrorMessagePass('Is Strong Password')
-    } else {
+    const handleChangeEmergencyLastName = (event) => {
+        const name = event.target.value;
+        setEmergencyLastName(name)
+    };
 
-      setErrorMessagePass('Password has to be 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number ')
-    }
-  }
-  const validateEmail = (value) => {
-    setEmail(value);
-    if (validator.isEmail(value)) {
-      setErrorMessageEmail('')
-    } else {
+    const handleChangeFamilyRelationship = (event) => {
+        const familyRelationship = event.target.value;
+        setFamilyRelationship(familyRelationship)
+    };
 
-      setErrorMessageEmail('Enter a valid email')
-    }
-  }
-  const handleRegister = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-    // const base64 = await fs.readFile(history.uri, 'base64')
-    // const buffer = Buffer.from(base64, 'base64')
-    // Create a JSON object with the username and password
-    console.log(history.name);
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
-    formData.append('dateOfBirth', dateOfBirth);
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('mobile', mobile);
-    formData.append('first', first);
-    formData.append('last', last);
-    formData.append('gender', gender)
-    formData.append('emergencyNumber', emergencyNumber);
-    formData.append('emergencyRel', emergencyRel);
-    
-    // formData.append('history', history);
-    // const data = {
-    //   "username":username,
-    //   "password":password,
-    //   "dateOfBirth":dateOfBirth,
-    //   "name":name,
-    //   "email":email,
-    //   "mobile":mobile,
-    //   "first":first,
-    //   "last":last,
-    //   "gender":gender,
-    //   "emergencyNumber":emergencyNumber,
-    //   "history": history,
-    // };
+    const handleChangeEmergencyNumber = (event) => {
+        const emergencyNumber = event.target.value;
+        setEmergencyNumber(emergencyNumber)
+    };
 
-    // Make a POST request to your backend register route
-    axios.post('http://localhost:8000/security/patient/', formData).then((response) => {
-      console.log(response.data);
-      if (response.data.success) {
-        sessionStorage.setItem('token', response.data.token);
-        // go to page patient
-      }
-      else {
-        alert(response.data.message);
+    const handleChangeGender = (event) => {
+        const gender = event.target.value;
+        setGender(gender)
+    };
 
-      }
-    })
-      .catch(error => {
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      });
-  }
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setIsUsernameInvalid(false);
+        setIsFirstNameInvalid(false);
+        setIsLastNameInvalid(false);
+        setIsEmailInvalid(false);
+        setIsPasswordInvalid(false);
+        setIsDateInValid(false);
+        setIsPhoneNumberInvalid(false);
+        setIsGenderInvalid(false);
+        setIsEmergencyFirstNameInvalid(false);
+        setIsEmergencyLastNameInvalid(false);
+        setIsEmergencyNumberInvalid(false);
+        setIsFamilyRelationshipInvalid(false);
+        setErrorMessage('');
+        let flag = true;
+        if (userName === '') {
+            setIsUsernameInvalid(true);
+            flag = false;
+        }
+        if (firstName === '') {
+            setIsFirstNameInvalid(true);
+            flag = false;
+        }
+        if (lastName === '') {
+            setIsLastNameInvalid(true);
+            flag = false;
+        }
+        if (email === '') {
+            setIsEmailInvalid(true);
+            flag = false;
+        }
+        if (password === '' || !validator.isStrongPassword(password, {
+          minLength: 8, minLowercase: 1,
+          minUppercase: 1, minNumbers: 1, minSymbols: 0
+        })) {
+          setIsPasswordInvalid(true);
+          flag = false;
+        }
+        if (dateOfBirth === '') {
+            setIsDateInValid(true);
+            flag = false;
+        }
+        if (phoneNumber == '') {
+            setIsPhoneNumberInvalid(true);
+            flag = false;
+        }
+        if (gender == '') {
+            setIsGenderInvalid(true);
+            flag = false;
+        }
+        if (emergencyFirstName === '') {
+            setIsEmergencyFirstNameInvalid(true);
+            flag = false;
+        }
+        if (emergencyLastName === '') {
+            setIsEmergencyLastNameInvalid(true);
+            flag = false;
+        }
+        if (familyRelationship === '') {
+            setIsFamilyRelationshipInvalid(true);
+            flag = false;
+        }
+        if (flag) {
+            let myGender = ''
+            if (gender) {
+                myGender = 'male'
+            } else {
+                myGender = 'female'
+            }
+            let myRel = ''
+            if (familyRelationship === 1) {
+                myRel = 'Husband'
+            }
+            else if (familyRelationship === 2) {
+                myRel = 'Wife'
+            }
+            else if (familyRelationship === 3) {
+                myRel = 'Child'
+            }
+            else {
+                myRel = ''
+            }
+            let data = {
+                "username": userName,
+                "name": firstName + " " + lastName,
+                "email": email,
+                "password": password,
+                "mobile": phoneNumber,
+                "dateOfBirth": dateOfBirth,
+                "gender": myGender,
+                "first": emergencyFirstName,
+                "last": emergencyLastName,
+                "emergencyNumber": emergencyNumber,
+                "emergencyRel": myRel,
+            }
+            try {
+                let response = await axios.post('http://localhost:8000/security/patient', data).then((response) => {
+                    console.log(response.data);
+                    if (response.data.success) {
+                        sessionStorage.setItem('token', response.data.token);
+                        // go to page patient
+                        window.location.href = "http://localhost:3000/Health-Plus/patientHome";
+                    }
+                    else {
+                        setErrorMessage(response.data.message)
+                    }
+                })
+            } catch (err) {
+                setErrorMessage(err.response.data.message)
+            }
+        }else{
+            setErrorMessage('Please fill all the required fields')
+        }
+    };
 
-  //   await fetch('http://localhost:8000/security/patient/', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'content-type': history.type,
-  //       'content-length': `${history.size}`,
-  //     },
-  //     body: JSON.stringify(data),
-  //   })
-  //     .then((response) => {
-  //       // Check the status code
-  //       console.log(response);
-
-  //       return response.json();
-
-  //     })
-  //     .then((data) => {
-  //       if (data.status !== 200) {
-  //         alert(data.message)
-  //       }
-  //       // Handle the response data
-  //       console.log('Response data:', data);
-  //     })
-  //     .catch((error) => {
-  //       // Handle network errors or other issues
-  //       console.error('Error:', error);
-  //     });
-  // };
 
   return (
-    <div>
-      <div id="login-form">
-        <h1>Sign up</h1>
-        <form>
-          <label htmlFor="name">name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="given-name"
+            name="username"
+            required
+            fullWidth
+            id="username"
+            label="User Name"
+            isInvalid={false}
+            error={isUsernameInvalid}
+            onChange={handleChangeUserName}
           />
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="given-name"
+            name="firstName"
+            required
+            fullWidth
+            id="firstName"
+            label="First Name"
+            error={isFirstNameInvalid}
+            onChange={handleChangeFirstName}
           />
-          <label htmlFor="password">Password:</label>
-          <input
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            id="lastName"
+            label="Last Name"
+            name="lastName"
+            autoComplete="family-name"
+            error={isLastNameInvalid}
+            onChange={handleChangeLastName}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            error={isEmailInvalid}
+            onChange={handleChangeEmail}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            name="password"
+            label="Password"
             type="password"
-            value={password}
-            onChange={(e) => validatePass(e.target.value)}></input> <br />
-          {errorMessagePass === '' ? null :
-            <span style={{
-              color: 'red',
-            }}>{errorMessagePass}</span>}
-          <br />
-          <label htmlFor="email">Email:</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => validateEmail(e.target.value)}></input> <br />
-          {errorMessageEmail === '' ? null :
-            <span style={{
-              color: 'red',
-            }}>{errorMessageEmail}</span>}
-          <label htmlFor="dateOfBirth">Date of Birth:</label>
-          <input
-            type="Date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
+            id="password"
+            autoComplete="new-password"
+            error={isPasswordInvalid}
+            onChange={handleChangePassword}
           />
-          <label htmlFor="gender">Gender</label>
-          <input
-            type="text"
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker required fullWidth id="dateOfBirth" name="dateOfBirth" error={isDateInValid} onChange={handleChangeDateOfBirth} />
+          </LocalizationProvider>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="gender"
+            id="standard-select-gender"
+            name="gender"
+            select
+            label="Gender"
+            fullWidth
+            error={isGenderInvalid}
+            onChange={handleChangeGender}
             value={gender}
-            onChange={(e) => setGender(e.target.value)}
+          >
+            <MenuItem value={true}>Male</MenuItem>
+            <MenuItem value={false}>Female</MenuItem>
+          </TextField>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            id="phoneNumber"
+            label="Phone Number"
+            name="phoneNumber"
+            autoComplete="tel"
+            type="number"  // Change type from 'number' to 'text'
+            inputMode="numeric"  // Set input mode to 'numeric'
+            pattern="[0-9]*"  // Set a pattern to only allow numeric input
+            error={isPhoneNumberInvalid}
+            onChange={handleChangePhoneNumber}
           />
-          <label htmlFor="mobile">Mobile Number:</label>
-          <input
-            type="text"
-            value={mobile}
-            onChange={(e) => setMobileNumber(e.target.value)}
+        </Grid>
+        <Grid item xs={12}>
+          <Divider style={{ height: '2px', background: 'black', width: '100%' }} />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            autoComplete="given-name"
+            name="emergencyFirstName"
+            required
+            fullWidth
+            id="emergencyFirstName"
+            label="Emergency First Name"
+            InputLabelProps={{
+              style: { fontSize: 15, top: '-10px' },
+              className: 'text-wrap'
+            }}
+            error={isEmergencyFirstNameInvalid}
+            onChange={handleChangeEmergencyFirstName}
           />
-          <label htmlFor="emergencyNumber">Emergency Number:</label>
-          <input
-            type="text"
-            value={emergencyNumber}
-            onChange={(e) => setEmergencyNumber(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            required
+            fullWidth
+            id="emergencyLastName"
+            label="Emergency Last Name"
+            name="emergencyLastName"
+            autoComplete="family-name"
+            InputLabelProps={{
+              style: { fontSize: 15, top: '-10px' },
+              className: 'text-wrap'
+            }}
+            error={isEmergencyLastNameInvalid}
+            onChange={handleChangeEmergencyLastName}
           />
-          <label htmlFor="first">Emergency First Name:</label>
-          <input
-            type="text"
-            value={first}
-            onChange={(e) => setEmergencyFirtName(e.target.value)}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            id="familyRelationship"
+            name="familyRelationship"
+            select
+            label="Family Relationship"
+            fullWidth
+            InputLabelProps={{
+              style: { fontSize: 15 },
+            }}
+            SelectProps={{
+              inputProps: {
+                classes: {
+                  root: 'smallerFont', // Apply your styling class here
+                },
+              },
+            }}
+            error={isFamilyRelationshipInvalid}
+            onChange={handleChangeFamilyRelationship}
+            value={familyRelationship}
+          >
+            <MenuItem value={1}>Husband</MenuItem>
+            <MenuItem value={2}>Wife</MenuItem>
+            <MenuItem value={3}>Child</MenuItem>
+          </TextField>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            id="emergencyNumber"
+            label="Emergency Number"
+            name="emergencyNumber"
+            autoComplete="tel"
+            type="number"  // Change type from 'number' to 'text'
+            inputMode="numeric"  // Set input mode to 'numeric'
+            pattern="[0-9]*"  // Set a pattern to only allow numeric input
+            error={isEmergencyNumberInvalid}
+            onChange={handleChangeEmergencyNumber}
           />
-          <label htmlFor="last">Emergency Last Name:</label>
-          <input
-            type="text"
-            value={last}
-            onChange={(e) => setEmergencyLastName(e.target.value)}
-          />
-           <label htmlFor="emergencyRel">Emergency Relation:</label>
-
-          <input
-            type="text"
-            value={emergencyRel}
-            onChange={(e) => setEmergencyRelation(e.target.value)}
-          />
-          {/* <label htmlFor="history">Medical History:</label> */}
-
-          {/* <input type="file" name="History" accept=".jpg , .png, .pdf, .jpeg" onChange={handleFileInputChange} />
-          {history && (
-            <p>
-              <strong>{history.name}</strong> ({history.size} bytes)
-            </p>
-          )}
-          {history && (
-            <button type="button" onClick={handleRemoveFile}>
-              X
-            </button>
-          )} */}
-          {/* <input type="file" onChange={handleFileChange} /> */}
-
-
-
-          <button type="submit" onClick={handleRegister}>Register</button>
-
-        </form>
-      </div>
-
-    </div>
+        </Grid>
+      </Grid>
+      {errorMessage == '' ? '' :
+        <Alert severity="error" className='mt-2'>{errorMessage}!</Alert>
+      }
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
+      >
+        Sign Up
+      </Button>
+      <Grid container justifyContent="flex-end">
+        <Grid item>
+          <Link href="http://localhost:3000/Health-Plus/signIn" variant="body2">
+            Already have an account? Sign in
+          </Link>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

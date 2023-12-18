@@ -154,7 +154,7 @@ export default function PackageCheckout() {
                     <FormControlLabel
                     value="wallet"
                     control={<Radio />}
-                    label={`Wallet ($${wallet})`}
+                    label={`Wallet ($${wallet.toFixed(2)})`}
                 />
                 )}
             </RadioGroup>

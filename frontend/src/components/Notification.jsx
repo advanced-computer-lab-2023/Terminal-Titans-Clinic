@@ -13,7 +13,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import DoneIcon from '@mui/icons-material/Done';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkRemoveIcon from '@mui/icons-material/BookmarkRemove';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import axios from 'axios';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -32,6 +33,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import { PatientNavBar } from './PatientNavBar.jsx';
 import style from '../Styles/Notification.css';
 import { DoctorNavBar } from './doctorNavBar.jsx';
+import { useParams } from 'react-router-dom';
 
 const drawerWidth = 240;
 const ITEM_HEIGHT = 48;
@@ -58,6 +60,10 @@ export default function ClippedDrawer() {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [type, setType] = React.useState('');
     const open = Boolean(anchorEl);
+
+
+    const params = useParams();
+
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -89,6 +95,7 @@ export default function ClippedDrawer() {
 
     React.useEffect(() => {
         setList('Inbox');
+        setType(params.type);
         getNotifications();
     }, []);
 
@@ -108,7 +115,7 @@ export default function ClippedDrawer() {
             },
         });
 
-        setType(getNotifications.data.type)
+        // setType(getNotifications.data.type)
 
         let saveTempRows = [];
         let doneTempRows = [];
@@ -121,27 +128,33 @@ export default function ClippedDrawer() {
             let formattedDate = date.toLocaleDateString("en-US", options);
 
             // console.log(formattedDate); // Output: "13 December"
-            if (getNotifications.data.notifications[i].Category === 'save')
+            if (getNotifications.data.notifications[i].Category === 'inbox') {
+                tempRows.push(createData(getNotifications.data.notifications[i]?._id,
+                    getNotifications.data.notifications[i]?.type,
+                    getNotifications.data.notifications[i].Message, formattedDate,
+                    getNotifications.data.notifications[i]?.Status,
+                    getNotifications.data.notifications[i]?.Category));
+            }
+            else if (getNotifications.data.notifications[i].Category === 'done') {
+                console.log('done');
+                doneTempRows.push(createData(getNotifications.data.notifications[i]?._id,
+                    getNotifications.data.notifications[i]?.type,
+                    getNotifications.data.notifications[i].Message, formattedDate,
+                    getNotifications.data.notifications[i]?.Status,
+                    getNotifications.data.notifications[i]?.Category));
+            }
+            else {
+                tempRows.push(createData(getNotifications.data.notifications[i]?._id,
+                    getNotifications.data.notifications[i]?.type,
+                    getNotifications.data.notifications[i].Message, formattedDate,
+                    getNotifications.data.notifications[i]?.Status,
+                    getNotifications.data.notifications[i]?.Category));
                 saveTempRows.push(createData(getNotifications.data.notifications[i]?._id,
                     getNotifications.data.notifications[i]?.type,
                     getNotifications.data.notifications[i].Message, formattedDate,
                     getNotifications.data.notifications[i]?.Status,
                     getNotifications.data.notifications[i]?.Category));
-            else
-                if (getNotifications.data.notifications[i].Category === 'done') {
-                    console.log('done');
-                    doneTempRows.push(createData(getNotifications.data.notifications[i]?._id,
-                        getNotifications.data.notifications[i]?.type,
-                        getNotifications.data.notifications[i].Message, formattedDate,
-                        getNotifications.data.notifications[i]?.Status,
-                        getNotifications.data.notifications[i]?.Category));
-                }
-                else
-                    tempRows.push(createData(getNotifications.data.notifications[i]?._id,
-                        getNotifications.data.notifications[i]?.type,
-                        getNotifications.data.notifications[i].Message, formattedDate,
-                        getNotifications.data.notifications[i]?.Status,
-                        getNotifications.data.notifications[i]?.Category));
+            }
         }
         setNotifications(tempRows);
         setInBoxRows(tempRows);
@@ -229,14 +242,10 @@ export default function ClippedDrawer() {
                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
             }
         });
-        setDoneRows(prevRows => {
-            return prevRows.map(doneRows => {
-                if (doneRows.id === id) {
-                    return { ...doneRows, Category: 'done' };
-                }
-                return doneRows;
-            });
-        });
+
+
+
+        setSavedRows(savedRows.filter((item) => item.id !== id));
         setInBoxRows(inBoxrows.filter((item) => item.id !== id));
 
 
@@ -249,6 +258,13 @@ export default function ClippedDrawer() {
                 return notification;
             });
         });
+
+        for (let i = 0; i < notifications.length; i++) {
+            if (notifications[i].id === id) {
+                setDoneRows([...doneRows, notifications[i]]);
+                break;
+            }
+        }
     }
 
     async function saveClick(id) {
@@ -258,17 +274,10 @@ export default function ClippedDrawer() {
                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
             }
         });
-        setSavedRows(prevRows => {
-            return prevRows.map(savedRows => {
-                if (savedRows.id === id) {
-                    if (savedRows.Category === 'save')
-                        return { ...savedRows, Category: 'inbox' };
-                    else
-                        return { ...savedRows, Category: 'save' };
-                }
-                return savedRows;
-            });
-        });
+
+
+        setDoneRows(doneRows.filter((item) => item.id !== id));
+
 
         setNotifications((prevNotifications) => {
             return prevNotifications.map((notification) => {
@@ -281,6 +290,25 @@ export default function ClippedDrawer() {
                 return notification;
             });
         });
+
+        setInBoxRows((prevNotifications) => {
+            return prevNotifications.map((notification) => {
+                if (notification.id === id) {
+                    if (notification.Category === 'save')
+                        return { ...notification, Category: 'inbox' };
+                    else
+                        return { ...notification, Category: 'save' };
+                }
+                return notification;
+            });
+        });
+
+        for (let i = 0; i < notifications.length; i++) {
+            if (notifications[i].id === id) {
+                setSavedRows([...savedRows, notifications[i]]);
+                break;
+            }
+        }
     }
 
     const setList = (list) => {
@@ -339,7 +367,7 @@ export default function ClippedDrawer() {
                         <ListItem disablePadding id='active2'>
                             <ListItemButton>
                                 <ListItemIcon>
-                                    <BookmarkBorderIcon />
+                                    <BookmarkIcon />
                                 </ListItemIcon>
                                 <ListItemText primary="Saved" onClick={() => { setList('Saved') }} />
                             </ListItemButton>
@@ -446,10 +474,8 @@ export default function ClippedDrawer() {
                                                     </span>
                                                     <span onClick={() => saveClick(row.id)}>
                                                         {row.Category == 'save' ?
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 011.743-1.342 48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664L19.5 19.5" />
-                                                            </svg>
-                                                            : <BookmarkBorderIcon />}
+                                                            <BookmarkRemoveIcon />
+                                                            : <BookmarkIcon />}
                                                     </span>
                                                 </div>
                                             </TableCell>
@@ -477,11 +503,9 @@ export default function ClippedDrawer() {
                                                             <DoneIcon />
                                                         </span>
                                                         <span onClick={() => saveClick(row.id)}>
-                                                            {row.Category == 'save' ?
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 011.743-1.342 48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664L19.5 19.5" />
-                                                                </svg>
-                                                                : <BookmarkBorderIcon />}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 011.743-1.342 48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664L19.5 19.5" />
+                                                            </svg>
                                                         </span>
                                                     </div>
                                                 </TableCell>
@@ -510,10 +534,8 @@ export default function ClippedDrawer() {
                                                         </span>
                                                         <span onClick={() => saveClick(row.id)}>
                                                             {row.Category == 'save' ?
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 011.743-1.342 48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664L19.5 19.5" />
-                                                                </svg>
-                                                                : <BookmarkBorderIcon />}
+                                                                <BookmarkRemoveIcon />
+                                                                : <BookmarkIcon />}
                                                         </span>
                                                     </div>
                                                 </TableCell>
